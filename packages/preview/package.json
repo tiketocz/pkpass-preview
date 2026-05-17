@@ -1,0 +1,29 @@
+{
+  "name": "@tiketo/pkpass-preview",
+  "version": "0.0.0",
+  "description": "React component for previewing Apple Wallet passes (.pkpass) in the browser.",
+  "license": "MIT",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tiketocz/pkpass-preview.git",
+    "directory": "packages/preview"
+  },
+  "homepage": "https://github.com/tiketocz/pkpass-preview#readme",
+  "bugs": {
+    "url": "https://github.com/tiketocz/pkpass-preview/issues"
+  },
+  "keywords": ["apple-wallet", "pkpass", "passkit", "react", "preview"],
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": ["dist", "README.md", "LICENSE"],
+  "peerDependencies": {
+    "react": "^18 || ^19",
+    "react-dom": "^18 || ^19"
+  }
+}
