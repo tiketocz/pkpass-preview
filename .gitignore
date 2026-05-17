@@ -1,0 +1,22 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+
+*.tsbuildinfo
+*.log
+.DS_Store
+
+coverage/
+.vitest-cache/
+
+# Cert material used by tools/sign-fixture.ts in M1.2+ — must never be
+# committed. Real path is env-driven (TIKETO_CERT_DIR); this is just a
+# belt-and-braces guard if someone drops files into the repo by mistake.
+*.p12
+*.pem
+wwdr*.cer
+
+# Build artefacts from tools/sign-fixture.ts (M1.2)
+tools/out/

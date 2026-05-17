@@ -1,0 +1,29 @@
+{
+  "name": "pkpass-preview",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Workspace root for @tiketo/pkpass-preview. See TIK-119.",
+  "license": "MIT",
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/node": "^22.9.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.5"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "bun@1.1.38"
+}
