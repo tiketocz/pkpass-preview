@@ -34,5 +34,28 @@
     "formatter": {
       "indentWidth": 2
     }
-  }
+  },
+  "overrides": [
+    {
+      "include": ["packages/preview/src/**"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noExplicitAny": "off"
+          },
+          "a11y": {
+            "noLabelWithoutControl": "off",
+            "useKeyWithClickEvents": "off",
+            "useButtonType": "off"
+          },
+          "correctness": {
+            "useExhaustiveDependencies": "off"
+          },
+          "security": {
+            "noDangerouslySetInnerHtml": "off"
+          }
+        }
+      }
+    }
+  ]
 }
