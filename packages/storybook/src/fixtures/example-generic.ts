@@ -12,9 +12,9 @@ export const exampleGeneric = {
     organizationName: "Demo Organization",
     description: "Example generic pass",
     logoText: "Demo",
-    foregroundColor: "rgb(20, 20, 20)",
-    labelColor: "rgb(80, 80, 80)",
-    backgroundColor: "rgb(240, 240, 240)",
+    foregroundColor: "#141414",
+    labelColor: "#505050",
+    backgroundColor: "#f0f0f0",
     generic: {
       headerFields: [{ key: "header-status", label: "Status", value: "Active" }],
       primaryFields: [{ key: "primary-name", label: "Name", value: "Hello World" }],

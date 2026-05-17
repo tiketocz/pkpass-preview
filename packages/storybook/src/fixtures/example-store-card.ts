@@ -12,9 +12,9 @@ export const exampleStoreCard = {
     organizationName: "Demo Organization",
     description: "Example store card",
     logoText: "Demo Loyalty",
-    foregroundColor: "rgb(255, 255, 255)",
-    labelColor: "rgb(220, 220, 220)",
-    backgroundColor: "rgb(40, 60, 120)",
+    foregroundColor: "#ffffff",
+    labelColor: "#dcdcdc",
+    backgroundColor: "#283c78",
     storeCard: {
       headerFields: [{ key: "header-balance", label: "Points", value: "1,250" }],
       primaryFields: [{ key: "primary-name", label: "Member", value: "Jane Sample" }],
