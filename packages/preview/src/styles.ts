@@ -152,7 +152,8 @@ export const getPassStyles = (identifier: string) => `
     font-size: 1.67em;
   }
 
-  /* id-card profile — currently used by Abu Dhabi GC (a generic pkpass).
+  /* id-card profile — for generic-class pkpass cards rendered as member /
+     ID cards (1 header + 2 secondary, no auxiliary).
      Header value is sized by the char-density algorithm (globalFontSizeHeader,
      see index.tsx FONT_PROFILES.id-card). vertical-align: top keeps a short
      value pinned to the top of the header line box (otherwise a small value sits

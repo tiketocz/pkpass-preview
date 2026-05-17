@@ -46,3 +46,9 @@ jobs:
 
       - name: test (vitest)
         run: bun run test
+
+      - name: build library (Bun.build)
+        run: bun run build
+
+      - name: build storybook
+        run: bun run storybook:build

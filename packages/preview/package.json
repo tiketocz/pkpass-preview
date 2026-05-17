@@ -28,6 +28,10 @@
   },
   "sideEffects": false,
   "files": ["dist", "README.md", "LICENSE"],
+  "scripts": {
+    "build": "bun ./scripts/build.ts",
+    "clean": "rm -rf dist"
+  },
   "dependencies": {
     "@bwip-js/browser": "^4.7.0",
     "csstype": "^3.1.3",

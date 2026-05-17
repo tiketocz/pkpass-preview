@@ -81,10 +81,11 @@ const FONT_PROFILES: Record<PassVariant, FontProfile> = {
   // change vs pre-TIK-99).
   default: BASELINE_PROFILE,
   // generic-baseline / store-card-baseline — explicit variants for stories
-  // that historically relied on the implicit `default` profile (Generic 4,
-  // Code128, PDF417 / Benešov, PGA, Back fields). Same values as `default` for
-  // now; kept distinct so future per-pkpass-type baseline tuning (e.g.
-  // store-card-only padding adjustment) can split without renaming consumers.
+  // that historically relied on the implicit `default` profile (generic
+  // info cards, code128/pdf417 barcode-only cards, plain store cards, back
+  // fields). Same values as `default` for now; kept distinct so future
+  // per-pkpass-type baseline tuning (e.g. store-card-only padding adjustment)
+  // can split without renaming consumers.
   "generic-baseline": BASELINE_PROFILE,
   "store-card-baseline": BASELINE_PROFILE,
   // generic / generic-header: kept at BASELINE_PROFILE values (= pre-PR main).
@@ -130,9 +131,9 @@ const FONT_PROFILES: Record<PassVariant, FontProfile> = {
     maxHeader: 17,
     headerDensity: 1.0,
   },
-  // event-ticket-5col: ET3 fixture (no primary; 5 secondary + 5 auxiliary
-  // columns of short numeric values). Marosh's "top row" = secondaryFields
-  // (cap 13), "bottom row" = auxiliaryFields (cap 19).
+  // event-ticket-5col: no-primary shape with 5 secondary + 5 auxiliary
+  // columns of short numeric values. "Top row" = secondaryFields (cap 13),
+  // "bottom row" = auxiliaryFields (cap 19).
   "event-ticket-5col": {
     density: 1.5,
     min: 10,
@@ -223,7 +224,7 @@ export const deriveVariant = (values: { [key: string]: any }): PassVariant => {
     if (head.length >= 2) return "generic";
     // G1/G2-shape: 1 header + 3+ secondary (wordy 3-col secondary row).
     if (head.length === 1 && sec.length >= 3) return "generic-header";
-    // G5-G9 / Abu-shape: 1 header + 2 secondary (member-card layout).
+    // Member-card shape: 1 header + 2 secondary (id-card layout).
     if (head.length === 1 && sec.length <= 2) return "id-card";
     return "generic-baseline";
   }
@@ -241,9 +242,9 @@ export const deriveVariant = (values: { [key: string]: any }): PassVariant => {
     if (aux.length >= 4) return "store-card-4col";
     // SC4-shape: primary + 1 auxiliary → 3-col secondary layout.
     if (prim.length >= 1 && aux.length === 1) return "store-card-3col";
-    // PGA-shape: primary + 2 secondary (no aux).
+    // Primary + 2 secondary (no aux): 2-col secondary layout.
     if (prim.length >= 1 && sec.length === 2) return "store-card-2col";
-    // Benešov-shape: 2+ headers, no primary, 1+ secondary, 1+ auxiliary.
+    // 2+ headers, no primary, 1+ secondary, 1+ auxiliary: 2-col layout.
     if (head.length >= 2 && prim.length === 0 && sec.length >= 1 && aux.length >= 1)
       return "store-card-2col";
     // SC3-shape: no header, no primary, 2 secondary.
@@ -251,8 +252,7 @@ export const deriveVariant = (values: { [key: string]: any }): PassVariant => {
     // BackFields1-shape: 1 header + 1 secondary + 1 auxiliary (no primary).
     if (head.length === 1 && sec.length === 1 && aux.length === 1 && prim.length === 0)
       return "store-card-baseline";
-    // Catch-all (SC1, SC2, SC8, Pilulka): storeCard cards with header+secondary
-    // or primary-only.
+    // Catch-all: storeCard cards with header+secondary or primary-only.
     return "store-card";
   }
 
