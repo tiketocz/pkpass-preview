@@ -1,5 +1,11 @@
 {
   "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@tiketo/pkpass-preview": ["packages/preview/src/index.tsx"]
+    }
+  },
   "include": ["packages/*/src/**/*", "tests/**/*", "vitest.config.ts"],
-  "exclude": ["node_modules", "dist", "**/*.d.ts"]
+  "exclude": ["node_modules", "dist"]
 }
