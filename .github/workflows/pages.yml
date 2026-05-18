@@ -6,17 +6,15 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: pages-${{ github.ref }}
+  group: pages-deploy
   cancel-in-progress: false
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 jobs:
-  build:
-    name: build storybook
+  build-and-deploy:
+    name: build + deploy storybook to gh-pages
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -42,19 +40,13 @@ jobs:
       - name: build storybook
         run: bun run storybook:build
 
-      - uses: actions/configure-pages@v5
-
-      - uses: actions/upload-pages-artifact@v3
+      # Deploy to the gh-pages branch (root). Preserves /pr-preview/* so
+      # open PR-preview deploys (rossjrw/pr-preview-action) are not wiped
+      # when main re-deploys.
+      - uses: JamesIves/github-pages-deploy-action@v4
         with:
-          path: packages/storybook/storybook-static
-
-  deploy:
-    name: deploy to pages
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+          branch: gh-pages
+          folder: packages/storybook/storybook-static
+          clean: true
+          clean-exclude: |
+            pr-preview

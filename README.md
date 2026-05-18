@@ -2,6 +2,8 @@
 
 [![Storybook](https://img.shields.io/badge/Storybook-live-FF4785?logo=storybook&logoColor=white)](https://tiketocz.github.io/pkpass-preview/)
 
+> **Per-PR previews** at `https://tiketocz.github.io/pkpass-preview/pr-preview/pr-<N>/` — every open PR gets its own live Storybook. URL is also posted as a sticky comment on the PR.
+
 React component for previewing Apple Wallet passes (`.pkpass`) in the browser. Renders pass JSON + assets the way iOS does, side-by-side with a real device screenshot when needed.
 
 **Status:** scaffold. The component source is still being ported from the private predecessor `tiketocz/pkpass-builder-ui`. Track progress in [TIK-119](https://jakubknejzlik.atlassian.net/browse/TIK-119).
