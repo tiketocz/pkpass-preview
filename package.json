@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
-    "@types/node": "^22.9.0",
+    "@types/node": "^24.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "happy-dom": "^15.11.7",
@@ -29,7 +29,7 @@
     "vitest": "^2.1.5"
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=24"
   },
   "packageManager": "bun@1.1.38"
 }

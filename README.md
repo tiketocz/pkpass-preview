@@ -44,7 +44,7 @@ In later milestones: `packages/storybook/` (M1.1, side-by-side Storybook 8 + Git
 
 ### Prerequisites
 
-- Node 22 — `nvm use` reads `.nvmrc`
+- Node 24 — `nvm use` reads `.nvmrc`
 - [Bun](https://bun.sh) (latest)
 
 ### First-time setup
