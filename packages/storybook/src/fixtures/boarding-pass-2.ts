@@ -4,7 +4,7 @@
 export const boardingPass2 = {
   "pass.json": {
     associatedStoreIdentifiers: [1234, 453435],
-    authenticationToken: "806bab07-5ad6-4d05-bb2e-6cc984efb1f2",
+    authenticationToken: "00000000-0000-0000-0000-000000000000",
     backgroundColor: "#BBBBBB",
     barcodes: [
       {
@@ -45,6 +45,6 @@ export const boardingPass2 = {
     serialNumber: "https://example.com/p/sample-share-token",
     teamIdentifier: "MVBMPD7HWW",
     voided: false,
-    webServiceURL: "https://ws.passkit.app/",
+    webServiceURL: "https://example.com/v1/",
   },
 };
