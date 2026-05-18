@@ -7,7 +7,9 @@
       "static",
       "tools/out",
       "storybook-static",
-      "**/storybook-static/**"
+      "**/storybook-static/**",
+      "visual-regression-output",
+      "**/visual-regression-output/**"
     ]
   },
   "formatter": {
