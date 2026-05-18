@@ -15,6 +15,15 @@ import { existsSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+// NODE_ENV must be "production" at *process start* — Bun's transpiler
+// snapshots it then to pick jsx vs jsxDEV. Setting it inside this script
+// is too late. The "build" npm script in package.json prefixes it.
+if (process.env.NODE_ENV !== "production") {
+  console.warn(
+    `[build] NODE_ENV=${process.env.NODE_ENV ?? "(unset)"} — expected "production". Bundle will contain jsxDEV calls and fail at render time. Run via 'bun run build' (which sets NODE_ENV) instead of invoking the script directly.`,
+  );
+}
+
 const pkgDir = fileURLToPath(new URL("..", import.meta.url));
 const distDir = join(pkgDir, "dist");
 
@@ -27,7 +36,7 @@ const result = await Bun.build({
   outdir: distDir,
   target: "browser",
   format: "esm",
-  external: ["react", "react-dom", "react/jsx-runtime"],
+  external: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime"],
   sourcemap: "external",
   minify: false,
   splitting: false,

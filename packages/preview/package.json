@@ -29,7 +29,7 @@
   "sideEffects": false,
   "files": ["dist", "README.md", "LICENSE"],
   "scripts": {
-    "build": "bun ./scripts/build.ts",
+    "build": "NODE_ENV=production bun ./scripts/build.ts",
     "clean": "rm -rf dist"
   },
   "dependencies": {
