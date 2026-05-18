@@ -42,5 +42,4 @@ export const exampleStoreCard = {
     ],
   },
   "icon.png": PLACEHOLDER_ICON_PNG,
-  "logo.png": PLACEHOLDER_ICON_PNG,
 };
