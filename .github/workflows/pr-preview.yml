@@ -1,0 +1,72 @@
+name: pr-preview
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, closed]
+
+# One run per PR. Newer pushes cancel earlier deploys; cleanup on close
+# runs to completion because the action gate uses github.event.action.
+concurrency:
+  group: pr-preview-${{ github.event.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write       # push to gh-pages branch
+  pull-requests: write  # sticky preview comment
+
+jobs:
+  deploy-preview:
+    # Only same-repo PRs — fork PRs cannot access GITHUB_TOKEN write
+    # scopes and rossjrw would no-op anyway. Closed events fall through
+    # to the cleanup job below.
+    if: >
+      github.event.action != 'closed' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.14
+
+      - name: cache bun install
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+          restore-keys: ${{ runner.os }}-bun-
+
+      - name: install
+        run: bun install --frozen-lockfile
+
+      - name: build library
+        run: bun run build
+
+      - name: build storybook
+        run: bun run storybook:build
+
+      # Deploys to gh-pages /pr-preview/pr-<N>/ and upserts a sticky
+      # PR comment with the preview URL. Umbrella index at /pr-preview/
+      # lists every open preview.
+      - uses: rossjrw/pr-preview-action@v1
+        with:
+          source-dir: packages/storybook/storybook-static
+          preview-branch: gh-pages
+          umbrella-dir: pr-preview
+          action: deploy
+
+  cleanup-preview:
+    if: >
+      github.event.action == 'closed' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: rossjrw/pr-preview-action@v1
+        with:
+          preview-branch: gh-pages
+          umbrella-dir: pr-preview
+          action: remove
