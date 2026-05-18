@@ -13,13 +13,7 @@
   "bugs": {
     "url": "https://github.com/tiketocz/pkpass-preview/issues"
   },
-  "keywords": [
-    "apple-wallet",
-    "pkpass",
-    "passkit",
-    "react",
-    "preview"
-  ],
+  "keywords": ["apple-wallet", "pkpass", "passkit", "react", "preview"],
   "publishConfig": {
     "access": "public"
   },
@@ -33,11 +27,7 @@
     }
   },
   "sideEffects": false,
-  "files": [
-    "dist",
-    "README.md",
-    "LICENSE"
-  ],
+  "files": ["dist", "README.md", "LICENSE"],
   "scripts": {
     "build": "NODE_ENV=production bun ./scripts/build.ts",
     "clean": "rm -rf dist"
