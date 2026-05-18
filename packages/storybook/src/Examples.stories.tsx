@@ -1,22 +1,22 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { PKPassPreview } from "@tiketo/pkpass-preview";
 
+import { Comparison, type ComparisonArgs } from "./Comparison";
 import { exampleGeneric } from "./fixtures/example-generic";
 import { exampleStoreCard } from "./fixtures/example-store-card";
 
-const meta: Meta<typeof PKPassPreview> = {
+const meta: Meta<ComparisonArgs> = {
   title: "Examples",
-  component: PKPassPreview,
+  render: (args) => <Comparison {...args} />,
   parameters: { layout: "centered" },
 };
 export default meta;
 
-type Story = StoryObj<typeof PKPassPreview>;
+type Story = StoryObj<ComparisonArgs>;
 
 export const Generic: Story = {
-  args: { values: exampleGeneric },
+  args: { values: exampleGeneric, screenshot: "example-generic" },
 };
 
 export const StoreCard: Story = {
-  args: { values: exampleStoreCard },
+  args: { values: exampleStoreCard, screenshot: "example-store-card" },
 };

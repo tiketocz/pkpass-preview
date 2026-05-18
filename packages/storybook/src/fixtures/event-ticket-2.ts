@@ -1,0 +1,53 @@
+// Ported from tiketocz/pkpass-builder-ui src/stories/fixtures/event-ticket2.ts
+// (anonymized: internal share tokens + customer back-fields replaced with placeholders).
+
+export const eventTicket2 = {
+  "pass.json": {
+    foregroundColor: "#000000",
+    labelColor: "#000000",
+    backgroundColor: "#BBBBBB",
+    formatVersion: 1,
+    logoText: "",
+    description: "Put pass description here",
+    organizationName: "Put organization name here",
+    eventTicket: {
+      primaryFields: [{ key: "primary-rfncl", label: "Label1", value: "Hello" }],
+      headerFields: [
+        {
+          key: "header-qydlp",
+          label: "This is header",
+          value: "And it's value",
+        },
+      ],
+      secondaryFields: [
+        {
+          key: "secondary-mkkwf",
+          label: "Label3",
+          value: "This is just test",
+          textAlignment: "PKTextAlignmentLeft",
+        },
+        {
+          key: "secondary-dzycj",
+          value: "To test alignment",
+          textAlignment: "PKTextAlignmentCenter",
+        },
+        {
+          key: "secondary-isfda",
+          value: "Right",
+          textAlignment: "PKTextAlignmentRight",
+        },
+      ],
+      auxiliaryFields: [
+        { key: "auxiliary-kxafj", label: "aux field", value: "lorem ipsum" },
+        {
+          key: "auxiliary-zogxj",
+          label: "another field",
+          value: "dolor simet",
+          textAlignment: "PKTextAlignmentRight",
+        },
+      ],
+    },
+  },
+  "icon.png":
+    "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",
+};
