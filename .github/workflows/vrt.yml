@@ -54,9 +54,19 @@ jobs:
         working-directory: head
         run: bunx playwright install --with-deps chromium
 
+      # Storybook resolves @tiketo/pkpass-preview against the built dist/,
+      # so the library has to be built before the storybook on each side.
+      - name: build library — head
+        working-directory: head
+        run: bun run build
+
       - name: build storybook — head
         working-directory: head
         run: bun run storybook:build
+
+      - name: build library — base
+        working-directory: base
+        run: bun run build
 
       - name: build storybook — base
         working-directory: base
