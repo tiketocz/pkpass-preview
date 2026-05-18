@@ -65,6 +65,16 @@ jobs:
           fi
           echo "tag $tag matches package version $pkg"
 
+      # npm 11 refuses to apply the default 'latest' dist-tag to a
+      # SemVer prerelease (anything with a hyphen, e.g. 0.0.1-alpha.0).
+      # Route prereleases to the 'next' channel, stable to 'latest'.
       - name: publish
         working-directory: packages/preview
-        run: npm publish --access public --provenance
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF#refs/tags/v}"
+          if [[ "$version" == *-* ]]; then
+            npm publish --access public --provenance --tag next
+          else
+            npm publish --access public --provenance
+          fi
