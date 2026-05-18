@@ -22,14 +22,15 @@ jobs:
         with:
           bun-version: 1.3.14
 
+      # Node 24 ships npm 11.x, which is the first npm major to handle the
+      # trusted-publishing OIDC handshake (npm 10 signs provenance but the
+      # final PUT fails with E404 because the registry call drops the
+      # npm-aud claim). Picking 24 here is purely a release-side bump —
+      # the library targets ES2022 and stays compatible with Node 18+.
       - uses: actions/setup-node@v4
         with:
-          node-version: 22.x
+          node-version: 24.x
           registry-url: https://registry.npmjs.org
-
-      # Trusted publishing requires npm >= 11.5.0; setup-node@v4 ships 10.9.x with Node 22.
-      - name: upgrade npm for trusted publishing
-        run: npm install -g npm@latest
 
       - name: cache bun install
         uses: actions/cache@v4
