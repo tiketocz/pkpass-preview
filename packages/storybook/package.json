@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "storybook": "STORYBOOK_DISABLE_TELEMETRY=1 storybook dev -p 6006",
-    "build": "STORYBOOK_DISABLE_TELEMETRY=1 NODE_OPTIONS=--max-old-space-size=4096 storybook build -o storybook-static"
+    "build": "NODE_ENV=production STORYBOOK_DISABLE_TELEMETRY=1 NODE_OPTIONS=--max-old-space-size=4096 storybook build -o storybook-static"
   },
   "dependencies": {
     "@tiketo/pkpass-preview": "*"
