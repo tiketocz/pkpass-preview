@@ -75,13 +75,19 @@ The published package `@tiketo/pkpass-preview` is the public successor to the pr
 
 ## Release
 
-(Configured in [TIK-123](https://jakubknejzlik.atlassian.net/browse/TIK-123).) Tag-driven via Changesets:
+Tag-driven. Mirrors `jakubknejzlik/ts-query`: manual version bump in `packages/preview/package.json`, push a `v*` tag, the `release` workflow validates and publishes.
 
 ```sh
-bunx changeset                       # describe the change
-bunx changeset version               # bump versions + write CHANGELOG.md
-git push                             # PR + merge
-git tag v1.0.0 && git push --tags    # fires npm-publish workflow
+# in packages/preview/
+npm version patch                    # or minor / major
+cd ../.. && git push
+git push origin v$(node -p "require('./packages/preview/package.json').version")
 ```
 
-`npm-publish` uses **OIDC trusted publisher** (no static `NPM_TOKEN`); the package must be registered on npmjs.com with this repo as the trusted publisher before the first publish.
+The `release.yml` workflow then:
+
+1. installs + lints + typechecks + tests + builds the library;
+2. asserts that the pushed tag matches `packages/preview/package.json` (catches a forgotten `npm version`);
+3. runs `npm publish --access public --provenance` from `packages/preview/`.
+
+**No static `NPM_TOKEN`.** Auth is via the [npm trusted publisher](https://docs.npmjs.com/trusted-publishers) flow — the OIDC token GitHub Actions mints (`id-token: write`) is validated by npmjs.com against this repo + workflow file. The `@tiketo/pkpass-preview` package on npmjs.com must list `tiketocz/pkpass-preview` (workflow `release.yml`, no environment) as a trusted publisher before the first publish.
