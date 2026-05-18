@@ -1,0 +1,138 @@
+#!/usr/bin/env node
+/**
+ * Compare two `visual-regression.mjs` report.json files and emit a Markdown
+ * delta summary on stdout. Used by the VRT GitHub Actions workflow to render
+ * the PR-vs-main comparison comment.
+ *
+ * Usage:
+ *   node scripts/vrt-compare.mjs <base.json> <head.json> [base-label] [head-label]
+ */
+
+import fs from "node:fs";
+
+const [, , basePath, headPath, baseLabel = "main", headLabel = "PR"] = process.argv;
+if (!basePath || !headPath) {
+  console.error("usage: vrt-compare.mjs <base.json> <head.json> [base-label] [head-label]");
+  process.exit(2);
+}
+
+const base = JSON.parse(fs.readFileSync(basePath, "utf8"));
+const head = JSON.parse(fs.readFileSync(headPath, "utf8"));
+
+const fixturesOf = (r) => r.results || r.fixtures || [];
+// Stories in pkpass-preview are 1:1 with fixtures (no separate `fixture`
+// field) so the story name alone is unique enough as a key.
+const key = (f) => `${f.story}${f.fixture ? `__${f.fixture}` : ""}`;
+const displayLabel = (f) => f.fixture || f.story;
+
+const baseRows = fixturesOf(base);
+const headRows = fixturesOf(head);
+const headByKey = new Map(headRows.map((f) => [key(f), f]));
+
+const rows = [];
+for (const b of baseRows) {
+  const h = headByKey.get(key(b));
+  if (!h) continue;
+  rows.push({
+    story: b.story,
+    fixture: displayLabel(b),
+    basePm: b.pixelmatchDiffPct,
+    headPm: h.pixelmatchDiffPct,
+    dPm: +(h.pixelmatchDiffPct - b.pixelmatchDiffPct).toFixed(2),
+    baseSsim: b.ssim,
+    headSsim: h.ssim,
+    dSsim: +(h.ssim - b.ssim).toFixed(4),
+  });
+}
+
+const mean = (arr, sel) => (arr.length ? arr.reduce((s, x) => s + sel(x), 0) / arr.length : 0);
+const meanBasePm = mean(baseRows, (r) => r.pixelmatchDiffPct);
+const meanHeadPm = mean(headRows, (r) => r.pixelmatchDiffPct);
+const meanBaseSsim = mean(baseRows, (r) => r.ssim);
+const meanHeadSsim = mean(headRows, (r) => r.ssim);
+
+const improved = rows.filter((r) => r.dSsim > 0.0005);
+const regressed = rows.filter((r) => r.dSsim < -0.0005);
+const unchanged = rows.length - improved.length - regressed.length;
+
+const sortByDsimDesc = (a, b) => b.dSsim - a.dSsim;
+const sortByDsimAsc = (a, b) => a.dSsim - b.dSsim;
+
+const fmtPct = (n) => `${n.toFixed(2)}%`;
+const fmtSsim = (n) => n.toFixed(4);
+const fmtD = (n, suffix = "") => `${n > 0 ? "+" : ""}${n.toFixed(4)}${suffix}`;
+
+const out = [];
+out.push("### :bar_chart: Visual regression report");
+out.push("");
+out.push(
+  `Fixtures: **${rows.length}** · improved: **${improved.length}** · regressed: **${regressed.length}** · unchanged: **${unchanged}**`,
+);
+out.push("");
+out.push(`| metric | ${baseLabel} | ${headLabel} | delta |`);
+out.push("|---|---:|---:|---:|");
+out.push(
+  `| mean pixelmatch %-diff (lower=better) | ${fmtPct(meanBasePm)} | ${fmtPct(meanHeadPm)} | ${(meanHeadPm - meanBasePm > 0 ? "+" : "") + (meanHeadPm - meanBasePm).toFixed(2)} pp |`,
+);
+out.push(
+  `| mean SSIM (higher=better) | ${fmtSsim(meanBaseSsim)} | ${fmtSsim(meanHeadSsim)} | ${fmtD(meanHeadSsim - meanBaseSsim)} |`,
+);
+out.push("");
+
+if (improved.length) {
+  out.push(
+    `<details><summary><b>Top SSIM improvements</b> (${Math.min(improved.length, 10)}/${improved.length})</summary>`,
+  );
+  out.push("");
+  out.push(
+    `| story | fixture | ${baseLabel} SSIM | ${headLabel} SSIM | Δ SSIM | ${baseLabel} pm % | ${headLabel} pm % |`,
+  );
+  out.push("|---|---|---:|---:|---:|---:|---:|");
+  for (const r of [...improved].sort(sortByDsimDesc).slice(0, 10)) {
+    out.push(
+      `| \`${r.story}\` | ${r.fixture} | ${fmtSsim(r.baseSsim)} | ${fmtSsim(r.headSsim)} | **${fmtD(r.dSsim)}** | ${fmtPct(r.basePm)} | ${fmtPct(r.headPm)} |`,
+    );
+  }
+  out.push("");
+  out.push("</details>");
+  out.push("");
+}
+
+if (regressed.length) {
+  out.push(
+    `<details open><summary><b>Top SSIM regressions</b> (${Math.min(regressed.length, 10)}/${regressed.length})</summary>`,
+  );
+  out.push("");
+  out.push(
+    `| story | fixture | ${baseLabel} SSIM | ${headLabel} SSIM | Δ SSIM | ${baseLabel} pm % | ${headLabel} pm % |`,
+  );
+  out.push("|---|---|---:|---:|---:|---:|---:|");
+  for (const r of [...regressed].sort(sortByDsimAsc).slice(0, 10)) {
+    out.push(
+      `| \`${r.story}\` | ${r.fixture} | ${fmtSsim(r.baseSsim)} | ${fmtSsim(r.headSsim)} | **${fmtD(r.dSsim)}** | ${fmtPct(r.basePm)} | ${fmtPct(r.headPm)} |`,
+    );
+  }
+  out.push("");
+  out.push("</details>");
+  out.push("");
+}
+
+out.push(`<details><summary>Full per-fixture table (${rows.length}, sorted by Δ SSIM)</summary>`);
+out.push("");
+out.push(
+  `| story | fixture | ${baseLabel} SSIM | ${headLabel} SSIM | Δ SSIM | ${baseLabel} pm % | ${headLabel} pm % |`,
+);
+out.push("|---|---|---:|---:|---:|---:|---:|");
+for (const r of [...rows].sort(sortByDsimDesc)) {
+  out.push(
+    `| \`${r.story}\` | ${r.fixture} | ${fmtSsim(r.baseSsim)} | ${fmtSsim(r.headSsim)} | ${fmtD(r.dSsim)} | ${fmtPct(r.basePm)} | ${fmtPct(r.headPm)} |`,
+  );
+}
+out.push("");
+out.push("</details>");
+out.push("");
+out.push(
+  "<sub>Generated by `scripts/vrt-compare.mjs`. Info-only — no CI quality gate. See `docs/VISUAL_REGRESSION.md`.</sub>",
+);
+
+process.stdout.write(`${out.join("\n")}\n`);

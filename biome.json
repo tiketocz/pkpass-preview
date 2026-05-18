@@ -65,7 +65,7 @@
       }
     },
     {
-      "include": ["packages/*/scripts/**"],
+      "include": ["packages/*/scripts/**", "scripts/**"],
       "linter": {
         "rules": {
           "suspicious": {

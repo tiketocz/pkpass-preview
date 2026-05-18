@@ -15,7 +15,9 @@
     "test:watch": "vitest",
     "build": "cd packages/preview && bun run build",
     "storybook": "cd packages/storybook && bun run storybook",
-    "storybook:build": "cd packages/storybook && bun run build"
+    "storybook:build": "cd packages/storybook && bun run build",
+    "vrt": "node scripts/visual-regression.mjs",
+    "vrt:build": "bun run storybook:build && bun run vrt"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
@@ -23,8 +25,13 @@
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "happy-dom": "^15.11.7",
+    "pixelmatch": "^7.1.0",
+    "playwright": "^1.49.0",
+    "pngjs": "^7.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "sharp": "^0.34.0",
+    "ssim.js": "^3.5.0",
     "typescript": "^5.6.3",
     "vitest": "^2.1.5"
   },

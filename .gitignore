@@ -21,3 +21,4 @@ wwdr*.cer
 
 # Build artefacts from tools/sign-fixture.ts (M1.2)
 tools/out/
+visual-regression-output/
