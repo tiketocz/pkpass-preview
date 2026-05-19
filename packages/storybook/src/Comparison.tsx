@@ -40,7 +40,11 @@ const styles = {
     padding: 16,
     textAlign: "center",
   } as const,
-  img: { maxWidth: 312, borderRadius: 12 } as const,
+  img: {
+    maxWidth: 312,
+    borderRadius: 12,
+    boxShadow: "0 3px 4px 0 rgb(0 0 0 / 20%), 0 2px 5px 0 rgb(0 0 0 / 19%)",
+  } as const,
 };
 
 // Screenshots live in packages/storybook/public/screenshots/ and are
