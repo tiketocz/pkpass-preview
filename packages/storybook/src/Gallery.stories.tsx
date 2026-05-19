@@ -35,7 +35,6 @@ import { pdf417_3 } from "./fixtures/pdf417-3";
 import { pdf417_4 } from "./fixtures/pdf417-4";
 import { pga } from "./fixtures/pga";
 import { pgaNational } from "./fixtures/pga-national";
-import { sample1 } from "./fixtures/sample1";
 import { sample2 } from "./fixtures/sample2";
 import { storeCard1 } from "./fixtures/store-card-1";
 import { storeCard2 } from "./fixtures/store-card-2";
@@ -69,8 +68,7 @@ const fixtures: Fixture[] = [
   { label: "Event ticket 3", values: eventTicket3 },
   { label: "Event ticket 4", values: eventTicket4 },
   { label: "Event ticket 5", values: eventTicket5 },
-  { label: "Sample 1", values: sample1 },
-  { label: "Sample 2", values: sample2 },
+  { label: "Membership ID card", values: sample2 },
   { label: "Resident benefit card", values: benesov },
   { label: "Tour-pro card", values: pga },
   { label: "Members card (long altText)", values: pgaNational },
