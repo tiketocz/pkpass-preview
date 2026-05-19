@@ -27,11 +27,13 @@ Pixel-perfect Apple Wallet pass previews for React.
 
 ## Why `pkpass-preview`?
 
-> GitHub search for `apple wallet pass preview` returns **zero** real components. We checked.
+> GitHub search for `apple wallet pass preview` returns **zero** real components _(checked 2026-05-16)_. We checked.
 
 Designing an Apple Wallet pass is a slow loop: edit `pass.json` → sign it → AirDrop to a phone → screenshot → adjust. By the time you spot the kerning issue, you've already burned a developer certificate quota.
 
 `pkpass-preview` renders the same JSON your signer pipeline consumes, **in the browser**, the way iOS Wallet does — so you can iterate on copy, fonts, colors, fields, and barcodes without ever leaving your editor.
+
+Live in production: every pass shared from **[get.tiketo.eu](https://get.tiketo.eu)** is rendered with this exact component.
 
 - **Pixel-parity with iOS Wallet** — fonts, spacing, header/secondary/auxiliary layout, barcode placement, dark back side, transit icons (boarding passes).
 - **Drop-in `<PKPassPreview values={...} />`** — pass the same `pass.json` + assets you'd zip up; nothing else to wire.
@@ -119,6 +121,8 @@ Server-side rendering (Next.js App Router, Remix, Astro): the component is clien
 
 If you're building a **dashboard, designer UI, CMS, or test harness** that needs a faithful Wallet preview without round-tripping through an iPhone, this is the missing piece.
 
+> **Pair `pkpass-preview` (design-time) with [`passkit-generator`](https://github.com/alexandercerutti/passkit-generator) (build-time)** for a full pipeline — preview while you design, sign when you ship.
+
 ## FAQ
 
 <details><summary><b>Does it work with Next.js / Remix / Astro?</b></summary>
@@ -144,6 +148,11 @@ Apple's `formatVersion: 1` schema, all five pass styles, and every documented fi
 <details><summary><b>How are the iOS reference screenshots produced?</b></summary>
 
 A real `.pkpass` is generated (via `tiketocz/pkpass-signer`), installed on an iPhone, screenshotted manually, and committed to `packages/storybook/public/screenshots/`. We re-shoot when iOS Wallet visibly changes a layout (roughly every major iOS release).
+</details>
+
+<details><summary><b>Why React only? What about Vue / Svelte / Solid?</b></summary>
+
+The component ships as ESM React 18+. Framework-agnostic primitives (a headless rendering core that any UI library can wrap) are on the roadmap if there's demand — [open an issue](https://github.com/tiketocz/pkpass-preview/issues/new) and tell us your stack.
 </details>
 
 <details><summary><b>Is this affiliated with Apple?</b></summary>
@@ -192,7 +201,8 @@ Tag-driven, OIDC-published. Bump the version in `packages/preview/package.json`,
 
 ## Resources
 
-- [Apple Wallet Developer Guide](https://developer.apple.com/documentation/walletpasses)
+- [Apple Wallet Developer Guide](https://developer.apple.com/documentation/walletpasses) — the `.pkpass` spec
+- [iOS Human Interface Guidelines · Wallet](https://developer.apple.com/design/human-interface-guidelines/wallet) — Apple's design intent
 - [`.pkpass` file format reference](https://developer.apple.com/library/archive/documentation/UserExperience/Reference/PassKit_Bundle/Chapters/Introduction.html)
 - [Live Storybook gallery](https://tiketocz.github.io/pkpass-preview/)
 - [`tiketocz/pkpass-builder-ui`](https://github.com/tiketocz/pkpass-builder-ui) — the archived private predecessor
