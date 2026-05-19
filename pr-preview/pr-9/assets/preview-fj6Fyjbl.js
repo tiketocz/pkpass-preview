@@ -1,0 +1,1 @@
+const e={parameters:{layout:"centered",controls:{expanded:!0},options:{storySort:{order:["Examples","Samples","Generic","Store card","Coupon","Boarding pass","Event ticket","Barcode","Gallery","Back fields"]}}}};export{e as default};
