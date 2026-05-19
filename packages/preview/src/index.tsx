@@ -1,4 +1,3 @@
-import { hexToCSSFilter } from "hex-to-css-filter";
 import * as React from "react";
 import { useMemo, useState } from "react";
 import { BarcodesPreview } from "./components/BarcodesPreview";
@@ -8,6 +7,7 @@ import { TransitIcon } from "./transit-icon";
 import type { FieldType, PassData, PassField, PassStructure } from "./types";
 
 export type { PassData, PassField, PassStructure, PKTextAlignment, FieldType } from "./types";
+export { PassTransitType } from "./types";
 
 export type PassVariant =
   | "default"
@@ -375,7 +375,6 @@ export const PKPassPreview = ({ values, removeVariablePlaceholders }: PreviewPro
   // Fix 4: Memoize dynamic styles to prevent recalculation
   const dynamicStyles = useMemo(() => {
     const secondaryFieldsCount = structure?.secondaryFields?.length || 0;
-    const cssFilter = data.labelColor ? hexToCSSFilter(data.labelColor).filter : "";
 
     return `
 ${getPassStyles(identifier)}
@@ -386,7 +385,6 @@ ${getPassStyles(identifier)}
 }
 #${identifier} #pass-transport-type {
   fill: ${data.labelColor};
-  filter: ${cssFilter}
 }
 
 #${identifier} #passFront #secondaryFields .passField {

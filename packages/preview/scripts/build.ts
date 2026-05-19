@@ -7,8 +7,9 @@
  *   dist/index.d.ts     — type declarations (via tsc)
  *   dist/index.d.ts.map — declaration map (via tsc)
  *
- * SVG icons are inlined as data URLs so consumers don't need to configure
- * an SVG loader. React + react-dom stay external (peerDeps).
+ * Transit icons are inlined as JSX components in transit-icon.tsx — no SVG
+ * loader needed at build time or in consumer bundlers. React + react-dom
+ * stay external (peerDeps).
  */
 
 import { existsSync, rmSync } from "node:fs";
@@ -40,7 +41,6 @@ const result = await Bun.build({
   sourcemap: "external",
   minify: false,
   splitting: false,
-  loader: { ".svg": "dataurl" },
   naming: "[name].js",
 });
 
