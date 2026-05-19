@@ -13,7 +13,7 @@ import { storeCard8 } from "./fixtures/store-card-8";
 const meta: Meta<ComparisonArgs> = {
   title: "Store card",
   render: (args) => <Comparison {...args} />,
-  tags: ["autodocs"],
+  tags: ["autodocs", "vrt"],
   parameters: {
     layout: "centered",
     docs: {

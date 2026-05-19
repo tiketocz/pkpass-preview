@@ -14,7 +14,7 @@ import { generic9 } from "./fixtures/generic9";
 const meta: Meta<ComparisonArgs> = {
   title: "Generic",
   render: (args) => <Comparison {...args} />,
-  tags: ["autodocs"],
+  tags: ["autodocs", "vrt"],
   parameters: {
     layout: "centered",
     docs: {

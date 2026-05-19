@@ -9,7 +9,7 @@ import { boardingPass3 } from "./fixtures/boarding-pass-3";
 const meta: Meta<ComparisonArgs> = {
   title: "Boarding pass",
   render: (args) => <Comparison {...args} />,
-  tags: ["autodocs"],
+  tags: ["autodocs", "vrt"],
   parameters: {
     layout: "centered",
     docs: {
