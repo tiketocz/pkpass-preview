@@ -220,18 +220,16 @@ export const getPassStyles = (identifier: string) => `
   #${identifier}.boardingPass.pkpass-variant-boarding-pass-long #primaryFields .passField > span > span {
     font-weight: 300;
   }
-  /* Transit icon (airplane/etc.) on boarding-pass variants — render at ~22px
-     to roughly match iOS Wallet. We force the SVG img to 22px (the base CSS
-     '#primaryFields img { max-width:70; max-height:90 }' would otherwise let
-     it size up to 70 if it had explicit dimensions). The JS-inline 34x34
-     wrapper span stays as-is — 22px img fits inside without overflow. */
-  #${identifier}.boardingPass.pkpass-variant-boarding-pass img#pass-transport-type,
-  #${identifier}.boardingPass.pkpass-variant-boarding-pass-short img#pass-transport-type,
-  #${identifier}.boardingPass.pkpass-variant-boarding-pass-long img#pass-transport-type {
+  /* Transit icon (airplane/etc.) on boarding-pass variants — rendered inline
+     as <svg>. Size to 32×32 so it visually matches iOS Wallet, and fill is
+     driven by the dynamic '#pass-transport-type { fill: labelColor }' rule
+     above (paths inherit fill via SVG cascade). All 5 transit SVGs use square
+     viewBoxes, so width===height is safe. */
+  #${identifier}.boardingPass.pkpass-variant-boarding-pass svg#pass-transport-type,
+  #${identifier}.boardingPass.pkpass-variant-boarding-pass-short svg#pass-transport-type,
+  #${identifier}.boardingPass.pkpass-variant-boarding-pass-long svg#pass-transport-type {
     width: 32px !important;
-    max-width: 32px !important;
-    height: auto !important;
-    max-height: none !important;
+    height: 32px !important;
     display: inline-block;
   }
   #${identifier}.eventTicket #primaryFields.strip {
