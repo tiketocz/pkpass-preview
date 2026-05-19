@@ -40,7 +40,14 @@ const styles = {
     padding: 16,
     textAlign: "center",
   } as const,
-  img: { maxWidth: 312, borderRadius: 12 } as const,
+  img: {
+    maxWidth: 312,
+    borderRadius: 12,
+    // Match PKPassPreview's own box-shadow (see packages/preview/src/styles.ts)
+    // so the side-by-side looks balanced. Requires every screenshot to be
+    // tight-cropped to the card content (no baked-in shadow halo).
+    boxShadow: "0 3px 4px 0 rgb(0 0 0 / 20%), 0 2px 5px 0 rgb(0 0 0 / 19%)",
+  } as const,
 };
 
 // Screenshots live in packages/storybook/public/screenshots/ and are
