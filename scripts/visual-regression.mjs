@@ -217,9 +217,21 @@ async function main() {
 
   const stories = await discoverStories(STORYBOOK_DIR);
   if (stories.length === 0) {
-    throw new Error(
-      `No stories tagged "${VRT_TAG}" found in ${STORYBOOK_DIR}/index.json — add \`tags: ["${VRT_TAG}"]\` to a story or its meta to opt in.`,
+    // Happens on the PR base when the base pre-dates VRT tagging (e.g. the
+    // very PR that introduces the tags). Soft-fail: write an empty report
+    // so `vrt-compare.mjs` can still render a delta comment from the head
+    // side. Once tags are merged to main this branch is silent.
+    const reason = `No stories tagged "${VRT_TAG}" found in ${STORYBOOK_DIR}/index.json`;
+    console.warn(`${reason} — emitting empty report.`);
+    await fs.writeFile(
+      path.join(OUT_DIR, "report.json"),
+      `${JSON.stringify({ results: [], emptyReason: reason }, null, 2)}\n`,
     );
+    await fs.writeFile(
+      path.join(OUT_DIR, "report.md"),
+      `# Visual regression report\n\n_${reason} — no fixtures to compare._\n`,
+    );
+    return;
   }
   console.log(`Discovered ${stories.length} stories tagged "${VRT_TAG}"`);
 
