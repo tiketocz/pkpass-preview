@@ -43,7 +43,10 @@ const styles = {
   img: {
     maxWidth: 312,
     borderRadius: 12,
-    boxShadow: "0 3px 4px 0 rgb(0 0 0 / 20%), 0 2px 5px 0 rgb(0 0 0 / 19%)",
+    // Hairline border (not box-shadow) so cards with already-baked-in
+    // shadow in the screenshot don't get a double-shadow halo, while
+    // pure-white cards still have a visible boundary on white viewport.
+    border: "1px solid rgb(0 0 0 / 8%)",
   } as const,
 };
 
