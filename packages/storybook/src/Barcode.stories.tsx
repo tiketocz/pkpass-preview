@@ -15,7 +15,7 @@ import { pdf417_4 } from "./fixtures/pdf417-4";
 const meta: Meta<ComparisonArgs> = {
   title: "Barcode",
   render: (args) => <Comparison {...args} />,
-  tags: ["autodocs"],
+  tags: ["autodocs", "vrt"],
   parameters: {
     layout: "centered",
     docs: {

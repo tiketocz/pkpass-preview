@@ -6,7 +6,7 @@ import { backFields1 } from "./fixtures/back-fields";
 const meta: Meta<ComparisonArgs> = {
   title: "Back fields",
   render: (args) => <Comparison {...args} />,
-  tags: ["autodocs"],
+  tags: ["autodocs", "vrt"],
   parameters: {
     layout: "centered",
     docs: {

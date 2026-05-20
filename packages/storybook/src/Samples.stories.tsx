@@ -9,7 +9,7 @@ import { sample2 } from "./fixtures/sample2";
 const meta: Meta<ComparisonArgs> = {
   title: "Samples",
   render: (args) => <Comparison {...args} />,
-  tags: ["autodocs"],
+  tags: ["autodocs", "vrt"],
   parameters: {
     layout: "centered",
     docs: {

@@ -10,7 +10,7 @@ import { eventTicket5 } from "./fixtures/event-ticket-5";
 const meta: Meta<ComparisonArgs> = {
   title: "Event ticket",
   render: (args) => <Comparison {...args} />,
-  tags: ["autodocs"],
+  tags: ["autodocs", "vrt"],
   parameters: {
     layout: "centered",
     docs: {

@@ -2,17 +2,20 @@
 /**
  * Visual regression report for the storybook fixtures.
  *
- * For every story listed below (one fixture per story in this repo, unlike
- * the predecessor pkpass-builder-ui where stories grouped multiple
- * fixtures), the script:
+ * Scope is auto-discovered from storybook-static/index.json: any story whose
+ * tags array includes "vrt" is in scope. Tag the meta in your .stories.tsx
+ * to opt a whole group in (see Comparison-using stories). Stories tagged
+ * with "vrt:skip" are excluded even if the meta is tagged.
+ *
+ * For each in-scope story the script:
  *   - screenshots the rendered PKPassPreview (#passCard inside Comparison)
  *   - loads the iOS reference image (img alt^="iOS Wallet screenshot")
  *   - resizes the iOS reference to match the screenshot dimensions
  *   - computes pixelmatch %-diff and SSIM
  *   - writes per-fixture diff PNG + aggregate report.{json,md}
  *
- * Stories without an iOS reference (placeholder render) are skipped with a
- * warning — they show up in the report count but not in the metrics.
+ * Stories without an iOS reference (e.g. boarding-pass transit-type-*) are
+ * still discovered via the tag but skipped at metric time with a log line.
  *
  * Run with the storybook static build pre-built:
  *   bun run storybook:build
@@ -24,6 +27,7 @@
  *   STORYBOOK_PORT  port for the local static server (default: 9700)
  *   OUT_DIR         output directory (default: visual-regression-output)
  *   DPR             devicePixelRatio for screenshots (default: 2)
+ *   VRT_TAG         opt-in tag name (default: "vrt")
  */
 
 import { spawn } from "node:child_process";
@@ -42,26 +46,29 @@ const STORYBOOK_DIR = process.env.STORYBOOK_DIR ?? "packages/storybook/storybook
 const PORT = Number(process.env.STORYBOOK_PORT ?? 9700);
 const OUT_DIR = process.env.OUT_DIR ?? "visual-regression-output";
 const DPR = Number(process.env.DPR ?? 2);
+const VRT_TAG = process.env.VRT_TAG ?? "vrt";
+const VRT_SKIP_TAG = `${VRT_TAG}:skip`;
 
-// One story per fixture. Stories without an iOS reference (Examples) are
-// listed for parity but skipped at metric time.
-const STORIES = [
-  "boarding-pass--boarding-pass-1",
-  "boarding-pass--boarding-pass-2",
-  "boarding-pass--boarding-pass-3",
-  "barcode--code-128-1",
-  "barcode--code-128-2",
-  "barcode--code-128-3",
-  "barcode--code-128-4",
-  "barcode--code-128-5",
-  "barcode--pdf-417-1",
-  "barcode--pdf-417-2",
-  "barcode--pdf-417-3",
-  "barcode--pdf-417-4",
-  "barcode--large-barcode",
-  "event-ticket--event-ticket-1",
-  "event-ticket--event-ticket-2",
-];
+async function discoverStories(storybookDir) {
+  const indexPath = path.join(storybookDir, "index.json");
+  if (!existsSync(indexPath)) {
+    throw new Error(
+      `Storybook index "${indexPath}" not found — run \`bun run storybook:build\` first.`,
+    );
+  }
+  const raw = await fs.readFile(indexPath, "utf8");
+  const index = JSON.parse(raw);
+  const entries = Object.values(index.entries ?? index.stories ?? {});
+  const ids = [];
+  for (const entry of entries) {
+    if (entry.type && entry.type !== "story") continue;
+    const tags = entry.tags ?? [];
+    if (!tags.includes(VRT_TAG)) continue;
+    if (tags.includes(VRT_SKIP_TAG)) continue;
+    ids.push(entry.id);
+  }
+  return ids;
+}
 
 function slugify(s) {
   return s
@@ -208,6 +215,26 @@ async function main() {
   await fs.mkdir(path.join(OUT_DIR, "ours"), { recursive: true });
   await fs.mkdir(path.join(OUT_DIR, "ref"), { recursive: true });
 
+  const stories = await discoverStories(STORYBOOK_DIR);
+  if (stories.length === 0) {
+    // Happens on the PR base when the base pre-dates VRT tagging (e.g. the
+    // very PR that introduces the tags). Soft-fail: write an empty report
+    // so `vrt-compare.mjs` can still render a delta comment from the head
+    // side. Once tags are merged to main this branch is silent.
+    const reason = `No stories tagged "${VRT_TAG}" found in ${STORYBOOK_DIR}/index.json`;
+    console.warn(`${reason} — emitting empty report.`);
+    await fs.writeFile(
+      path.join(OUT_DIR, "report.json"),
+      `${JSON.stringify({ results: [], emptyReason: reason }, null, 2)}\n`,
+    );
+    await fs.writeFile(
+      path.join(OUT_DIR, "report.md"),
+      `# Visual regression report\n\n_${reason} — no fixtures to compare._\n`,
+    );
+    return;
+  }
+  console.log(`Discovered ${stories.length} stories tagged "${VRT_TAG}"`);
+
   const stopServer = startServer(STORYBOOK_DIR, PORT);
   try {
     await waitForServer(PORT);
@@ -219,7 +246,7 @@ async function main() {
     const page = await ctx.newPage();
 
     const results = [];
-    for (const story of STORIES) {
+    for (const story of stories) {
       const captured = await captureStory(page, story).catch((e) => {
         console.warn(`  ${story}: capture failed — ${e.message}`);
         return null;

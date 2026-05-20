@@ -6,14 +6,26 @@ No quality gate yet — the job posts metrics but never blocks merge. Promoting 
 
 ## What it measures
 
-For each story listed in `scripts/visual-regression.mjs`:
+Scope is auto-discovered from `storybook-static/index.json`: any story whose `tags` array includes `vrt` is in scope. Opt a whole group in by tagging the `meta` in its `.stories.tsx`:
+
+```ts
+const meta: Meta<ComparisonArgs> = {
+  title: "Coupon",
+  tags: ["vrt"],
+  // ...
+};
+```
+
+Tag a single story (or its meta) with `vrt:skip` to exclude it even if otherwise included.
+
+For each in-scope story:
 
 1. Screenshot of `#passCard` from the Storybook iframe (LEFT pane of `Comparison`).
 2. iOS reference image from `packages/storybook/public/screenshots/<name>.jpg`, resized to match.
 3. `pixelmatch` diff count → reported as %-of-pixels-different.
 4. `ssim.js` mssim score (0..1, higher = closer match).
 
-Stories without an iOS reference (`examples--*`) are skipped — they render the placeholder and have nothing to compare.
+Stories without an iOS reference are still discovered via the tag but skipped at metric time with a log line.
 
 ## Local run
 
@@ -30,7 +42,7 @@ Outputs:
 - `visual-regression-output/report.md`
 - `visual-regression-output/{ours,ref,diff}/*.png`
 
-Env overrides: `STORYBOOK_DIR`, `STORYBOOK_PORT`, `OUT_DIR`, `DPR`.
+Env overrides: `STORYBOOK_DIR`, `STORYBOOK_PORT`, `OUT_DIR`, `DPR`, `VRT_TAG` (default `vrt`).
 
 ## Workflow shape
 

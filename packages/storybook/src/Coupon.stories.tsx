@@ -6,7 +6,7 @@ import { coupon1 } from "./fixtures/coupon1";
 const meta: Meta<ComparisonArgs> = {
   title: "Coupon",
   render: (args) => <Comparison {...args} />,
-  tags: ["autodocs"],
+  tags: ["autodocs", "vrt"],
   parameters: {
     layout: "centered",
     docs: {
