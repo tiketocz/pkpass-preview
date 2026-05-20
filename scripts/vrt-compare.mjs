@@ -61,7 +61,7 @@ if (base.emptyReason && headRows.length > 0) {
 
   const renderAbs = (rows) => {
     const lines = [];
-    lines.push(`| story | fixture | SSIM | pixelmatch %-diff |`);
+    lines.push("| story | fixture | SSIM | pixelmatch %-diff |");
     lines.push("|---|---|---:|---:|");
     for (const f of rows) {
       lines.push(
@@ -72,7 +72,7 @@ if (base.emptyReason && headRows.length > 0) {
   };
 
   out.push(
-    `<details open><summary><b>Worst 10 by SSIM</b> (lowest similarity vs iOS reference)</summary>`,
+    "<details open><summary><b>Worst 10 by SSIM</b> (lowest similarity vs iOS reference)</summary>",
   );
   out.push("");
   out.push(...renderAbs(worst));
@@ -80,7 +80,7 @@ if (base.emptyReason && headRows.length > 0) {
   out.push("</details>");
   out.push("");
 
-  out.push(`<details><summary><b>Best 10 by SSIM</b></summary>`);
+  out.push("<details><summary><b>Best 10 by SSIM</b></summary>");
   out.push("");
   out.push(...renderAbs(best));
   out.push("");
