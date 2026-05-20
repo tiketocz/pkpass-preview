@@ -4,7 +4,7 @@
 
 ### See your Apple Wallet pass before you ship it.
 
-Pixel-perfect Apple Wallet pass previews for React.
+iOS-faithful Apple Wallet pass previews for React.
 
 [**Live Storybook →**](https://tiketocz.github.io/pkpass-preview/) &nbsp;·&nbsp;
 [**npm**](https://www.npmjs.com/package/@tiketo/pkpass-preview) &nbsp;·&nbsp;
@@ -16,9 +16,8 @@ Pixel-perfect Apple Wallet pass previews for React.
 [![Storybook](https://img.shields.io/badge/Storybook-live-FF4785?style=flat-square&logo=storybook&logoColor=white)](https://tiketocz.github.io/pkpass-preview/)
 [![Used in production by tiketo](https://img.shields.io/badge/Used%20in%20production%20by-tiketo-0a84ff?style=flat-square)](https://tiketo.eu)
 
-<!-- TODO: replace with real side-by-side composite hero (ours :left_right_arrow: iOS). For now a placeholder grid of fixtures from the live Storybook. -->
 <a href="https://tiketocz.github.io/pkpass-preview/">
-  <img src="./packages/storybook/public/screenshots/boarding-pass-1.jpg" alt="Apple Wallet boarding pass rendered by @tiketo/pkpass-preview side-by-side with iOS Wallet" width="640" />
+  <img src="./packages/storybook/public/screenshots/hero-3cards.png" alt="Three Apple Wallet passes rendered by @tiketo/pkpass-preview — a navy loyalty store card, a white membership ID card, and a yellow coupon — side by side" width="880" />
 </a>
 
 </div>
@@ -29,17 +28,15 @@ Pixel-perfect Apple Wallet pass previews for React.
 
 > GitHub search for `apple wallet pass preview` returns **zero** real components _(checked 2026-05-16)_. We checked.
 
-Designing an Apple Wallet pass is a slow loop: edit `pass.json` → sign it → AirDrop to a phone → screenshot → adjust. By the time you spot the kerning issue, you've already burned a developer certificate quota.
+Designing an Apple Wallet pass is a slow loop: edit `pass.json` → sign it → AirDrop to a phone → screenshot → adjust. By the time you spot the kerning issue, you've already wasted half a morning on the round-trip.
 
-`pkpass-preview` renders the same JSON your signer pipeline consumes, **in the browser**, the way iOS Wallet does — so you can iterate on copy, fonts, colors, fields, and barcodes without ever leaving your editor.
+`pkpass-preview` renders the same JSON your signer pipeline consumes, **in the browser**, close to the way iOS Wallet does — so you can iterate on copy, fonts, colors, fields, and barcodes without ever leaving your editor.
 
-Live in production: every pass shared from **[get.tiketo.eu](https://get.tiketo.eu)** is rendered with this exact component.
-
-- **Pixel-parity with iOS Wallet** — fonts, spacing, header/secondary/auxiliary layout, barcode placement, dark back side, transit icons (boarding passes).
+- **Close-to-iOS rendering** — fonts, spacing, header/secondary/auxiliary layout, barcode placement, dark back side, transit icons (boarding passes). Not literal pixel-parity; honest visual fidelity that's good enough to design against.
 - **Drop-in `<PKPassPreview values={...} />`** — pass the same `pass.json` + assets you'd zip up; nothing else to wire.
 - **Auto-variant detection** — `id-card`, `store-card`, `boarding-pass-short`, `boarding-pass-long`, `event-ticket`, `coupon`, and more, picked automatically from the field shape. Manual override available.
-- **Side-by-side iOS reference screenshots** — every storybook story renders our output next to a real iOS Wallet screenshot of the same pass.
-- **TypeScript-first**, **ESM-only**, **tree-shakeable**, **CSP-safe** (no inline styles), **SSR-friendly** (wrap in `dynamic` import).
+- **Scoped styles** — every instance gets its own unique container id; no global CSS, no portal, safe to render many cards on one page.
+- **TypeScript-first**, **ESM-only**, **tree-shakeable**, **CSP-safe** (no inline `style=""`), **SSR-friendly** (wrap in `dynamic` import).
 
 ## Install
 
@@ -90,14 +87,15 @@ That's it. No theme provider, no portal, no global CSS — the component scopes 
 
 |   |   |
 |---|---|
-| **Side-by-side iOS comparison** | Every fixture pairs our render with a real Wallet screenshot. |
 | **All five pass styles** | `boardingPass`, `coupon`, `eventTicket`, `generic`, `storeCard`. |
-| **Auto-variant detection** | id-card / store-card-3col / boarding-pass-long / coupon / event-ticket-strip and 10+ others, derived from field shape. |
+| **Auto-variant detection** | id-card / store-card-3col / boarding-pass-long / coupon / event-ticket-strip and 10+ others, derived from field shape. Manual override available. |
 | **Barcodes** | PDF417, QR, Code 128, Aztec — placement matches iOS (header, footer, strip-overlay). |
 | **Transit icons** | Airplane / train / bus / boat / generic, inline JSX SVG, `fill: currentColor` follows `labelColor`. |
 | **Back fields & dark mode** | iOS-accurate dark back side with link/separator treatment. |
-| **Storybook-ready** | First-class story integration with a `<Comparison>` helper. |
-| **VRT-ready** | Headless Playwright + pixelmatch + SSIM script ships in the repo. |
+| **Scoped styles** | Unique container id per instance — no global CSS, no portal, safe to render many cards on one page. |
+| **CSP-safe** | No inline `style=""`, no inline `<style>`. Works under strict CSP without `unsafe-inline`. |
+| **SSR-friendly** | Client-only; wrap in `next/dynamic({ ssr: false })` or render inside a client component. |
+| **TypeScript-first, ESM-only** | Strict types, tree-shakeable, zero runtime dependencies in the public API surface. |
 
 ## Compatibility
 
@@ -216,6 +214,6 @@ Tag-driven, OIDC-published. Bump the version in `packages/preview/package.json`,
 <div align="center">
 
 Built by **[tiketo](https://tiketo.eu)** — an Apple &amp; Google Wallet pass platform.<br/>
-We use this component in production.
+We use this component in production at **[get.tiketo.eu](https://get.tiketo.eu)**.
 
 </div>
