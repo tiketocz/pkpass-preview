@@ -7,7 +7,16 @@ import { exampleStoreCard } from "./fixtures/example-store-card";
 const meta: Meta<ComparisonArgs> = {
   title: "Examples",
   render: (args) => <Comparison {...args} />,
-  parameters: { layout: "centered" },
+  tags: ["autodocs"],
+  parameters: {
+    layout: "centered",
+    docs: {
+      description: {
+        component:
+          "MVP brand showcase used in the README quick start — fastest preview of what production input looks like.",
+      },
+    },
+  },
 };
 export default meta;
 

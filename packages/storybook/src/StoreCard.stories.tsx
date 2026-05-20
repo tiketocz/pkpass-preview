@@ -13,7 +13,16 @@ import { storeCard8 } from "./fixtures/store-card-8";
 const meta: Meta<ComparisonArgs> = {
   title: "Store card",
   render: (args) => <Comparison {...args} />,
-  parameters: { layout: "centered" },
+  tags: ["autodocs"],
+  parameters: {
+    layout: "centered",
+    docs: {
+      description: {
+        component:
+          "storeCard — 2-col / 3-col density, hero primary auto-fit (`primaryDensity` profile), member-card and check-in styles.",
+      },
+    },
+  },
 };
 export default meta;
 

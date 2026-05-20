@@ -15,7 +15,16 @@ import { pdf417_4 } from "./fixtures/pdf417-4";
 const meta: Meta<ComparisonArgs> = {
   title: "Barcode",
   render: (args) => <Comparison {...args} />,
-  parameters: { layout: "centered" },
+  tags: ["autodocs"],
+  parameters: {
+    layout: "centered",
+    docs: {
+      description: {
+        component:
+          "Barcode rendering primitives — code128, PDF417, QR — sizing, positioning and alt-text fallback.",
+      },
+    },
+  },
 };
 export default meta;
 

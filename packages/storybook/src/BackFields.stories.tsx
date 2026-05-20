@@ -6,7 +6,16 @@ import { backFields1 } from "./fixtures/back-fields";
 const meta: Meta<ComparisonArgs> = {
   title: "Back fields",
   render: (args) => <Comparison {...args} />,
-  parameters: { layout: "centered" },
+  tags: ["autodocs"],
+  parameters: {
+    layout: "centered",
+    docs: {
+      description: {
+        component:
+          "Back-side render — long-form key/value pairs in the iOS Wallet dark layout. No header strip, no logo; primary text is hidden.",
+      },
+    },
+  },
 };
 export default meta;
 

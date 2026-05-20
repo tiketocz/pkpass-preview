@@ -9,7 +9,16 @@ import { sample2 } from "./fixtures/sample2";
 const meta: Meta<ComparisonArgs> = {
   title: "Samples",
   render: (args) => <Comparison {...args} />,
-  parameters: { layout: "centered" },
+  tags: ["autodocs"],
+  parameters: {
+    layout: "centered",
+    docs: {
+      description: {
+        component:
+          "Real-world .pkpass samples ingested into the renderer — each story is the side-by-side render vs the iOS Wallet screenshot from the original pass.",
+      },
+    },
+  },
 };
 export default meta;
 

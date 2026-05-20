@@ -14,7 +14,16 @@ import { generic9 } from "./fixtures/generic9";
 const meta: Meta<ComparisonArgs> = {
   title: "Generic",
   render: (args) => <Comparison {...args} />,
-  parameters: { layout: "centered" },
+  tags: ["autodocs"],
+  parameters: {
+    layout: "centered",
+    docs: {
+      description: {
+        component:
+          "generic — most flexible type. Small label/value tables; the renderer's density profile (Baseline) gets exercised hardest here.",
+      },
+    },
+  },
 };
 export default meta;
 
