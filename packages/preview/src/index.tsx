@@ -59,6 +59,11 @@ type FontProfile = {
   // a long one ("BUSINESS CARD" / "VIZITKA PRODEJCE") scales down.
   maxHeader?: number;
   headerDensity?: number;
+  // When set, overrides `density` for primary fields only. Lets a profile
+  // push the primary value to hero size (matching iOS Wallet) without also
+  // enlarging header / secondary / auxiliary text that share the same
+  // FontProfile but use their own caps.
+  primaryDensity?: number;
 };
 
 // Pre-TIK-99 baseline values — referenced by `default` and by the explicit
@@ -104,8 +109,17 @@ const FONT_PROFILES: Record<PassVariant, FontProfile> = {
   // is retained so future fine-tuning can split back into separate profiles.
   "store-card": BASELINE_PROFILE,
   "store-card-numeric": BASELINE_PROFILE,
-  "store-card-2col": BASELINE_PROFILE,
-  "store-card-3col": BASELINE_PROFILE,
+  // 2col / 3col can include a non-empty primary field by deriveVariant rules.
+  // iOS Wallet renders that primary as a hero element that fills ~95% of card
+  // width (measured: 11-char "Jane Sample" = 609/640 device px ≈ 95%, ~55px
+  // logical font). BASELINE density 1.4 + cap 18 clamps it to body size.
+  // Use `primaryDensity: 1.9` so the primary-only path gets the hero font
+  // while header / secondary / auxiliary keep the BASELINE density 1.4 — that
+  // matters because store-card-2col is also the catch-all for header-only +
+  // secondary+aux fixtures (e.g. resident-benefit) where bumping global
+  // density would inflate the header value.
+  "store-card-2col": { ...BASELINE_PROFILE, primaryDensity: 1.8, max: 60 },
+  "store-card-3col": { ...BASELINE_PROFILE, primaryDensity: 1.8, max: 60 },
   "store-card-4col": BASELINE_PROFILE,
   // coupon: kept at BASELINE_PROFILE — VRT showed iOS reference matches main.
   coupon: BASELINE_PROFILE,
@@ -288,10 +302,12 @@ export const PKPassPreview = ({ values, removeVariablePlaceholders }: PreviewPro
   }, [profile]);
 
   const getDensity = useMemo(() => {
-    return (fieldType?: FieldType): number =>
-      fieldType === "headerFields" && profile.headerDensity != null
-        ? profile.headerDensity
-        : profile.density;
+    return (fieldType?: FieldType): number => {
+      if (fieldType === "headerFields" && profile.headerDensity != null)
+        return profile.headerDensity;
+      if (fieldType === undefined && profile.primaryDensity != null) return profile.primaryDensity;
+      return profile.density;
+    };
   }, [profile]);
 
   const calculateFontSizeBasedOnCharCount = useMemo(() => {
