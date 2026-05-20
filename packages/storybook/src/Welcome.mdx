@@ -1,0 +1,154 @@
+import { Meta } from "@storybook/blocks";
+
+<Meta title="Welcome" />
+
+<div style={{
+  padding: "48px 8px 8px",
+  fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif",
+  color: "#0B0B45",
+  maxWidth: 880,
+  margin: "0 auto",
+}}>
+
+<div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 32 }}>
+  <img
+    src="brand/tiketo-wordmark.png"
+    alt="tiketo"
+    style={{ height: 32, width: "auto" }}
+  />
+  <span style={{
+    background: "#0066FF",
+    color: "#fff",
+    padding: "4px 10px",
+    borderRadius: 999,
+    fontSize: 11,
+    fontWeight: 600,
+    letterSpacing: "0.04em",
+    textTransform: "uppercase",
+  }}>open source · MIT</span>
+</div>
+
+# @tiketo/pkpass-preview
+
+<p style={{ fontSize: 22, lineHeight: 1.4, color: "#0B0B45", marginTop: 0 }}>
+  <strong>See your Apple Wallet pass before you ship it.</strong>
+</p>
+
+<p style={{ fontSize: 16, lineHeight: 1.6, color: "#475569", marginTop: 0 }}>
+  A pixel-perfect React renderer for Apple Wallet passes. Side-by-side with the
+  real iOS render — so what you design is what users see.
+</p>
+
+<p style={{ fontSize: 15, lineHeight: 1.6, color: "#475569", fontStyle: "italic" }}>
+  Pass generators are everywhere. Pass <em>previews</em> aren't. We built this
+  because we needed it.
+</p>
+
+<div style={{
+  background: "#0B0B45",
+  color: "#e2e8f0",
+  borderRadius: 12,
+  padding: "20px 24px",
+  fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+  fontSize: 14,
+  lineHeight: 1.6,
+  margin: "24px 0",
+  whiteSpace: "pre",
+  overflowX: "auto",
+}}>
+{`import { PKPassPreview } from "@tiketo/pkpass-preview";
+
+<PKPassPreview values={brewbeatCoffee} />`}
+</div>
+
+<div style={{ display: "flex", gap: 12, flexWrap: "wrap", margin: "24px 0 40px" }}>
+  <a
+    href="?path=/story/examples--store-card"
+    style={{
+      background: "#0066FF",
+      color: "#fff",
+      padding: "10px 18px",
+      borderRadius: 8,
+      textDecoration: "none",
+      fontWeight: 600,
+      fontSize: 14,
+    }}
+  >Open live demo →</a>
+  <a
+    href="https://github.com/tiketocz/pkpass-preview"
+    target="_blank"
+    rel="noreferrer"
+    style={{
+      background: "#fff",
+      color: "#0B0B45",
+      padding: "10px 18px",
+      borderRadius: 8,
+      textDecoration: "none",
+      fontWeight: 600,
+      fontSize: 14,
+      border: "1px solid #e2e8f0",
+    }}
+  >GitHub</a>
+  <a
+    href="https://npmjs.com/package/@tiketo/pkpass-preview"
+    target="_blank"
+    rel="noreferrer"
+    style={{
+      background: "#fff",
+      color: "#0B0B45",
+      padding: "10px 18px",
+      borderRadius: 8,
+      textDecoration: "none",
+      fontWeight: 600,
+      fontSize: 14,
+      border: "1px solid #e2e8f0",
+    }}
+  >npm</a>
+</div>
+
+## What's inside
+
+<ul style={{ fontSize: 15, lineHeight: 1.9, color: "#0B0B45", paddingLeft: 20 }}>
+  <li>✅ <strong>Pixel-parity vs iOS Wallet</strong> — every fixture visually verified</li>
+  <li>✅ <strong>Drop-in</strong> — one component, one prop, no setup</li>
+  <li>✅ <strong>All pass types</strong> — boarding · store · event · coupon · generic</li>
+  <li>✅ <strong>Auto-variant & density detection</strong></li>
+  <li>✅ <strong>Dark back-side render</strong></li>
+  <li>✅ <strong>TypeScript native · ESM-only · tree-shakeable</strong></li>
+</ul>
+
+## Where to start
+
+<table style={{ width: "100%", marginTop: 16, fontSize: 14, borderCollapse: "collapse" }}>
+  <thead>
+    <tr style={{ borderBottom: "1px solid #e2e8f0" }}>
+      <th style={{ textAlign: "left", padding: "8px 0", color: "#64748b", fontWeight: 600 }}>If you want to…</th>
+      <th style={{ textAlign: "left", padding: "8px 0", color: "#64748b", fontWeight: 600 }}>Open</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style={{ borderBottom: "1px solid #f1f5f9" }}>
+      <td style={{ padding: "10px 0" }}>see the README quick start in action</td>
+      <td style={{ padding: "10px 0" }}><a href="?path=/story/examples--store-card">Examples</a></td>
+    </tr>
+    <tr style={{ borderBottom: "1px solid #f1f5f9" }}>
+      <td style={{ padding: "10px 0" }}>see real-world .pkpass samples</td>
+      <td style={{ padding: "10px 0" }}><a href="?path=/story/samples--membership-id-card">Samples</a></td>
+    </tr>
+    <tr style={{ borderBottom: "1px solid #f1f5f9" }}>
+      <td style={{ padding: "10px 0" }}>scan every variant at once</td>
+      <td style={{ padding: "10px 0" }}><a href="?path=/story/gallery--all">Gallery</a></td>
+    </tr>
+    <tr style={{ borderBottom: "1px solid #f1f5f9" }}>
+      <td style={{ padding: "10px 0" }}>find the closest layout to your design</td>
+      <td style={{ padding: "10px 0" }}>any of the per-type sections</td>
+    </tr>
+  </tbody>
+</table>
+
+<p style={{ marginTop: 56, fontSize: 13, color: "#94a3b8", borderTop: "1px solid #e2e8f0", paddingTop: 16 }}>
+  Built by <a href="https://tiketo.eu" target="_blank" rel="noreferrer" style={{ color: "#0066FF" }}>tiketo</a>
+  {" "}— we use this in production. Apple Wallet® and all Apple branding are property of Apple Inc.; this project is not affiliated with Apple.
+</p>
+
+</div>

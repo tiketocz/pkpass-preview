@@ -6,7 +6,16 @@ import { coupon1 } from "./fixtures/coupon1";
 const meta: Meta<ComparisonArgs> = {
   title: "Coupon",
   render: (args) => <Comparison {...args} />,
-  parameters: { layout: "centered" },
+  tags: ["autodocs"],
+  parameters: {
+    layout: "centered",
+    docs: {
+      description: {
+        component:
+          "coupon — discount, voucher and loyalty layouts. Strip image dominant; back fields used for terms & expiry.",
+      },
+    },
+  },
 };
 export default meta;
 

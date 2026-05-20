@@ -10,7 +10,16 @@ import { eventTicket5 } from "./fixtures/event-ticket-5";
 const meta: Meta<ComparisonArgs> = {
   title: "Event ticket",
   render: (args) => <Comparison {...args} />,
-  parameters: { layout: "centered" },
+  tags: ["autodocs"],
+  parameters: {
+    layout: "centered",
+    docs: {
+      description: {
+        component:
+          "eventTicket — pre-event poster and day-of layouts, with and without seat/holder secondary fields.",
+      },
+    },
+  },
 };
 export default meta;
 

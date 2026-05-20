@@ -9,7 +9,16 @@ import { boardingPass3 } from "./fixtures/boarding-pass-3";
 const meta: Meta<ComparisonArgs> = {
   title: "Boarding pass",
   render: (args) => <Comparison {...args} />,
-  parameters: { layout: "centered" },
+  tags: ["autodocs"],
+  parameters: {
+    layout: "centered",
+    docs: {
+      description: {
+        component:
+          "boardingPass — variants by transit type (air/train/bus/boat/generic), with terminal sub-fields and primary destination layout.",
+      },
+    },
+  },
 };
 export default meta;
 

@@ -135,7 +135,16 @@ const AllCards = () => (
 const meta: Meta = {
   title: "Gallery",
   render: () => <AllCards />,
-  parameters: { layout: "fullscreen" },
+  tags: ["autodocs"],
+  parameters: {
+    layout: "fullscreen",
+    docs: {
+      description: {
+        component:
+          "All fixtures on one screen — mosaic across every pass type, variant and density. Useful for scanning to the closest match for your design.",
+      },
+    },
+  },
 };
 export default meta;
 
