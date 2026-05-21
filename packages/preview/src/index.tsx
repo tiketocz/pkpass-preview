@@ -19,6 +19,7 @@ export type PassVariant =
   | "store-card"
   | "store-card-numeric"
   | "store-card-2col"
+  | "store-card-2col-hero"
   | "store-card-3col"
   | "store-card-4col"
   | "coupon"
@@ -59,6 +60,11 @@ type FontProfile = {
   // a long one ("BUSINESS CARD" / "VIZITKA PRODEJCE") scales down.
   maxHeader?: number;
   headerDensity?: number;
+  // When set, overrides `density` for primary fields only. Lets a profile
+  // push the primary value to hero size (matching iOS Wallet) without also
+  // enlarging header / secondary / auxiliary text that share the same
+  // FontProfile but use their own caps.
+  primaryDensity?: number;
 };
 
 // Pre-TIK-99 baseline values — referenced by `default` and by the explicit
@@ -104,8 +110,40 @@ const FONT_PROFILES: Record<PassVariant, FontProfile> = {
   // is retained so future fine-tuning can split back into separate profiles.
   "store-card": BASELINE_PROFILE,
   "store-card-numeric": BASELINE_PROFILE,
+  // 2col matches multiple shapes — only `2col-hero` (with a non-empty primary
+  // field) gets the iOS hero tier treatment. The plain `2col` catch-all keeps
+  // BASELINE so header-only fixtures (e.g. resident-benefit, where the header
+  // values are the de-facto primary) don't get bumped above iOS reference.
   "store-card-2col": BASELINE_PROFILE,
-  "store-card-3col": BASELINE_PROFILE,
+  // store-card-2col-hero: primary + 2 secondary (loyalty / member card shape).
+  // Tuned against the iOS Wallet reference for `examples--store-card`
+  // (Jane Sample). Per-field densities so each row independently matches
+  // the iOS tier:
+  //   primary "Jane Sample" 11 chars → 320/11×1.6 ≈ 46.5 (cap 50). Cannot
+  //   shrink-fit so cap is held just below the storeCard inner width to
+  //   avoid clipping the trailing char.
+  //   header value "1,250" 5 chars → char-density (1.0) lands at 64, cap 28
+  //   → 28px (matches iOS header value cap, also fits the 3.8em header
+  //   strip).
+  //   secondary "Tier"/"Gold" + "Member since"/"2024" → 320/16×1.5=30 (cap
+  //   maxAdditional 30) → matches iOS sec-value tier.
+  "store-card-2col-hero": {
+    ...BASELINE_PROFILE,
+    density: 1.5,
+    primaryDensity: 1.6,
+    max: 50,
+    headerDensity: 1.0,
+    maxHeader: 19,
+    maxAdditional: 30,
+  },
+  // store-card-3col: primary + 1 auxiliary (sc4 photo-card shape). The
+  // primary value is usually whitespace/blank (placeholder for a thumbnail),
+  // so the hero font tier doesn't apply here — and bumping header/secondary
+  // would push the short numeric header (e.g. "123456") far above the iOS
+  // reference. Keep only the `primaryDensity` + `max` knobs from PR #12 so
+  // any future fixture with a non-blank primary still gets shrink-fit
+  // protection up to 60px, but header + secondary stay at BASELINE.
+  "store-card-3col": { ...BASELINE_PROFILE, primaryDensity: 1.8, max: 60 },
   "store-card-4col": BASELINE_PROFILE,
   // coupon: kept at BASELINE_PROFILE — VRT showed iOS reference matches main.
   coupon: BASELINE_PROFILE,
@@ -242,8 +280,11 @@ export const deriveVariant = (values: { [key: string]: any }): PassVariant => {
     if (aux.length >= 4) return "store-card-4col";
     // SC4-shape: primary + 1 auxiliary → 3-col secondary layout.
     if (prim.length >= 1 && aux.length === 1) return "store-card-3col";
-    // Primary + 2 secondary (no aux): 2-col secondary layout.
-    if (prim.length >= 1 && sec.length === 2) return "store-card-2col";
+    // Primary + 2 secondary (no aux): 2-col secondary layout with hero
+    // primary. Split from the plain `store-card-2col` (which also catches
+    // header-only shapes like resident-benefit) so only the with-primary
+    // case gets the iOS hero font tier.
+    if (prim.length >= 1 && sec.length === 2) return "store-card-2col-hero";
     // 2+ headers, no primary, 1+ secondary, 1+ auxiliary: 2-col layout.
     if (head.length >= 2 && prim.length === 0 && sec.length >= 1 && aux.length >= 1)
       return "store-card-2col";
@@ -288,10 +329,12 @@ export const PKPassPreview = ({ values, removeVariablePlaceholders }: PreviewPro
   }, [profile]);
 
   const getDensity = useMemo(() => {
-    return (fieldType?: FieldType): number =>
-      fieldType === "headerFields" && profile.headerDensity != null
-        ? profile.headerDensity
-        : profile.density;
+    return (fieldType?: FieldType): number => {
+      if (fieldType === "headerFields" && profile.headerDensity != null)
+        return profile.headerDensity;
+      if (fieldType === undefined && profile.primaryDensity != null) return profile.primaryDensity;
+      return profile.density;
+    };
   }, [profile]);
 
   const calculateFontSizeBasedOnCharCount = useMemo(() => {
