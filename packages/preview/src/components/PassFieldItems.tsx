@@ -54,13 +54,13 @@ export const PassFieldItemHeader = ({
   value,
   attributedValue,
   textAlignment,
-  globalFontSize,
+  valueFontSize,
 }: PassField & {
-  globalFontSize?: number;
+  valueFontSize?: number;
 }) => {
   const { fontSize, ref } = useFitText({});
   const textAlign: Property.TextAlign = getTextAlignment(textAlignment);
-  const headerFontSize = globalFontSize != null ? `${globalFontSize}px` : fontSize;
+  const headerFontSize = valueFontSize != null ? `${valueFontSize}px` : fontSize;
 
   return (
     <>

@@ -604,7 +604,7 @@ ${secondaryFieldsCount >= 4 ? `max-width: calc(100% / ${secondaryFieldsCount});`
               {headerFields.map((f, i) => (
                 <PassFieldItemHeader
                   {...f}
-                  globalFontSize={globalFontSizeHeader}
+                  valueFontSize={globalFontSizeHeader}
                   key={f.key || `${i}`}
                 />
               ))}
