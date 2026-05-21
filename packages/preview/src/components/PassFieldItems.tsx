@@ -49,31 +49,60 @@ export const PassFieldItem = ({
   );
 };
 
-export const PassFieldItemHeader = ({
-  label,
-  value,
-  attributedValue,
-  textAlignment,
-  valueFontSize,
-}: PassField & {
-  valueFontSize?: number;
-}) => {
+// Profiles with `headerDensity` precompute header font size, so `useFitText`'s
+// ResizeObserver and DOM measurement are dead work. Split the component so the
+// hook only mounts in the auto-fit branch (TIK-109).
+const PassFieldItemHeaderFit = ({ label, value, attributedValue, textAlignment }: PassField) => {
   const { fontSize, ref } = useFitText({});
   const textAlign: Property.TextAlign = getTextAlignment(textAlignment);
-  const headerFontSize = valueFontSize != null ? `${valueFontSize}px` : fontSize;
 
   return (
     <>
       <div className="passField" style={{ textAlign }} ref={ref}>
         <label>{label}</label>
         <span>
-          <span style={{ fontSize: headerFontSize, fontWeight: 400 }}>
+          <span style={{ fontSize, fontWeight: 400 }}>
             {attributedValue?.toString() || value?.toString()}
           </span>
         </span>
       </div>{" "}
     </>
   );
+};
+
+const PassFieldItemHeaderStatic = ({
+  label,
+  value,
+  attributedValue,
+  textAlignment,
+  valueFontSize,
+}: PassField & { valueFontSize: number }) => {
+  const textAlign: Property.TextAlign = getTextAlignment(textAlignment);
+
+  return (
+    <>
+      <div className="passField" style={{ textAlign }}>
+        <label>{label}</label>
+        <span>
+          <span style={{ fontSize: `${valueFontSize}px`, fontWeight: 400 }}>
+            {attributedValue?.toString() || value?.toString()}
+          </span>
+        </span>
+      </div>{" "}
+    </>
+  );
+};
+
+export const PassFieldItemHeader = ({
+  valueFontSize,
+  ...field
+}: PassField & {
+  valueFontSize?: number;
+}) => {
+  if (valueFontSize != null) {
+    return <PassFieldItemHeaderStatic {...field} valueFontSize={valueFontSize} />;
+  }
+  return <PassFieldItemHeaderFit {...field} />;
 };
 
 export const PassBackFieldItem = ({ label, value, attributedValue, textAlignment }: PassField) => {
