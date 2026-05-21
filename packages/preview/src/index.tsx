@@ -133,7 +133,7 @@ const FONT_PROFILES: Record<PassVariant, FontProfile> = {
     primaryDensity: 1.6,
     max: 50,
     headerDensity: 1.0,
-    maxHeader: 28,
+    maxHeader: 19,
     maxAdditional: 30,
   },
   // store-card-3col: primary + 1 auxiliary (sc4 photo-card shape). The
