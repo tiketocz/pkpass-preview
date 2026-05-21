@@ -92,11 +92,7 @@ What `FONT_PROFILES` doesn't cover (static CSS, not charCount-based):
 
 | Variant                                    | Selector                                            | Property             | Value                |
 |--------------------------------------------|-----------------------------------------------------|----------------------|----------------------|
-| `generic`                                  | `.generic #headerFields`                            | height               | 50px                 |
-| `generic`                                  | `.generic #headerFields img`                        | max-height           | 50px                 |
 | `generic`                                  | `#headerFields h1`                                  | font-size            | 1.67em (~16.7px)     |
-| `generic`                                  | `#secondaryFields .passField > span > span`         | font-weight          | 300                  |
-| `generic`                                  | `#auxiliaryFields .passField > span > span`         | font-weight          | 300                  |
 | `id-card`                                  | `.generic #secondaryFields > span > span`           | font-weight          | 100                  |
 | `id-card`                                  | `.generic #headerFields .passField > span > span`   | vertical-align       | top                  |
 | `id-card`                                  | `.generic #headerFields`                            | height               | 45px                 |
