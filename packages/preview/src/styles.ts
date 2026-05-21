@@ -126,12 +126,7 @@ export const getPassStyles = (identifier: string) => `
      the mapping is one-to-one with pkpass type + field shape — e.g. id-card
      == generic-class with primary + auxiliary fields and no logoText. */
 
-  /* generic + generic-header variants — taller header box than baseline so
-     the per-variant logoText (h1) and header value fit without overflow. The
-     default / generic-baseline / store-card-baseline profiles deliberately do
-     NOT include this override — they fall back to the base
-     #headerFields { height: 3.8em } for backwards-compat with main. */
-  /* generic / generic-header — keep base header height (3.8em) and base logo
+  /* generic variant — keeps base header height (3.8em) and base logo
      max-height (38px). The previous 50px override was needed when h1 had
      line-height: 3em (so its line-box was ~50px tall and the strip needed to
      match). With base h1 now at line-height: 1 + flex centering, both image
@@ -145,10 +140,9 @@ export const getPassStyles = (identifier: string) => `
     max-height: 41px;
   }
 
-  /* logoText (h1) scaled +1/3 for generic / generic-header (1.25em -> 1.67em);
+  /* logoText (h1) scaled +1/3 for generic variant (1.25em -> 1.67em);
      cards without a logoText render no h1 so this is a no-op for them. */
-  #${identifier}.generic.pkpass-variant-generic #headerFields h1,
-  #${identifier}.generic.pkpass-variant-generic-header #headerFields h1 {
+  #${identifier}.generic.pkpass-variant-generic #headerFields h1 {
     font-size: 1.67em;
   }
 

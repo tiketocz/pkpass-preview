@@ -1,7 +1,7 @@
 // Generic pass example — synthetic, no real customer data.
 //
 // Shape: 1 header field + 1 primary field + 3 secondary fields + 2 auxiliary
-// fields. `deriveVariant` will resolve this to the `generic-header` profile.
+// fields. `deriveVariant` will resolve this to the `generic` profile.
 
 const PLACEHOLDER_ICON_PNG =
   "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAp0lEQVR4nNXX6wqAIAyGYS/H+8f7KwqCUJfbdLwm+C/3PeCxlHM+yJ62AZRS7h7dnhwREIl4ZzSA+oPI8Kt1AVGIXk0RsBoh1foErEJ81RgCZhGjsSqAF6EZowZYEdpvTQBtYQvUDBgFWKfKBZCCPOvEDagDvTtlCtBDWNu/AegUoIsQ3YboQYQexehlhF7H6IMEfZKhj9KIcAmx349JdHiNaABUxwEnrg4HdIHXtTQAAAAASUVORK5CYII=";

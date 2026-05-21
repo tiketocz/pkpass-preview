@@ -5,7 +5,6 @@ export type PassVariant =
   | "generic-baseline"
   | "store-card-baseline"
   | "generic"
-  | "generic-header"
   | "id-card"
   | "store-card"
   | "store-card-numeric"
@@ -84,13 +83,15 @@ export const FONT_PROFILES: Record<PassVariant, FontProfile> = {
   // can split without renaming consumers.
   "generic-baseline": BASELINE_PROFILE,
   "store-card-baseline": BASELINE_PROFILE,
-  // generic / generic-header: kept at BASELINE_PROFILE values (= pre-PR main).
-  // Earlier iterations bumped density + caps to grow text closer to iOS but
-  // VRT against the iOS reference shows main was closer than the bumped
-  // values; reverting these two profiles keeps the rendered field text in
-  // sync with main / iOS for Generic 1/2/3.
-  generic: BASELINE_PROFILE,
-  "generic-header": BASELINE_PROFILE,
+  // generic: single profile for all G1/G2/G3 shapes (TIK-108 merge of the
+  // previous `generic` + `generic-header` split, which differed only in
+  // whether the header value was useFitText-sized or char-density-sized).
+  // headerDensity + maxHeader replace useFitText so header sizing is
+  // deterministic: short G3 headers ("1"/"2") clamp at maxHeader (22px);
+  // long G1/G2 header ("And it's value", 14 chars) → 320/14×0.7 ≈ 16px,
+  // matching the prior useFitText output within ~1px. Field caps stay at
+  // BASELINE so primary/secondary/auxiliary render identically to main.
+  generic: { ...BASELINE_PROFILE, headerDensity: 0.7, maxHeader: 22 },
   // id-card: kept at BASELINE_PROFILE for now — VRT vs iOS shows main was
   // closer than the previously-tuned (density 1.8, maxHeader 18 + headerDensity 0.5).
   "id-card": BASELINE_PROFILE,
@@ -191,11 +192,11 @@ export const FONT_PROFILES: Record<PassVariant, FontProfile> = {
   },
   // event-ticket-generic: ET5 fixture — it's actually a `generic` pkpass class
   // (NOT eventTicket), with a logoText. Separate variant so it doesn't share
-  // `generic-header` (which is reserved for G1/G2). maxPrimary 26 grows the
-  // logoText/primary close to iOS hero size; maxSecondary 19 matches the iOS
-  // secondary tier for the longer label/value pairs; maxAuxiliary 15 keeps
-  // the aux row a step smaller so the visual hierarchy stays
-  // primary > secondary > auxiliary.
+  // the unified `generic` profile (which targets G1/G2/G3). maxPrimary 26
+  // grows the logoText/primary close to iOS hero size; maxSecondary 19
+  // matches the iOS secondary tier for the longer label/value pairs;
+  // maxAuxiliary 15 keeps the aux row a step smaller so the visual hierarchy
+  // stays primary > secondary > auxiliary.
   // math (primary, 8ch row): 320/8*1.5 = 60 → cap maxPrimary 26.
   "event-ticket-generic": {
     density: 1.5,

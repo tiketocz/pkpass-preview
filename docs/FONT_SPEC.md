@@ -26,8 +26,7 @@ otherwise headers fall back to `useFitText` against the static CSS size.
 | `default`                |     1.4 |  10 |         18 |           18 |           14 |         — |          — |
 | `generic-baseline`       |     1.4 |  10 |         18 |           18 |           14 |         — |          — |
 | `store-card-baseline`    |     1.4 |  10 |         18 |           18 |           14 |         — |          — |
-| `generic`                |     2.0 |  10 |         27 |           20 |           16 |        19 |        0.5 |
-| `generic-header`         |     2.0 |  10 |         27 |           20 |           16 |        18 |        0.8 |
+| `generic`                |     1.4 |  10 |         18 |           18 |           14 |        22 |        0.7 |
 | `id-card`                |     1.8 |  10 |         26 |           20 |           16 |        18 |        0.5 |
 | `store-card`             |     1.7 |  10 |         26 |           24 |           20 |        17 |       0.56 |
 | `store-card-numeric`     |     1.5 |  10 |         20 |           20 |           16 |         — |          — |
@@ -69,8 +68,7 @@ prop required. The variant is derived deterministically from `values`
 | `eventTicket`   | else                                                            | `event-ticket`         |
 | `generic`       | headerFields = 0 AND has primary AND has logoText               | `event-ticket-generic` |
 | `generic`       | headerFields = 0 AND no primary                                 | `generic-baseline`     |
-| `generic`       | headerFields ≥ 2                                                | `generic`              |
-| `generic`       | headerFields = 1 AND secondary ≥ 3                              | `generic-header`       |
+| `generic`       | headerFields ≥ 2 OR (headerFields = 1 AND secondary ≥ 3)        | `generic`              |
 | `generic`       | headerFields = 1 AND secondary ≤ 2                              | `id-card`              |
 | `generic`       | else                                                            | `generic-baseline`     |
 | `storeCard`     | aux ≥ 5                                                         | `store-card-numeric`   |
@@ -94,11 +92,11 @@ What `FONT_PROFILES` doesn't cover (static CSS, not charCount-based):
 
 | Variant                                    | Selector                                            | Property             | Value                |
 |--------------------------------------------|-----------------------------------------------------|----------------------|----------------------|
-| `generic` + `generic-header`               | `.generic #headerFields`                            | height               | 50px                 |
-| `generic` + `generic-header`               | `.generic #headerFields img`                        | max-height           | 50px                 |
-| `generic` + `generic-header`               | `#headerFields h1`                                  | font-size            | 1.67em (~16.7px)     |
-| `generic` + `generic-header`               | `#secondaryFields .passField > span > span`         | font-weight          | 300                  |
-| `generic` + `generic-header`               | `#auxiliaryFields .passField > span > span`         | font-weight          | 300                  |
+| `generic`                                  | `.generic #headerFields`                            | height               | 50px                 |
+| `generic`                                  | `.generic #headerFields img`                        | max-height           | 50px                 |
+| `generic`                                  | `#headerFields h1`                                  | font-size            | 1.67em (~16.7px)     |
+| `generic`                                  | `#secondaryFields .passField > span > span`         | font-weight          | 300                  |
+| `generic`                                  | `#auxiliaryFields .passField > span > span`         | font-weight          | 300                  |
 | `id-card`                                  | `.generic #secondaryFields > span > span`           | font-weight          | 100                  |
 | `id-card`                                  | `.generic #headerFields .passField > span > span`   | vertical-align       | top                  |
 | `id-card`                                  | `.generic #headerFields`                            | height               | 45px                 |
