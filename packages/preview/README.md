@@ -58,8 +58,9 @@ bun run lint        # biome check .
 bun run lint:fix    # biome check --write .
 bun run format      # biome format --write .
 bun run typecheck   # tsc --noEmit
-bun run test        # vitest run (one-shot)
-bun run test:watch  # vitest (watch mode)
+bun run test          # vitest run (one-shot)
+bun run test:watch    # vitest (watch mode)
+bun run test:coverage # vitest run + v8 coverage report (html in coverage/)
 ```
 
 ## Frozen API contract

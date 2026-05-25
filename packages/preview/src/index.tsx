@@ -36,13 +36,13 @@ export interface PreviewProps {
   removeVariablePlaceholders?: boolean;
 }
 
-const ROW_WIDTH = 320;
+export const ROW_WIDTH = 320;
 
 // TIK-99: per-template "variant" font profiles. The font size is still computed
 // dynamically from the text length ((ROW_WIDTH / charCount) * density, clamped to
 // [min, max]); the variant only changes the parameters of that computation, so a
 // longer/shorter value still gets a fitting size — no hardcoded per-card pixels.
-type FontProfile = {
+export type FontProfile = {
   // Char-density multiplier used by calculateGlobalFontSizeForRow:
   //   size = (ROW_WIDTH / charCount) * density,
   // then clamped to [min, max] (or maxAdditional / maxAuxiliary by field type).
@@ -80,7 +80,7 @@ const BASELINE_PROFILE: FontProfile = {
   maxAuxiliary: 14,
 };
 
-const FONT_PROFILES: Record<PassVariant, FontProfile> = {
+export const FONT_PROFILES: Record<PassVariant, FontProfile> = {
   // default profile — preserved 1:1 from the pre-TIK-99 main branch (density
   // 1.4, caps 18/18/14). Used as the fallback when `deriveVariant` cannot
   // recognise the pkpass class from `values['pass.json']` (no behaviour
@@ -202,6 +202,54 @@ const FONT_PROFILES: Record<PassVariant, FontProfile> = {
   },
 };
 
+// Pure helpers for the char-density font sizing algorithm. Lifted out of the
+// component (TIK-106) so they can be unit-tested without rendering React.
+// `PKPassPreview` calls these with its `profile` (FONT_PROFILES[variant]) and
+// behaviour is unchanged — see `tests/font-profiles.test.ts` for the pinned
+// per-variant baselines.
+export const getMaxFontSize = (profile: FontProfile, fieldType?: FieldType): number => {
+  if (fieldType === "secondaryFields") return profile.maxAdditional;
+  if (fieldType === "auxiliaryFields") return profile.maxAuxiliary;
+  if (fieldType === "headerFields") return profile.maxHeader ?? profile.max;
+  return profile.max;
+};
+
+export const getDensity = (profile: FontProfile, fieldType?: FieldType): number => {
+  if (fieldType === "headerFields" && profile.headerDensity != null) return profile.headerDensity;
+  if (fieldType === undefined && profile.primaryDensity != null) return profile.primaryDensity;
+  return profile.density;
+};
+
+export const calculateFontSize = (
+  profile: FontProfile,
+  charCount: number,
+  fieldType?: FieldType,
+): number => {
+  if (charCount === 0) return 0;
+  const maxFontSize = getMaxFontSize(profile, fieldType);
+  const fontSize = Math.max((ROW_WIDTH / charCount) * getDensity(profile, fieldType), profile.min);
+  return Math.min(fontSize, maxFontSize);
+};
+
+// Sum char counts across a row of fields, then run the char-density algorithm.
+// Header rows sum value-lengths only (label has its own fixed size); other rows
+// take the max(value, label) per field.
+export const calculateGlobalFontSizeForRow = (
+  profile: FontProfile,
+  fields: PassField[] | undefined,
+  fieldType?: FieldType,
+): number | undefined => {
+  if (!fields) return undefined;
+  const totalCharCount = fields.reduce((count: number, field) => {
+    const valueLength = field.attributedValue?.length || field.value?.toString().length || 0;
+    const labelLength = field.label?.length || 0;
+    return (
+      count + (fieldType === "headerFields" ? valueLength : Math.max(valueLength, labelLength))
+    );
+  }, 0);
+  return calculateFontSize(profile, totalCharCount, fieldType);
+};
+
 // Deterministic variant detection from `values` (pkpass type + field shape).
 // Pure function — no DOM measurement, no content heuristics beyond the explicit
 // boarding-pass primary-value length check below. Falls back to `default` when
@@ -318,57 +366,13 @@ export const PKPassPreview = ({ values, removeVariablePlaceholders }: PreviewPro
     return `visualEditor_${(Math.random() + 1).toString(36).substring(7)}`;
   }, []);
 
-  // Fix 7: Memoize callback functions to ensure stability
-  const getMaxFontSize = useMemo(() => {
-    return (fieldType?: FieldType): number => {
-      if (fieldType === "secondaryFields") return profile.maxAdditional;
-      if (fieldType === "auxiliaryFields") return profile.maxAuxiliary;
-      if (fieldType === "headerFields") return profile.maxHeader ?? profile.max;
-      return profile.max;
-    };
+  // TIK-106: delegates to the pure top-level helper so unit tests can hit the
+  // same algorithm without rendering React. Memo keeps the closure stable for
+  // downstream useMemo deps (globalFontSizePrimary/Header/Secondary/Auxiliary).
+  const calculateRowFontSize = useMemo(() => {
+    return (fields: PassField[] | undefined, fieldType?: FieldType) =>
+      calculateGlobalFontSizeForRow(profile, fields, fieldType);
   }, [profile]);
-
-  const getDensity = useMemo(() => {
-    return (fieldType?: FieldType): number => {
-      if (fieldType === "headerFields" && profile.headerDensity != null)
-        return profile.headerDensity;
-      if (fieldType === undefined && profile.primaryDensity != null) return profile.primaryDensity;
-      return profile.density;
-    };
-  }, [profile]);
-
-  const calculateFontSizeBasedOnCharCount = useMemo(() => {
-    return (charCount: number, fieldType?: FieldType) => {
-      if (charCount === 0) {
-        return 0;
-      }
-
-      const maxFontSize = getMaxFontSize(fieldType);
-      const fontSize = Math.max((ROW_WIDTH / charCount) * getDensity(fieldType), profile.min);
-
-      return Math.min(fontSize, maxFontSize);
-    };
-  }, [getMaxFontSize, getDensity, profile]);
-
-  const calculateGlobalFontSizeForRow = useMemo(() => {
-    return (fields: PassField[] | undefined, fieldType?: FieldType) => {
-      if (!fields) {
-        return undefined;
-      }
-
-      const totalCharCount = fields.reduce((count: number, field) => {
-        const valueLength = field.attributedValue?.length || field.value?.toString().length || 0;
-        const labelLength = field.label?.length || 0;
-        // Header value is sized off the value length only — the header label has
-        // its own fixed size, so a long label shouldn't shrink the value.
-        return (
-          count + (fieldType === "headerFields" ? valueLength : Math.max(valueLength, labelLength))
-        );
-      }, 0);
-
-      return calculateFontSizeBasedOnCharCount(totalCharCount, fieldType);
-    };
-  }, [calculateFontSizeBasedOnCharCount]);
 
   // Fix 2: Memoize data processing to prevent recalculation on every render
   const data: PassData = useMemo(() => {
@@ -490,17 +494,17 @@ ${secondaryFieldsCount >= 4 ? `max-width: calc(100% / ${secondaryFieldsCount});`
 
   // Fix 6: Memoize font size calculations to prevent recalculation on every render
   const globalFontSizePrimary = useMemo(() => {
-    return calculateGlobalFontSizeForRow(structure?.primaryFields);
-  }, [calculateGlobalFontSizeForRow, structure?.primaryFields]);
+    return calculateRowFontSize(structure?.primaryFields);
+  }, [calculateRowFontSize, structure?.primaryFields]);
 
   // Header value font size — only for profiles that opt into char-density header
   // sizing (headerDensity set); otherwise undefined → PassFieldItemHeader falls
   // back to its useFitText behavior.
   const globalFontSizeHeader = useMemo(() => {
     if (profile.headerDensity == null) return undefined;
-    const size = calculateGlobalFontSizeForRow(headerFields, "headerFields");
+    const size = calculateRowFontSize(headerFields, "headerFields");
     return size && size > 0 ? size : undefined;
-  }, [profile, calculateGlobalFontSizeForRow, headerFields]);
+  }, [profile, calculateRowFontSize, headerFields]);
 
   const secondaryFields = useMemo(() => {
     if (data.storeCard) {
@@ -531,12 +535,12 @@ ${secondaryFieldsCount >= 4 ? `max-width: calc(100% / ${secondaryFieldsCount});`
   }, [data.storeCard, data.generic, structure?.auxiliaryFields]);
 
   const globalFontSizeSecondary = useMemo(() => {
-    return calculateGlobalFontSizeForRow(secondaryFields, "secondaryFields");
-  }, [calculateGlobalFontSizeForRow, secondaryFields]);
+    return calculateRowFontSize(secondaryFields, "secondaryFields");
+  }, [calculateRowFontSize, secondaryFields]);
 
   const globalFontSizeAuxiliary = useMemo(() => {
-    return calculateGlobalFontSizeForRow(auxiliaryFields, "auxiliaryFields");
-  }, [calculateGlobalFontSizeForRow, auxiliaryFields]);
+    return calculateRowFontSize(auxiliaryFields, "auxiliaryFields");
+  }, [calculateRowFontSize, auxiliaryFields]);
 
   // Fix 7: Memoize inline style objects to prevent recreation on every render
   const primaryFieldsStyle = useMemo(
