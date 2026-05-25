@@ -37,10 +37,12 @@ describe("FONT_PROFILES char-density algorithm — minimum spec (TIK-106)", () =
     expect(calculateFontSize(FONT_PROFILES["boarding-pass"], 6)).toBe(18);
   });
 
-  // TC4 — boarding-pass-long, low-cap clamp. Original TIK-106 spec: 11
-  // (density 0.95, max 11). Post-TIK-108 unification → BASELINE → cap 18.
-  it("boarding-pass-long / 21ch primaryFields → 18 (BASELINE cap; was 11 in TIK-106 spec pre-TIK-108)", () => {
-    expect(calculateFontSize(FONT_PROFILES["boarding-pass-long"], 21)).toBe(18);
+  // TC4 — boarding-pass, long primary value. Original TIK-106 spec: 11
+  // (boarding-pass-long, density 0.95, max 11). Post-TIK-108 unification →
+  // BASELINE → cap 18. Post-TIK-112 collapse: -short/-long entries removed,
+  // single `boarding-pass` profile handles all primary lengths.
+  it("boarding-pass / 21ch primaryFields → 18 (BASELINE cap; was 11 in TIK-106 spec pre-TIK-108, pre-TIK-112 routed to -long)", () => {
+    expect(calculateFontSize(FONT_PROFILES["boarding-pass"], 21)).toBe(18);
   });
 
   // TC5 — event-ticket-5col, packed-row auxiliary cap. 320/5*1.5=96 → cap 13.
@@ -78,9 +80,12 @@ describe("FONT_PROFILES char-density algorithm — extended coverage", () => {
     );
   });
 
-  // TC9 — boarding-pass-short. Original TIK-106 spec: 22. Post-TIK-108 → BASELINE → 18.
-  it("boarding-pass-short / 11ch primaryFields → 18 (BASELINE cap; was 22 in TIK-106 spec pre-TIK-108)", () => {
-    expect(calculateFontSize(FONT_PROFILES["boarding-pass-short"], 11)).toBe(18);
+  // TC9 — boarding-pass, short primary value. Original TIK-106 spec: 22
+  // (boarding-pass-short, density 1.5, max 22). Post-TIK-108 → BASELINE →
+  // 18. Post-TIK-112 collapse: same profile as the long-primary case (TC4)
+  // since the variant split was removed.
+  it("boarding-pass / 11ch primaryFields → 18 (BASELINE cap; was 22 in TIK-106 spec pre-TIK-108, pre-TIK-112 routed to -short)", () => {
+    expect(calculateFontSize(FONT_PROFILES["boarding-pass"], 11)).toBe(18);
   });
 
   // TC10 — generic primary. Original TIK-106 spec: ~16 (density 2.0).
