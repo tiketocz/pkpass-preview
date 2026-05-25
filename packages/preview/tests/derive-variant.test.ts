@@ -8,11 +8,12 @@
 // the small-cap variant`).
 import { describe, expect, it } from "vitest";
 import { deriveVariant } from "../src/index";
+import type { PassField } from "../src/types";
 
 const bp = (primaryValue: string) => ({
   "pass.json": {
     boardingPass: {
-      primaryFields: [{ value: primaryValue }],
+      primaryFields: [{ key: "destination", value: primaryValue }] satisfies PassField[],
     },
   },
 });
