@@ -8,7 +8,7 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       reporter: ["text", "html"],
-      include: ["packages/preview/src/index.tsx"],
+      include: ["packages/preview/src/font-profiles.ts"],
     },
   },
 });

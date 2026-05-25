@@ -10,7 +10,13 @@
 // store-card, and coupon variants were unified onto BASELINE_PROFILE — the
 // "original TIK-106 spec px" is noted in each test for audit trail.
 import { describe, expect, it } from "vitest";
-import { FONT_PROFILES, calculateFontSize, getDensity, getMaxFontSize } from "../src/index";
+import {
+  FONT_PROFILES,
+  calculateFontSize,
+  calculateGlobalFontSizeForRow,
+  getDensity,
+  getMaxFontSize,
+} from "../src/font-profiles";
 
 describe("FONT_PROFILES char-density algorithm — minimum spec (TIK-106)", () => {
   // TC1 — default profile, cap-bound primary. 320/8*1.4=56 → cap 18.
@@ -128,6 +134,50 @@ describe("getMaxFontSize", () => {
 
   it("falls back to profile.max for headerFields when maxHeader not set", () => {
     expect(getMaxFontSize(FONT_PROFILES.default, "headerFields")).toBe(FONT_PROFILES.default.max);
+  });
+});
+
+describe("calculateGlobalFontSizeForRow", () => {
+  // Wraps the algorithm: sums char counts across a row of PassFields, then
+  // delegates to calculateFontSize. Exercises the value vs label vs
+  // attributedValue precedence and the header / non-header sum mode.
+  it("returns undefined for undefined fields (early return)", () => {
+    expect(calculateGlobalFontSizeForRow(FONT_PROFILES.default, undefined)).toBeUndefined();
+  });
+
+  it("non-header row sums max(value, label) per field", () => {
+    // Two fields: ("Tier", "Gold") = max(4,4)=4, ("Member since","2024") =
+    // max(12,4)=12. Total 16ch, secondaryFields → 320/16*1.4=28 → cap 18.
+    const fields = [
+      { label: "Tier", value: "Gold" },
+      { label: "Member since", value: "2024" },
+    ];
+    expect(calculateGlobalFontSizeForRow(FONT_PROFILES.default, fields, "secondaryFields")).toBe(
+      18,
+    );
+  });
+
+  it("headerFields sums value-lengths only (label ignored, label fixed-size)", () => {
+    // Field with label "BUSINESS CARD" (13ch) + value "CARD" (4ch). Header mode
+    // should sum 4 (value only), not 13 (label). 320/4*1.0=80, cap maxHeader 19.
+    const fields = [{ label: "BUSINESS CARD", value: "CARD" }];
+    expect(
+      calculateGlobalFontSizeForRow(FONT_PROFILES["store-card-2col-hero"], fields, "headerFields"),
+    ).toBe(19);
+  });
+
+  it("attributedValue takes precedence over value (HTML markup is sized by raw length)", () => {
+    // attributedValue "<a>Tap here</a>" (15ch) wins over value "fallback" (8).
+    // No label → total 15ch. primary → 320/15*1.4 ≈ 29.87 → cap 18.
+    const fields = [{ attributedValue: "<a>Tap here</a>", value: "fallback" }];
+    expect(calculateGlobalFontSizeForRow(FONT_PROFILES.default, fields)).toBe(18);
+  });
+
+  it("missing value AND missing label coerces to 0 (no crash on undefined.toString)", () => {
+    // Sparse field — neither value nor label present. Should not throw.
+    const fields = [{}];
+    // 0 charCount → calculateFontSize early-returns 0.
+    expect(calculateGlobalFontSizeForRow(FONT_PROFILES.default, fields)).toBe(0);
   });
 });
 
