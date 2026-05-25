@@ -37,6 +37,10 @@ export type FontProfile = {
   // match the pre-TIK-99 baseline.
   density: number;
   min: number;
+  // Per-field caps. Required for FontProfile shape completeness — even
+  // variants that don't render a given field type (e.g. `event-ticket-5col`
+  // has no primary fields per `deriveVariant`) declare all three caps so
+  // `getMaxFontSize` can be a total function without `?? fallback` branches.
   maxPrimary: number; // primary fields
   maxSecondary: number; // secondary fields
   maxAuxiliary: number; // auxiliary fields
@@ -148,6 +152,7 @@ export const FONT_PROFILES: Record<PassVariant, FontProfile> = {
   // maxPrimary 20 grows the primary value to iOS hero size; maxSecondary 15
   // matches the iOS 3-col secondary tier; maxAuxiliary 14 keeps the aux row
   // visually distinct (smaller than secondary) per iOS reference.
+  // math (header, "And it's value" 14ch): 320/14*1.0 = 22.86 → cap maxHeader 17.
   "event-ticket": {
     density: 2.1,
     min: 10,
@@ -163,6 +168,7 @@ export const FONT_PROFILES: Record<PassVariant, FontProfile> = {
   // of denser numeric aux values so they don't collide visually with the
   // header strip. maxPrimary 20 unused (no primary fields) but kept for
   // FontProfile shape completeness.
+  // math (auxiliary, 5ch packed row): 320/5*1.5 = 96 → cap maxAuxiliary 13.
   "event-ticket-5col": {
     density: 1.5,
     min: 10,
@@ -175,6 +181,7 @@ export const FONT_PROFILES: Record<PassVariant, FontProfile> = {
   // the secondary row legible alongside the strip image without overlapping;
   // maxAuxiliary 15 sits just below to keep the visual hierarchy
   // secondary > auxiliary as in iOS reference.
+  // math (secondary, 10ch row): 320/10*1.5 = 48 → cap maxSecondary 18.
   "event-ticket-strip": {
     density: 1.5,
     min: 10,
@@ -189,6 +196,7 @@ export const FONT_PROFILES: Record<PassVariant, FontProfile> = {
   // secondary tier for the longer label/value pairs; maxAuxiliary 15 keeps
   // the aux row a step smaller so the visual hierarchy stays
   // primary > secondary > auxiliary.
+  // math (primary, 8ch row): 320/8*1.5 = 60 → cap maxPrimary 26.
   "event-ticket-generic": {
     density: 1.5,
     min: 10,
