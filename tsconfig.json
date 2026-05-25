@@ -6,6 +6,6 @@
       "@tiketo/pkpass-preview": ["packages/preview/src/index.tsx"]
     }
   },
-  "include": ["packages/*/src/**/*", "tests/**/*", "vitest.config.ts"],
+  "include": ["packages/*/src/**/*", "packages/*/tests/**/*", "tests/**/*", "vitest.config.ts"],
   "exclude": ["node_modules", "dist"]
 }

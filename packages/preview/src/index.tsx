@@ -2,205 +2,31 @@ import * as React from "react";
 import { useMemo, useState } from "react";
 import { BarcodesPreview } from "./components/BarcodesPreview";
 import { PassBackFieldItem, PassFieldItem, PassFieldItemHeader } from "./components/PassFieldItems";
+import { FONT_PROFILES, type PassVariant, calculateGlobalFontSizeForRow } from "./font-profiles";
 import { getPassStyles } from "./styles";
 import { TransitIcon } from "./transit-icon";
 import type { FieldType, PassData, PassField, PassStructure } from "./types";
 
 export type { PassData, PassField, PassStructure, PKTextAlignment, FieldType } from "./types";
 export { PassTransitType } from "./types";
-
-export type PassVariant =
-  | "default"
-  | "generic-baseline"
-  | "store-card-baseline"
-  | "generic"
-  | "generic-header"
-  | "id-card"
-  | "store-card"
-  | "store-card-numeric"
-  | "store-card-2col"
-  | "store-card-2col-hero"
-  | "store-card-3col"
-  | "store-card-4col"
-  | "coupon"
-  | "boarding-pass"
-  | "boarding-pass-short"
-  | "boarding-pass-long"
-  | "event-ticket"
-  | "event-ticket-5col"
-  | "event-ticket-strip"
-  | "event-ticket-generic";
+// TIK-106: re-exported from ./font-profiles so the char-density algorithm
+// lives in a standalone module (testable without rendering React, coverage
+// scoped to just the algorithm) while keeping the public API surface
+// identical for consumers importing from `@tiketo/pkpass-preview`.
+export {
+  FONT_PROFILES,
+  ROW_WIDTH,
+  calculateFontSize,
+  calculateGlobalFontSizeForRow,
+  getDensity,
+  getMaxFontSize,
+} from "./font-profiles";
+export type { FontProfile, PassVariant } from "./font-profiles";
 
 export interface PreviewProps {
   values: { [key: string]: any };
   removeVariablePlaceholders?: boolean;
 }
-
-const ROW_WIDTH = 320;
-
-// TIK-99: per-template "variant" font profiles. The font size is still computed
-// dynamically from the text length ((ROW_WIDTH / charCount) * density, clamped to
-// [min, max]); the variant only changes the parameters of that computation, so a
-// longer/shorter value still gets a fitting size — no hardcoded per-card pixels.
-type FontProfile = {
-  // Char-density multiplier used by calculateGlobalFontSizeForRow:
-  //   size = (ROW_WIDTH / charCount) * density,
-  // then clamped to [min, max] (or maxAdditional / maxAuxiliary by field type).
-  // density 1.0 ≈ 1 char per pixel of row width at the cap; higher density →
-  // larger font for the same char count. The default profile uses 1.4 to
-  // match the pre-TIK-99 baseline.
-  density: number;
-  min: number;
-  max: number; // primary fields
-  maxAdditional: number; // secondary fields
-  maxAuxiliary: number; // auxiliary fields
-  // When set, the header value is sized by the same char-density algorithm
-  // (using headerDensity instead of density, clamped to [min, maxHeader])
-  // instead of useFitText — so a short header value ("CARD") stays large while
-  // a long one ("BUSINESS CARD" / "VIZITKA PRODEJCE") scales down.
-  maxHeader?: number;
-  headerDensity?: number;
-  // When set, overrides `density` for primary fields only. Lets a profile
-  // push the primary value to hero size (matching iOS Wallet) without also
-  // enlarging header / secondary / auxiliary text that share the same
-  // FontProfile but use their own caps.
-  primaryDensity?: number;
-};
-
-// Pre-TIK-99 baseline values — referenced by `default` and by the explicit
-// per-pkpass-type baseline variants (`generic-baseline`, `store-card-baseline`).
-// The two baseline variants currently share these exact values but are kept
-// separate so future per-pkpass-type baseline tuning (e.g. a storeCard-only
-// padding adjustment) can split without renaming downstream consumers.
-const BASELINE_PROFILE: FontProfile = {
-  density: 1.4,
-  min: 10,
-  max: 18,
-  maxAdditional: 18,
-  maxAuxiliary: 14,
-};
-
-const FONT_PROFILES: Record<PassVariant, FontProfile> = {
-  // default profile — preserved 1:1 from the pre-TIK-99 main branch (density
-  // 1.4, caps 18/18/14). Used as the fallback when `deriveVariant` cannot
-  // recognise the pkpass class from `values['pass.json']` (no behaviour
-  // change vs pre-TIK-99).
-  default: BASELINE_PROFILE,
-  // generic-baseline / store-card-baseline — explicit variants for stories
-  // that historically relied on the implicit `default` profile (generic
-  // info cards, code128/pdf417 barcode-only cards, plain store cards, back
-  // fields). Same values as `default` for now; kept distinct so future
-  // per-pkpass-type baseline tuning (e.g. store-card-only padding adjustment)
-  // can split without renaming consumers.
-  "generic-baseline": BASELINE_PROFILE,
-  "store-card-baseline": BASELINE_PROFILE,
-  // generic / generic-header: kept at BASELINE_PROFILE values (= pre-PR main).
-  // Earlier iterations bumped density + caps to grow text closer to iOS but
-  // VRT against the iOS reference shows main was closer than the bumped
-  // values; reverting these two profiles keeps the rendered field text in
-  // sync with main / iOS for Generic 1/2/3.
-  generic: BASELINE_PROFILE,
-  "generic-header": BASELINE_PROFILE,
-  // id-card: kept at BASELINE_PROFILE for now — VRT vs iOS shows main was
-  // closer than the previously-tuned (density 1.8, maxHeader 18 + headerDensity 0.5).
-  "id-card": BASELINE_PROFILE,
-  // store-card family — kept at BASELINE_PROFILE; VRT against iOS showed main
-  // was closer than the previously-tuned per-shape (2col/3col/4col/numeric)
-  // values across the fixtures. The shape detection itself (via deriveVariant)
-  // is retained so future fine-tuning can split back into separate profiles.
-  "store-card": BASELINE_PROFILE,
-  "store-card-numeric": BASELINE_PROFILE,
-  // 2col matches multiple shapes — only `2col-hero` (with a non-empty primary
-  // field) gets the iOS hero tier treatment. The plain `2col` catch-all keeps
-  // BASELINE so header-only fixtures (e.g. resident-benefit, where the header
-  // values are the de-facto primary) don't get bumped above iOS reference.
-  "store-card-2col": BASELINE_PROFILE,
-  // store-card-2col-hero: primary + 2 secondary (loyalty / member card shape).
-  // Tuned against the iOS Wallet reference for `examples--store-card`
-  // (Jane Sample). Per-field densities so each row independently matches
-  // the iOS tier:
-  //   primary "Jane Sample" 11 chars → 320/11×1.6 ≈ 46.5 (cap 50). Cannot
-  //   shrink-fit so cap is held just below the storeCard inner width to
-  //   avoid clipping the trailing char.
-  //   header value "1,250" 5 chars → char-density (1.0) lands at 64, cap 28
-  //   → 28px (matches iOS header value cap, also fits the 3.8em header
-  //   strip).
-  //   secondary "Tier"/"Gold" + "Member since"/"2024" → 320/16×1.5=30 (cap
-  //   maxAdditional 30) → matches iOS sec-value tier.
-  "store-card-2col-hero": {
-    ...BASELINE_PROFILE,
-    density: 1.5,
-    primaryDensity: 1.6,
-    max: 50,
-    headerDensity: 1.0,
-    maxHeader: 19,
-    maxAdditional: 30,
-  },
-  // store-card-3col: primary + 1 auxiliary (sc4 photo-card shape). The
-  // primary value is usually whitespace/blank (placeholder for a thumbnail),
-  // so the hero font tier doesn't apply here — and bumping header/secondary
-  // would push the short numeric header (e.g. "123456") far above the iOS
-  // reference. Keep only the `primaryDensity` + `max` knobs from PR #12 so
-  // any future fixture with a non-blank primary still gets shrink-fit
-  // protection up to 60px, but header + secondary stay at BASELINE.
-  "store-card-3col": { ...BASELINE_PROFILE, primaryDensity: 1.8, max: 60 },
-  "store-card-4col": BASELINE_PROFILE,
-  // coupon: kept at BASELINE_PROFILE — VRT showed iOS reference matches main.
-  coupon: BASELINE_PROFILE,
-  // boarding-pass family — kept at BASELINE_PROFILE; VRT showed BP1/2/3 are
-  // closer to iOS reference at default values than with the previously-tuned
-  // caps + headerDensity. `deriveVariant` only ever emits the `-short` or
-  // `-long` form (split by primary value length > 12 chars); the base
-  // `'boarding-pass'` entry exists so the FONT_PROFILES map is total over
-  // the PassVariant union.
-  "boarding-pass": BASELINE_PROFILE,
-  "boarding-pass-short": BASELINE_PROFILE,
-  "boarding-pass-long": BASELINE_PROFILE,
-  // event-ticket: ET1/ET2 fixtures (no strip image, no logoText). Header
-  // value char-density driven (320/14*1.0=22.9 → cap 19 for "And it's value");
-  // density 2.0 grows 3-col secondary the same way `generic` does (12.3→16.4);
-  // maxAuxiliary 15 (~-1px vs default 16).
-  "event-ticket": {
-    density: 2.1,
-    min: 10,
-    max: 20,
-    maxAdditional: 15,
-    maxAuxiliary: 14,
-    maxHeader: 17,
-    headerDensity: 1.0,
-  },
-  // event-ticket-5col: no-primary shape with 5 secondary + 5 auxiliary
-  // columns of short numeric values. "Top row" = secondaryFields (cap 13),
-  // "bottom row" = auxiliaryFields (cap 19).
-  "event-ticket-5col": {
-    density: 1.5,
-    min: 10,
-    max: 20,
-    maxAdditional: 15,
-    maxAuxiliary: 13,
-  },
-  // event-ticket-strip: ET4 fixture (with strip image). Secondary capped at
-  // 13 (~-1/3 from default 20); auxiliary capped at 15 (~-1px). Primary stays
-  // at default cap 20.
-  "event-ticket-strip": {
-    density: 1.5,
-    min: 10,
-    max: 20,
-    maxAdditional: 18,
-    maxAuxiliary: 15,
-  },
-  // event-ticket-generic: ET5 fixture — it's actually a `generic` pkpass
-  // class (NOT eventTicket), with a logoText. Separate variant so it doesn't
-  // share `generic-header` (which is reserved for G1/G2). Primary cap 27
-  // (~+1/3), secondary 18 (~-2px), aux 15 (~-1px).
-  "event-ticket-generic": {
-    density: 1.5,
-    min: 10,
-    max: 26,
-    maxAdditional: 19,
-    maxAuxiliary: 15,
-  },
-};
 
 // Deterministic variant detection from `values` (pkpass type + field shape).
 // Pure function — no DOM measurement, no content heuristics beyond the explicit
@@ -318,57 +144,13 @@ export const PKPassPreview = ({ values, removeVariablePlaceholders }: PreviewPro
     return `visualEditor_${(Math.random() + 1).toString(36).substring(7)}`;
   }, []);
 
-  // Fix 7: Memoize callback functions to ensure stability
-  const getMaxFontSize = useMemo(() => {
-    return (fieldType?: FieldType): number => {
-      if (fieldType === "secondaryFields") return profile.maxAdditional;
-      if (fieldType === "auxiliaryFields") return profile.maxAuxiliary;
-      if (fieldType === "headerFields") return profile.maxHeader ?? profile.max;
-      return profile.max;
-    };
+  // TIK-106: delegates to the pure top-level helper so unit tests can hit the
+  // same algorithm without rendering React. Memo keeps the closure stable for
+  // downstream useMemo deps (globalFontSizePrimary/Header/Secondary/Auxiliary).
+  const calculateRowFontSize = useMemo(() => {
+    return (fields: PassField[] | undefined, fieldType?: FieldType) =>
+      calculateGlobalFontSizeForRow(profile, fields, fieldType);
   }, [profile]);
-
-  const getDensity = useMemo(() => {
-    return (fieldType?: FieldType): number => {
-      if (fieldType === "headerFields" && profile.headerDensity != null)
-        return profile.headerDensity;
-      if (fieldType === undefined && profile.primaryDensity != null) return profile.primaryDensity;
-      return profile.density;
-    };
-  }, [profile]);
-
-  const calculateFontSizeBasedOnCharCount = useMemo(() => {
-    return (charCount: number, fieldType?: FieldType) => {
-      if (charCount === 0) {
-        return 0;
-      }
-
-      const maxFontSize = getMaxFontSize(fieldType);
-      const fontSize = Math.max((ROW_WIDTH / charCount) * getDensity(fieldType), profile.min);
-
-      return Math.min(fontSize, maxFontSize);
-    };
-  }, [getMaxFontSize, getDensity, profile]);
-
-  const calculateGlobalFontSizeForRow = useMemo(() => {
-    return (fields: PassField[] | undefined, fieldType?: FieldType) => {
-      if (!fields) {
-        return undefined;
-      }
-
-      const totalCharCount = fields.reduce((count: number, field) => {
-        const valueLength = field.attributedValue?.length || field.value?.toString().length || 0;
-        const labelLength = field.label?.length || 0;
-        // Header value is sized off the value length only — the header label has
-        // its own fixed size, so a long label shouldn't shrink the value.
-        return (
-          count + (fieldType === "headerFields" ? valueLength : Math.max(valueLength, labelLength))
-        );
-      }, 0);
-
-      return calculateFontSizeBasedOnCharCount(totalCharCount, fieldType);
-    };
-  }, [calculateFontSizeBasedOnCharCount]);
 
   // Fix 2: Memoize data processing to prevent recalculation on every render
   const data: PassData = useMemo(() => {
@@ -490,17 +272,17 @@ ${secondaryFieldsCount >= 4 ? `max-width: calc(100% / ${secondaryFieldsCount});`
 
   // Fix 6: Memoize font size calculations to prevent recalculation on every render
   const globalFontSizePrimary = useMemo(() => {
-    return calculateGlobalFontSizeForRow(structure?.primaryFields);
-  }, [calculateGlobalFontSizeForRow, structure?.primaryFields]);
+    return calculateRowFontSize(structure?.primaryFields);
+  }, [calculateRowFontSize, structure?.primaryFields]);
 
   // Header value font size — only for profiles that opt into char-density header
   // sizing (headerDensity set); otherwise undefined → PassFieldItemHeader falls
   // back to its useFitText behavior.
   const globalFontSizeHeader = useMemo(() => {
     if (profile.headerDensity == null) return undefined;
-    const size = calculateGlobalFontSizeForRow(headerFields, "headerFields");
+    const size = calculateRowFontSize(headerFields, "headerFields");
     return size && size > 0 ? size : undefined;
-  }, [profile, calculateGlobalFontSizeForRow, headerFields]);
+  }, [profile, calculateRowFontSize, headerFields]);
 
   const secondaryFields = useMemo(() => {
     if (data.storeCard) {
@@ -531,12 +313,12 @@ ${secondaryFieldsCount >= 4 ? `max-width: calc(100% / ${secondaryFieldsCount});`
   }, [data.storeCard, data.generic, structure?.auxiliaryFields]);
 
   const globalFontSizeSecondary = useMemo(() => {
-    return calculateGlobalFontSizeForRow(secondaryFields, "secondaryFields");
-  }, [calculateGlobalFontSizeForRow, secondaryFields]);
+    return calculateRowFontSize(secondaryFields, "secondaryFields");
+  }, [calculateRowFontSize, secondaryFields]);
 
   const globalFontSizeAuxiliary = useMemo(() => {
-    return calculateGlobalFontSizeForRow(auxiliaryFields, "auxiliaryFields");
-  }, [calculateGlobalFontSizeForRow, auxiliaryFields]);
+    return calculateRowFontSize(auxiliaryFields, "auxiliaryFields");
+  }, [calculateRowFontSize, auxiliaryFields]);
 
   // Fix 7: Memoize inline style objects to prevent recreation on every render
   const primaryFieldsStyle = useMemo(
