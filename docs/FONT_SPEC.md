@@ -4,21 +4,25 @@ This document captures the per-variant font sizing algorithm shipped by
 `@tiketo/pkpass-preview`. It is the canonical reference for both consumers
 (tuning expectations) and contributors (extending profiles or variants).
 
-## 1. `FONT_PROFILES` (`packages/preview/src/index.tsx`)
+## 1. `FONT_PROFILES` (`packages/preview/src/font-profiles.ts`)
 
 Per-row font size:
 
 ```
-fontSize = clamp((ROW_WIDTH / charCount) * density, min, max)
+fontSize = clamp((ROW_WIDTH / charCount) * density, min, maxPrimary)
 ```
+
+(For `secondaryFields`, `auxiliaryFields`, `headerFields` the cap is
+`maxSecondary`, `maxAuxiliary`, `maxHeader` respectively — see
+`getMaxFontSize` in `font-profiles.ts`.)
 
 `charCount` per row sums `max(value.length, label.length)` across fields in
 the row; for `headerFields` the sum uses `value.length` only. `headerDensity`
 replaces `density` when computing header values, but only if defined —
 otherwise headers fall back to `useFitText` against the static CSS size.
 
-| Variant                  | density | min | max | maxAdd | maxAux | maxHeader | headerDens |
-|--------------------------|--------:|----:|----:|-------:|-------:|----------:|-----------:|
+| Variant                  | density | min | maxPrimary | maxSecondary | maxAuxiliary | maxHeader | headerDens |
+|--------------------------|--------:|----:|-----------:|-------------:|-------------:|----------:|-----------:|
 | `default`                | 1.4     | 10  | 18  | 18     | 14     | —         | —          |
 | `generic-baseline`       | 1.4     | 10  | 18  | 18     | 14     | —         | —          |
 | `store-card-baseline`    | 1.4     | 10  | 18  | 18     | 14     | —         | —          |
@@ -80,9 +84,9 @@ prop required. The variant is derived deterministically from `values`
 | none of above   | —                                                               | `default`              |
 
 The `default` profile is a 1:1 match with the pre-auto-detection baseline
-(`density: 1.4`, `max: 18`, `maxAdditional: 18`, `maxAuxiliary: 14`). External
-consumers whose `values` don't match any rule get `default` and therefore
-render exactly as before opt-in.
+(`density: 1.4`, `maxPrimary: 18`, `maxSecondary: 18`, `maxAuxiliary: 14`).
+External consumers whose `values` don't match any rule get `default` and
+therefore render exactly as before opt-in.
 
 ## 3. Variant-scoped CSS (`packages/preview/src/styles.ts`)
 
