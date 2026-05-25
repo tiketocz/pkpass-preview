@@ -195,33 +195,28 @@ export const getPassStyles = (identifier: string) => `
        aligns inside the primary box regardless of font size. */
     line-height: 1em;
   }
-  /* boarding-pass / -short / -long — widen FROM column so long values
-     (e.g. BP2 "LONG TEXT LONG TEXT") truncate later, matching iOS more
-     closely. TO column trimmed so the two don't overlap. The middle gap is
-     where the transit icon sits. */
-  #${identifier}.boardingPass.pkpass-variant-boarding-pass #primaryFields .passField:first-child,
-  #${identifier}.boardingPass.pkpass-variant-boarding-pass-short #primaryFields .passField:first-child,
-  #${identifier}.boardingPass.pkpass-variant-boarding-pass-long #primaryFields .passField:first-child {
+  /* boarding-pass — widen FROM column so long values (e.g. BP2 "LONG TEXT
+     LONG TEXT") truncate later, matching iOS more closely. TO column
+     trimmed so the two don't overlap. The middle gap is where the transit
+     icon sits. Selectors use only .boardingPass (1:1 with the pkpass
+     class) since the pre-TIK-112 -short/-long variant suffixes were
+     dropped along with the routing split. */
+  #${identifier}.boardingPass #primaryFields .passField:first-child {
     width: 200px;
   }
-  #${identifier}.boardingPass.pkpass-variant-boarding-pass #primaryFields .passField:last-child,
-  #${identifier}.boardingPass.pkpass-variant-boarding-pass-short #primaryFields .passField:last-child,
-  #${identifier}.boardingPass.pkpass-variant-boarding-pass-long #primaryFields .passField:last-child {
+  #${identifier}.boardingPass #primaryFields .passField:last-child {
     width: 90px;
   }
-  /* boarding-pass-{short,long}: primary value light weight. */
-  #${identifier}.boardingPass.pkpass-variant-boarding-pass-short #primaryFields .passField > span > span,
-  #${identifier}.boardingPass.pkpass-variant-boarding-pass-long #primaryFields .passField > span > span {
+  /* boarding-pass primary value: light weight (matches iOS Wallet). */
+  #${identifier}.boardingPass #primaryFields .passField > span > span {
     font-weight: 300;
   }
-  /* Transit icon (airplane/etc.) on boarding-pass variants — rendered inline
-     as <svg>. Size to 32×32 so it visually matches iOS Wallet, and fill is
+  /* Transit icon (airplane/etc.) on boarding-pass — rendered inline as
+     <svg>. Size to 32×32 so it visually matches iOS Wallet, and fill is
      driven by the dynamic '#pass-transport-type { fill: labelColor }' rule
-     above (paths inherit fill via SVG cascade). All 5 transit SVGs use square
-     viewBoxes, so width===height is safe. */
-  #${identifier}.boardingPass.pkpass-variant-boarding-pass svg#pass-transport-type,
-  #${identifier}.boardingPass.pkpass-variant-boarding-pass-short svg#pass-transport-type,
-  #${identifier}.boardingPass.pkpass-variant-boarding-pass-long svg#pass-transport-type {
+     above (paths inherit fill via SVG cascade). All 5 transit SVGs use
+     square viewBoxes, so width===height is safe. */
+  #${identifier}.boardingPass svg#pass-transport-type {
     width: 32px !important;
     height: 32px !important;
     display: inline-block;
