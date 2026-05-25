@@ -31,14 +31,18 @@ export const ROW_WIDTH = 320;
 export type FontProfile = {
   // Char-density multiplier used by calculateGlobalFontSizeForRow:
   //   size = (ROW_WIDTH / charCount) * density,
-  // then clamped to [min, max] (or maxAdditional / maxAuxiliary by field type).
+  // then clamped to [min, maxPrimary] (or maxSecondary / maxAuxiliary by field type).
   // density 1.0 ≈ 1 char per pixel of row width at the cap; higher density →
   // larger font for the same char count. The default profile uses 1.4 to
   // match the pre-TIK-99 baseline.
   density: number;
   min: number;
-  max: number; // primary fields
-  maxAdditional: number; // secondary fields
+  // Per-field caps. Required for FontProfile shape completeness — even
+  // variants that don't render a given field type (e.g. `event-ticket-5col`
+  // has no primary fields per `deriveVariant`) declare all three caps so
+  // `getMaxFontSize` can be a total function without `?? fallback` branches.
+  maxPrimary: number; // primary fields
+  maxSecondary: number; // secondary fields
   maxAuxiliary: number; // auxiliary fields
   // When set, the header value is sized by the same char-density algorithm
   // (using headerDensity instead of density, clamped to [min, maxHeader])
@@ -61,8 +65,8 @@ export type FontProfile = {
 const BASELINE_PROFILE: FontProfile = {
   density: 1.4,
   min: 10,
-  max: 18,
-  maxAdditional: 18,
+  maxPrimary: 18,
+  maxSecondary: 18,
   maxAuxiliary: 14,
 };
 
@@ -112,24 +116,24 @@ export const FONT_PROFILES: Record<PassVariant, FontProfile> = {
   //   maxHeader 19 → 19px (pinned by font-profiles.test.ts; the lower cap
   //   keeps the value within the 3.8em header strip).
   //   secondary "Tier"/"Gold" + "Member since"/"2024" → 320/16×1.5=30 (cap
-  //   maxAdditional 30) → matches iOS sec-value tier.
+  //   maxSecondary 30) → matches iOS sec-value tier.
   "store-card-2col-hero": {
     ...BASELINE_PROFILE,
     density: 1.5,
     primaryDensity: 1.6,
-    max: 50,
+    maxPrimary: 50,
     headerDensity: 1.0,
     maxHeader: 19,
-    maxAdditional: 30,
+    maxSecondary: 30,
   },
   // store-card-3col: primary + 1 auxiliary (sc4 photo-card shape). The
   // primary value is usually whitespace/blank (placeholder for a thumbnail),
   // so the hero font tier doesn't apply here — and bumping header/secondary
   // would push the short numeric header (e.g. "123456") far above the iOS
-  // reference. Keep only the `primaryDensity` + `max` knobs from PR #12 so
-  // any future fixture with a non-blank primary still gets shrink-fit
+  // reference. Keep only the `primaryDensity` + `maxPrimary` knobs from PR #12
+  // so any future fixture with a non-blank primary still gets shrink-fit
   // protection up to 60px, but header + secondary stay at BASELINE.
-  "store-card-3col": { ...BASELINE_PROFILE, primaryDensity: 1.8, max: 60 },
+  "store-card-3col": { ...BASELINE_PROFILE, primaryDensity: 1.8, maxPrimary: 60 },
   "store-card-4col": BASELINE_PROFILE,
   // coupon: kept at BASELINE_PROFILE — VRT showed iOS reference matches main.
   coupon: BASELINE_PROFILE,
@@ -142,48 +146,62 @@ export const FONT_PROFILES: Record<PassVariant, FontProfile> = {
   "boarding-pass": BASELINE_PROFILE,
   "boarding-pass-short": BASELINE_PROFILE,
   "boarding-pass-long": BASELINE_PROFILE,
-  // event-ticket: ET1/ET2 fixtures (no strip image, no logoText). Header
-  // value char-density driven (320/14*1.0=22.9 → cap 19 for "And it's value");
-  // density 2.0 grows 3-col secondary the same way `generic` does (12.3→16.4);
-  // maxAuxiliary 15 (~-1px vs default 16).
+  // event-ticket: ET1/ET2 fixtures (no strip image, no logoText). Header value
+  // is char-density driven (headerDensity 1.0, maxHeader 17) so a long header
+  // like "And it's value" (14 chars) shrinks to fit the row. density 2.1 +
+  // maxPrimary 20 grows the primary value to iOS hero size; maxSecondary 15
+  // matches the iOS 3-col secondary tier; maxAuxiliary 14 keeps the aux row
+  // visually distinct (smaller than secondary) per iOS reference.
+  // math (header, "And it's value" 14ch): 320/14*1.0 = 22.86 → cap maxHeader 17.
   "event-ticket": {
     density: 2.1,
     min: 10,
-    max: 20,
-    maxAdditional: 15,
+    maxPrimary: 20,
+    maxSecondary: 15,
     maxAuxiliary: 14,
     maxHeader: 17,
     headerDensity: 1.0,
   },
-  // event-ticket-5col: no-primary shape with 5 secondary + 5 auxiliary
-  // columns of short numeric values. "Top row" = secondaryFields (cap 13),
-  // "bottom row" = auxiliaryFields (cap 19).
+  // event-ticket-5col: no-primary shape with 5 secondary + 5 auxiliary columns
+  // of short numeric values. maxSecondary 15 caps the "top row" (secondary
+  // labels/values like FLIGHT / GATE), maxAuxiliary 13 caps the "bottom row"
+  // of denser numeric aux values so they don't collide visually with the
+  // header strip. maxPrimary 20 unused (no primary fields) but kept for
+  // FontProfile shape completeness.
+  // math (auxiliary, 5ch packed row): 320/5*1.5 = 96 → cap maxAuxiliary 13.
   "event-ticket-5col": {
     density: 1.5,
     min: 10,
-    max: 20,
-    maxAdditional: 15,
+    maxPrimary: 20,
+    maxSecondary: 15,
     maxAuxiliary: 13,
   },
-  // event-ticket-strip: ET4 fixture (with strip image). Secondary capped at
-  // 13 (~-1/3 from default 20); auxiliary capped at 15 (~-1px). Primary stays
-  // at default cap 20.
+  // event-ticket-strip: ET4 fixture (with strip image). maxPrimary 20 matches
+  // the iOS primary tier for the row above the strip; maxSecondary 18 keeps
+  // the secondary row legible alongside the strip image without overlapping;
+  // maxAuxiliary 15 sits just below to keep the visual hierarchy
+  // secondary > auxiliary as in iOS reference.
+  // math (secondary, 10ch row): 320/10*1.5 = 48 → cap maxSecondary 18.
   "event-ticket-strip": {
     density: 1.5,
     min: 10,
-    max: 20,
-    maxAdditional: 18,
+    maxPrimary: 20,
+    maxSecondary: 18,
     maxAuxiliary: 15,
   },
-  // event-ticket-generic: ET5 fixture — it's actually a `generic` pkpass
-  // class (NOT eventTicket), with a logoText. Separate variant so it doesn't
-  // share `generic-header` (which is reserved for G1/G2). Primary cap 27
-  // (~+1/3), secondary 18 (~-2px), aux 15 (~-1px).
+  // event-ticket-generic: ET5 fixture — it's actually a `generic` pkpass class
+  // (NOT eventTicket), with a logoText. Separate variant so it doesn't share
+  // `generic-header` (which is reserved for G1/G2). maxPrimary 26 grows the
+  // logoText/primary close to iOS hero size; maxSecondary 19 matches the iOS
+  // secondary tier for the longer label/value pairs; maxAuxiliary 15 keeps
+  // the aux row a step smaller so the visual hierarchy stays
+  // primary > secondary > auxiliary.
+  // math (primary, 8ch row): 320/8*1.5 = 60 → cap maxPrimary 26.
   "event-ticket-generic": {
     density: 1.5,
     min: 10,
-    max: 26,
-    maxAdditional: 19,
+    maxPrimary: 26,
+    maxSecondary: 19,
     maxAuxiliary: 15,
   },
 };
@@ -194,10 +212,10 @@ export const FONT_PROFILES: Record<PassVariant, FontProfile> = {
 // behaviour is unchanged — see `tests/font-profiles.test.ts` for the pinned
 // per-variant baselines.
 export const getMaxFontSize = (profile: FontProfile, fieldType?: FieldType): number => {
-  if (fieldType === "secondaryFields") return profile.maxAdditional;
+  if (fieldType === "secondaryFields") return profile.maxSecondary;
   if (fieldType === "auxiliaryFields") return profile.maxAuxiliary;
-  if (fieldType === "headerFields") return profile.maxHeader ?? profile.max;
-  return profile.max;
+  if (fieldType === "headerFields") return profile.maxHeader ?? profile.maxPrimary;
+  return profile.maxPrimary;
 };
 
 export const getDensity = (profile: FontProfile, fieldType?: FieldType): number => {

@@ -4,40 +4,44 @@ This document captures the per-variant font sizing algorithm shipped by
 `@tiketo/pkpass-preview`. It is the canonical reference for both consumers
 (tuning expectations) and contributors (extending profiles or variants).
 
-## 1. `FONT_PROFILES` (`packages/preview/src/index.tsx`)
+## 1. `FONT_PROFILES` (`packages/preview/src/font-profiles.ts`)
 
 Per-row font size:
 
 ```
-fontSize = clamp((ROW_WIDTH / charCount) * density, min, max)
+fontSize = clamp((ROW_WIDTH / charCount) * density, min, maxPrimary)
 ```
+
+(For `secondaryFields`, `auxiliaryFields`, `headerFields` the cap is
+`maxSecondary`, `maxAuxiliary`, `maxHeader` respectively — see
+`getMaxFontSize` in `font-profiles.ts`.)
 
 `charCount` per row sums `max(value.length, label.length)` across fields in
 the row; for `headerFields` the sum uses `value.length` only. `headerDensity`
 replaces `density` when computing header values, but only if defined —
 otherwise headers fall back to `useFitText` against the static CSS size.
 
-| Variant                  | density | min | max | maxAdd | maxAux | maxHeader | headerDens |
-|--------------------------|--------:|----:|----:|-------:|-------:|----------:|-----------:|
-| `default`                | 1.4     | 10  | 18  | 18     | 14     | —         | —          |
-| `generic-baseline`       | 1.4     | 10  | 18  | 18     | 14     | —         | —          |
-| `store-card-baseline`    | 1.4     | 10  | 18  | 18     | 14     | —         | —          |
-| `generic`                | 2.0     | 10  | 27  | 20     | 16     | 19        | 0.5        |
-| `generic-header`         | 2.0     | 10  | 27  | 20     | 16     | 18        | 0.8        |
-| `id-card`                | 1.8     | 10  | 26  | 20     | 16     | 18        | 0.5        |
-| `store-card`             | 1.7     | 10  | 26  | 24     | 20     | 17        | 0.56       |
-| `store-card-numeric`     | 1.5     | 10  | 20  | 20     | 16     | —         | —          |
-| `store-card-2col`        | 1.85    | 10  | 26  | 17     | 16     | 14        | 0.56       |
-| `store-card-3col`        | 2.06    | 10  | 26  | 24     | 20     | 19        | 0.56       |
-| `store-card-4col`        | 1.42    | 10  | 26  | 24     | 20     | 19        | 0.56       |
-| `coupon`                 | 2.5     | 10  | 26  | 24     | 24     | 20        | 0.56       |
-| `boarding-pass`          | 1.5     | 10  | 28  | 20     | 16     | 20        | 0.6        |
-| `boarding-pass-short`    | 1.5     | 10  | 22  | 20     | 16     | 20        | 0.6        |
-| `boarding-pass-long`     | 0.95    | 10  | 11  | 20     | 16     | 20        | 0.6        |
-| `event-ticket`           | 2.1     | 10  | 20  | 15     | 14     | 17        | 1.0        |
-| `event-ticket-5col`      | 1.5     | 10  | 20  | 15     | 13     | —         | —          |
-| `event-ticket-strip`     | 1.5     | 10  | 20  | 18     | 15     | —         | —          |
-| `event-ticket-generic`   | 1.5     | 10  | 26  | 19     | 15     | —         | —          |
+| Variant                  | density | min | maxPrimary | maxSecondary | maxAuxiliary | maxHeader | headerDens |
+|--------------------------|--------:|----:|-----------:|-------------:|-------------:|----------:|-----------:|
+| `default`                |     1.4 |  10 |         18 |           18 |           14 |         — |          — |
+| `generic-baseline`       |     1.4 |  10 |         18 |           18 |           14 |         — |          — |
+| `store-card-baseline`    |     1.4 |  10 |         18 |           18 |           14 |         — |          — |
+| `generic`                |     2.0 |  10 |         27 |           20 |           16 |        19 |        0.5 |
+| `generic-header`         |     2.0 |  10 |         27 |           20 |           16 |        18 |        0.8 |
+| `id-card`                |     1.8 |  10 |         26 |           20 |           16 |        18 |        0.5 |
+| `store-card`             |     1.7 |  10 |         26 |           24 |           20 |        17 |       0.56 |
+| `store-card-numeric`     |     1.5 |  10 |         20 |           20 |           16 |         — |          — |
+| `store-card-2col`        |    1.85 |  10 |         26 |           17 |           16 |        14 |       0.56 |
+| `store-card-3col`        |    2.06 |  10 |         26 |           24 |           20 |        19 |       0.56 |
+| `store-card-4col`        |    1.42 |  10 |         26 |           24 |           20 |        19 |       0.56 |
+| `coupon`                 |     2.5 |  10 |         26 |           24 |           24 |        20 |       0.56 |
+| `boarding-pass`          |     1.5 |  10 |         28 |           20 |           16 |        20 |        0.6 |
+| `boarding-pass-short`    |     1.5 |  10 |         22 |           20 |           16 |        20 |        0.6 |
+| `boarding-pass-long`     |    0.95 |  10 |         11 |           20 |           16 |        20 |        0.6 |
+| `event-ticket`           |     2.1 |  10 |         20 |           15 |           14 |        17 |        1.0 |
+| `event-ticket-5col`      |     1.5 |  10 |         20 |           15 |           13 |         — |          — |
+| `event-ticket-strip`     |     1.5 |  10 |         20 |           18 |           15 |         — |          — |
+| `event-ticket-generic`   |     1.5 |  10 |         26 |           19 |           15 |         — |          — |
 
 `default`, `generic-baseline` and `store-card-baseline` share identical
 parameters; they are kept distinct so future per-pkpass-type baseline
@@ -80,9 +84,9 @@ prop required. The variant is derived deterministically from `values`
 | none of above   | —                                                               | `default`              |
 
 The `default` profile is a 1:1 match with the pre-auto-detection baseline
-(`density: 1.4`, `max: 18`, `maxAdditional: 18`, `maxAuxiliary: 14`). External
-consumers whose `values` don't match any rule get `default` and therefore
-render exactly as before opt-in.
+(`density: 1.4`, `maxPrimary: 18`, `maxSecondary: 18`, `maxAuxiliary: 14`).
+External consumers whose `values` don't match any rule get `default` and
+therefore render exactly as before opt-in.
 
 ## 3. Variant-scoped CSS (`packages/preview/src/styles.ts`)
 
