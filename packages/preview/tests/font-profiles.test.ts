@@ -17,6 +17,7 @@ import {
   getDensity,
   getMaxFontSize,
 } from "../src/font-profiles";
+import type { PassField } from "../src/types";
 
 describe("FONT_PROFILES char-density algorithm — minimum spec (TIK-106)", () => {
   // TC1 — default profile, cap-bound primary. 320/8*1.4=56 → cap 18.
@@ -132,7 +133,7 @@ describe("getMaxFontSize", () => {
     expect(getMaxFontSize(FONT_PROFILES["store-card-2col-hero"], "headerFields")).toBe(19);
   });
 
-  it("falls back to profile.max for headerFields when maxHeader not set", () => {
+  it("falls back to profile.max for headerFields when maxHeader not set (contract — not exercised by PKPassPreview when headerDensity unset)", () => {
     expect(getMaxFontSize(FONT_PROFILES.default, "headerFields")).toBe(FONT_PROFILES.default.max);
   });
 });
@@ -148,9 +149,9 @@ describe("calculateGlobalFontSizeForRow", () => {
   it("non-header row sums max(value, label) per field", () => {
     // Two fields: ("Tier", "Gold") = max(4,4)=4, ("Member since","2024") =
     // max(12,4)=12. Total 16ch, secondaryFields → 320/16*1.4=28 → cap 18.
-    const fields = [
-      { label: "Tier", value: "Gold" },
-      { label: "Member since", value: "2024" },
+    const fields: PassField[] = [
+      { key: "tier", label: "Tier", value: "Gold" },
+      { key: "memberSince", label: "Member since", value: "2024" },
     ];
     expect(calculateGlobalFontSizeForRow(FONT_PROFILES.default, fields, "secondaryFields")).toBe(
       18,
@@ -160,7 +161,7 @@ describe("calculateGlobalFontSizeForRow", () => {
   it("headerFields sums value-lengths only (label ignored, label fixed-size)", () => {
     // Field with label "BUSINESS CARD" (13ch) + value "CARD" (4ch). Header mode
     // should sum 4 (value only), not 13 (label). 320/4*1.0=80, cap maxHeader 19.
-    const fields = [{ label: "BUSINESS CARD", value: "CARD" }];
+    const fields: PassField[] = [{ key: "h1", label: "BUSINESS CARD", value: "CARD" }];
     expect(
       calculateGlobalFontSizeForRow(FONT_PROFILES["store-card-2col-hero"], fields, "headerFields"),
     ).toBe(19);
@@ -169,13 +170,20 @@ describe("calculateGlobalFontSizeForRow", () => {
   it("attributedValue takes precedence over value (HTML markup is sized by raw length)", () => {
     // attributedValue "<a>Tap here</a>" (15ch) wins over value "fallback" (8).
     // No label → total 15ch. primary → 320/15*1.4 ≈ 29.87 → cap 18.
-    const fields = [{ attributedValue: "<a>Tap here</a>", value: "fallback" }];
+    const fields: PassField[] = [
+      { key: "p1", attributedValue: "<a>Tap here</a>", value: "fallback" },
+    ];
     expect(calculateGlobalFontSizeForRow(FONT_PROFILES.default, fields)).toBe(18);
   });
 
   it("missing value AND missing label coerces to 0 (no crash on undefined.toString)", () => {
-    // Sparse field — neither value nor label present. Should not throw.
-    const fields = [{}];
+    // Sparse field — deliberately malformed to exercise the runtime guard
+    // `field.value?.toString().length || 0`. `pass.json` arrives via
+    // JSON.parse() and can violate the static PassField contract at runtime;
+    // dropping the optional chain on a "the type says it's required" basis
+    // would crash this case. Test pins the defensive path; the cast bypasses
+    // the static contract on purpose.
+    const fields = [{}] as unknown as PassField[];
     // 0 charCount → calculateFontSize early-returns 0.
     expect(calculateGlobalFontSizeForRow(FONT_PROFILES.default, fields)).toBe(0);
   });
@@ -197,7 +205,7 @@ describe("getDensity", () => {
     expect(getDensity(FONT_PROFILES["store-card-2col-hero"])).toBe(1.6);
   });
 
-  it("primaryDensity does NOT override for secondary / aux / header rows", () => {
+  it("primaryDensity does NOT override for secondary / aux / header rows (contract — pins behaviour for future profiles, current live caller only requests primary path with primaryDensity set)", () => {
     const hero = FONT_PROFILES["store-card-2col-hero"];
     // hero has primaryDensity 1.6 but base density 1.5 — non-primary rows
     // should land on 1.5 (or headerDensity for header).

@@ -108,9 +108,9 @@ export const FONT_PROFILES: Record<PassVariant, FontProfile> = {
   //   primary "Jane Sample" 11 chars → 320/11×1.6 ≈ 46.5 (cap 50). Cannot
   //   shrink-fit so cap is held just below the storeCard inner width to
   //   avoid clipping the trailing char.
-  //   header value "1,250" 5 chars → char-density (1.0) lands at 64, cap 28
-  //   → 28px (matches iOS header value cap, also fits the 3.8em header
-  //   strip).
+  //   header value "1,250" 5 chars → char-density (1.0) lands at 64, cap
+  //   maxHeader 19 → 19px (pinned by font-profiles.test.ts; the lower cap
+  //   keeps the value within the 3.8em header strip).
   //   secondary "Tier"/"Gold" + "Member since"/"2024" → 320/16×1.5=30 (cap
   //   maxAdditional 30) → matches iOS sec-value tier.
   "store-card-2col-hero": {
