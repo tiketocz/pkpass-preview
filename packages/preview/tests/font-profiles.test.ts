@@ -1,8 +1,9 @@
 // TIK-106 — unit tests for the FONT_PROFILES char-density font-sizing
 // algorithm. The (size = ROW_WIDTH / charCount * density, clamped to
-// [min, max-by-fieldType]) computation lives in pure helpers exported from
-// `src/index.tsx`; this suite pins the per-variant baseline so future tuning
-// can move pixels intentionally rather than by accident.
+// [min, maxPrimary | maxSecondary | maxAuxiliary | maxHeader by fieldType])
+// computation lives in pure helpers exported from `src/font-profiles.ts`;
+// this suite pins the per-variant baseline so future tuning can move pixels
+// intentionally rather than by accident.
 //
 // Expected values are pinned against current main (post-PR #13 TIK-108
 // profile-unification, 2026-05-21). Four cases from the original TIK-106
@@ -43,8 +44,8 @@ describe("FONT_PROFILES char-density algorithm — minimum spec (TIK-106)", () =
   });
 
   // TC5 — event-ticket-5col, packed-row auxiliary cap. 320/5*1.5=96 → cap 13.
-  // Confirms `maxAuxiliary` distinct from `maxAdditional`.
-  it("event-ticket-5col / 5ch auxiliaryFields → 13 (cap-bound, maxAuxiliary distinct from maxAdditional)", () => {
+  // Confirms `maxAuxiliary` distinct from `maxSecondary`.
+  it("event-ticket-5col / 5ch auxiliaryFields → 13 (cap-bound, maxAuxiliary distinct from maxSecondary)", () => {
     expect(calculateFontSize(FONT_PROFILES["event-ticket-5col"], 5, "auxiliaryFields")).toBe(13);
   });
 
@@ -113,13 +114,13 @@ describe("FONT_PROFILES char-density algorithm — extended coverage", () => {
 });
 
 describe("getMaxFontSize", () => {
-  it("returns profile.max for undefined / primary fieldType", () => {
-    expect(getMaxFontSize(FONT_PROFILES.default)).toBe(FONT_PROFILES.default.max);
+  it("returns profile.maxPrimary for undefined / primary fieldType", () => {
+    expect(getMaxFontSize(FONT_PROFILES.default)).toBe(FONT_PROFILES.default.maxPrimary);
   });
 
-  it("returns profile.maxAdditional for secondaryFields", () => {
+  it("returns profile.maxSecondary for secondaryFields", () => {
     expect(getMaxFontSize(FONT_PROFILES.default, "secondaryFields")).toBe(
-      FONT_PROFILES.default.maxAdditional,
+      FONT_PROFILES.default.maxSecondary,
     );
   });
 
@@ -133,8 +134,10 @@ describe("getMaxFontSize", () => {
     expect(getMaxFontSize(FONT_PROFILES["store-card-2col-hero"], "headerFields")).toBe(19);
   });
 
-  it("falls back to profile.max for headerFields when maxHeader not set (contract — not exercised by PKPassPreview when headerDensity unset)", () => {
-    expect(getMaxFontSize(FONT_PROFILES.default, "headerFields")).toBe(FONT_PROFILES.default.max);
+  it("falls back to profile.maxPrimary for headerFields when maxHeader not set (contract — not exercised by PKPassPreview when headerDensity unset)", () => {
+    expect(getMaxFontSize(FONT_PROFILES.default, "headerFields")).toBe(
+      FONT_PROFILES.default.maxPrimary,
+    );
   });
 });
 
