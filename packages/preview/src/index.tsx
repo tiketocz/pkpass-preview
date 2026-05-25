@@ -84,10 +84,12 @@ export const deriveVariant = (values: { [key: string]: any }): PassVariant => {
     if (head.length === 0 && prim.length > 0 && hasLogoText) return "event-ticket-generic";
     // G4-shape: no header AND no primary → barcode-only baseline.
     if (head.length === 0 && prim.length === 0) return "generic-baseline";
-    // G3-shape: 2+ headers → denser layout.
-    if (head.length >= 2) return "generic";
-    // G1/G2-shape: 1 header + 3+ secondary (wordy 3-col secondary row).
-    if (head.length === 1 && sec.length >= 3) return "generic-header";
+    // G1/G2/G3-shape: 2+ headers (G3 denser layout) OR 1 header + 3+ secondary
+    // (G1/G2 wordy 3-col layout). Collapsed onto a single `generic` profile in
+    // TIK-108 — the previous `generic` vs `generic-header` split only varied
+    // by useFitText vs char-density header sizing, now unified via
+    // headerDensity+maxHeader.
+    if (head.length >= 2 || (head.length === 1 && sec.length >= 3)) return "generic";
     // Member-card shape: 1 header + 2 secondary (id-card layout).
     if (head.length === 1 && sec.length <= 2) return "id-card";
     return "generic-baseline";
