@@ -34,7 +34,7 @@ Designing an Apple Wallet pass is a slow loop: edit `pass.json` → sign it → 
 
 - **Close-to-iOS rendering** — fonts, spacing, header/secondary/auxiliary layout, barcode placement, dark back side, transit icons (boarding passes). Not literal pixel-parity; honest visual fidelity that's good enough to design against.
 - **Drop-in `<PKPassPreview values={...} />`** — pass the same `pass.json` + assets you'd zip up; nothing else to wire.
-- **Auto-variant detection** — `id-card`, `store-card`, `boarding-pass-short`, `boarding-pass-long`, `event-ticket`, `coupon`, and more, picked automatically from the field shape. Manual override available.
+- **Auto-variant detection** — `id-card`, `store-card`, `boarding-pass`, `event-ticket`, `coupon`, and more, picked automatically from the field shape. Manual override available.
 - **Scoped styles** — every instance gets its own unique container id; no global CSS, no portal, safe to render many cards on one page.
 - **TypeScript-first**, **ESM-only**, **tree-shakeable**, **CSP-safe** (no inline `style=""`), **SSR-friendly** (wrap in `dynamic` import).
 
@@ -88,7 +88,7 @@ That's it. No theme provider, no portal, no global CSS — the component scopes 
 |   |   |
 |---|---|
 | **All five pass styles** | `boardingPass`, `coupon`, `eventTicket`, `generic`, `storeCard`. |
-| **Auto-variant detection** | id-card / store-card-3col / boarding-pass-long / coupon / event-ticket-strip and 10+ others, derived from field shape. Manual override available. |
+| **Auto-variant detection** | id-card / store-card-3col / boarding-pass / coupon / event-ticket-strip and 10+ others, derived from field shape. Manual override available. |
 | **Barcodes** | PDF417, QR, Code 128, Aztec — placement matches iOS (header, footer, strip-overlay). |
 | **Transit icons** | Airplane / train / bus / boat / generic, inline JSX SVG, `fill: currentColor` follows `labelColor`. |
 | **Back fields & dark mode** | iOS-accurate dark back side with link/separator treatment. |

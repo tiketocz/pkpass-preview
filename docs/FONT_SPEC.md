@@ -35,8 +35,6 @@ otherwise headers fall back to `useFitText` against the static CSS size.
 | `store-card-4col`        |    1.42 |  10 |         26 |           24 |           20 |        19 |       0.56 |
 | `coupon`                 |     2.5 |  10 |         26 |           24 |           24 |        20 |       0.56 |
 | `boarding-pass`          |     1.5 |  10 |         28 |           20 |           16 |        20 |        0.6 |
-| `boarding-pass-short`    |     1.5 |  10 |         22 |           20 |           16 |        20 |        0.6 |
-| `boarding-pass-long`     |    0.95 |  10 |         11 |           20 |           16 |        20 |        0.6 |
 | `event-ticket`           |     2.1 |  10 |         20 |           15 |           14 |        17 |        1.0 |
 | `event-ticket-5col`      |     1.5 |  10 |         20 |           15 |           13 |         — |          — |
 | `event-ticket-strip`     |     1.5 |  10 |         20 |           18 |           15 |         — |          — |
@@ -55,14 +53,13 @@ historically distinct shop-card layouts (primary + 2 secondary; 2 headers
 
 Public API is `<PKPassPreview values={pass.values} />` — no `variant`
 prop required. The variant is derived deterministically from `values`
-(pkpass class + field counts + boarding-pass primary value length) by
-`deriveVariant(values)` in `packages/preview/src/index.tsx`. First-match-wins:
+(pkpass class + field counts) by `deriveVariant(values)` in
+`packages/preview/src/index.tsx`. First-match-wins:
 
 | pkpass class    | additional signal                                              | → variant              |
 |-----------------|----------------------------------------------------------------|------------------------|
 | `coupon`        | —                                                              | `coupon`               |
-| `boardingPass`  | primary value length > 12                                       | `boarding-pass-long`   |
-| `boardingPass`  | else                                                            | `boarding-pass-short`  |
+| `boardingPass`  | —                                                              | `boarding-pass`        |
 | `eventTicket`   | secondary = 5 AND primary = 0                                   | `event-ticket-5col`    |
 | `eventTicket`   | headerFields = 0                                                | `event-ticket-strip`   |
 | `eventTicket`   | else                                                            | `event-ticket`         |
@@ -103,7 +100,7 @@ What `FONT_PROFILES` doesn't cover (static CSS, not charCount-based):
 | `coupon`                                   | `.coupon #headerFields h1`                          | font-size            | 1.67em (~16.7px)     |
 | `boarding-pass` family                     | `.boardingPass #primaryFields .passField:first-child` | width              | 200px (from 125)     |
 | `boarding-pass` family                     | `.boardingPass #primaryFields .passField:last-child`  | width              | 90px (from 125)      |
-| `boarding-pass-short` + `-long`            | `.boardingPass #primaryFields > span > span`        | font-weight          | 300                  |
+| `boarding-pass`                            | `.boardingPass #primaryFields > span > span`        | font-weight          | 300                  |
 | `boarding-pass` family                     | `img#pass-transport-type`                           | width/max-width      | 32px (+max-height:none) |
 | `event-ticket-generic`                     | `.generic #headerFields h1`                         | font-size            | 1.75em (~17.5px)     |
 | `event-ticket-generic`                     | `.generic #headerFields img`                        | max-height           | 41px                 |
