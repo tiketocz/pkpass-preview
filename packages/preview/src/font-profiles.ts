@@ -15,8 +15,6 @@ export type PassVariant =
   | "store-card-4col"
   | "coupon"
   | "boarding-pass"
-  | "boarding-pass-short"
-  | "boarding-pass-long"
   | "event-ticket"
   | "event-ticket-5col"
   | "event-ticket-strip"
@@ -137,15 +135,12 @@ export const FONT_PROFILES: Record<PassVariant, FontProfile> = {
   "store-card-4col": BASELINE_PROFILE,
   // coupon: kept at BASELINE_PROFILE — VRT showed iOS reference matches main.
   coupon: BASELINE_PROFILE,
-  // boarding-pass family — kept at BASELINE_PROFILE; VRT showed BP1/2/3 are
-  // closer to iOS reference at default values than with the previously-tuned
-  // caps + headerDensity. `deriveVariant` only ever emits the `-short` or
-  // `-long` form (split by primary value length > 12 chars); the base
-  // `'boarding-pass'` entry exists so the FONT_PROFILES map is total over
-  // the PassVariant union.
+  // boarding-pass — kept at BASELINE_PROFILE; VRT showed BP1/2/3 are closer
+  // to iOS reference at default values than with previously-tuned caps +
+  // headerDensity. Pre-TIK-112 had a `-short`/`-long` variant split routed by
+  // primary value char count > 12, but post-TIK-108 unification all three
+  // BP entries collapsed to the same profile, making the split vestigial.
   "boarding-pass": BASELINE_PROFILE,
-  "boarding-pass-short": BASELINE_PROFILE,
-  "boarding-pass-long": BASELINE_PROFILE,
   // event-ticket: ET1/ET2 fixtures (no strip image, no logoText). Header value
   // is char-density driven (headerDensity 1.0, maxHeader 17) so a long header
   // like "And it's value" (14 chars) shrinks to fit the row. density 2.1 +

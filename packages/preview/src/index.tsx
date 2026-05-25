@@ -29,10 +29,9 @@ export interface PreviewProps {
 }
 
 // Deterministic variant detection from `values` (pkpass type + field shape).
-// Pure function — no DOM measurement, no content heuristics beyond the explicit
-// boarding-pass primary-value length check below. Falls back to `default` when
-// no recognised pkpass class is present. `PKPassPreview` calls this on every
-// render; the public API of the component stays `values`-only.
+// Pure function — no DOM measurement, no content heuristics. Falls back to
+// `default` when no recognised pkpass class is present. `PKPassPreview` calls
+// this on every render; the public API of the component stays `values`-only.
 //
 // Rules are evaluated top-to-bottom; first match wins. Each rule references the
 // fixture shape that anchored it so the mapping remains traceable for future
@@ -46,18 +45,11 @@ export const deriveVariant = (values: { [key: string]: any }): PassVariant => {
   // pkpass class — exactly one of these top-level keys is set per the spec.
   if (pass.coupon) return "coupon";
 
-  if (pass.boardingPass) {
-    const bp = pass.boardingPass;
-    // Threshold > 12 chars: anchored on the BP fixtures (BP1 "Prague12345" = 11,
-    // BP3 "<a>here</a>" = 12, both short; BP2 "LONG TEXT LONG TEXT" = 19, long).
-    // 13+ char primary values push to the -long profile (cap 11px) because the
-    // 200px FROM column truncates them at the base 28px cap. This is a char-count
-    // heuristic — real airport codes / city names just above the threshold (e.g.
-    // "San Francisco" = 13) will fall into -long and render small; if that becomes
-    // a problem, a measured-text-width approach (TIK-XXX) is the proper fix.
-    const longVal = (bp.primaryFields ?? []).some((f: any) => String(f?.value ?? "").length > 12);
-    return longVal ? "boarding-pass-long" : "boarding-pass-short";
-  }
+  // boarding-pass: single profile post-TIK-112. The previous `-short`/`-long`
+  // split routed by primary value length > 12 chars was made vestigial by
+  // TIK-108 (all three BP variants collapsed onto BASELINE_PROFILE, so the
+  // routing produced identical visual output regardless of branch).
+  if (pass.boardingPass) return "boarding-pass";
 
   if (pass.eventTicket) {
     const et = pass.eventTicket;
