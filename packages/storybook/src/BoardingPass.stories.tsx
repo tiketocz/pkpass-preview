@@ -40,15 +40,26 @@ export const BoardingPass3: Story = {
 };
 
 // All 5 transit types rendered against the same fixture — visual regression
-// guard for the inline-JSX transit icons (TIK-100 port).
+// guard for the inline-JSX transit icons (TIK-100 port). The primary FROM
+// value and header are overridden here to match the captured iOS Wallet
+// screenshots (`transit-*.jpg`), which were taken from a different source
+// pass than BP1 (FROM "Prague" + header "FLIGHT TIK 100", not BP1's
+// anonymized "Prague12345" + "ASFG/fdhs"). BP1's own story keeps the
+// original fixture untouched so it still matches `boarding-pass-1.jpg`.
 const withTransitType = (transitType: PassTransitType) => {
   const passJson = boardingPass1["pass.json"] as Record<string, unknown>;
   const boardingPass = passJson.boardingPass as Record<string, unknown>;
+  const primaryFields = boardingPass.primaryFields as Array<Record<string, unknown>>;
   return {
     ...boardingPass1,
     "pass.json": {
       ...passJson,
-      boardingPass: { ...boardingPass, transitType },
+      boardingPass: {
+        ...boardingPass,
+        transitType,
+        headerFields: [{ key: "header-flight", label: "FLIGHT", value: "TIK 100" }],
+        primaryFields: [{ ...primaryFields[0], value: "Prague" }, primaryFields[1]],
+      },
     },
   };
 };
