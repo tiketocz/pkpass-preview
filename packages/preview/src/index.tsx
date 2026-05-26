@@ -406,6 +406,7 @@ ${secondaryFieldsCount >= 4 ? `max-width: calc(100% / ${secondaryFieldsCount});`
                     <PassFieldItemFit
                       {...structure?.primaryFields[0]}
                       maxFontSize={profile.maxPrimary}
+                      minFontSize={profile.min}
                     />
                   )}
                   <span style={transitIconStyle}>
@@ -416,6 +417,7 @@ ${secondaryFieldsCount >= 4 ? `max-width: calc(100% / ${secondaryFieldsCount});`
                       {...f}
                       key={f.key || `${i}`}
                       maxFontSize={profile.maxPrimary}
+                      minFontSize={profile.min}
                     />
                   ))}
                 </>

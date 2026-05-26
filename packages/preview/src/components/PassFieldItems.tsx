@@ -2,6 +2,7 @@ import type { Property } from "csstype";
 import * as React from "react";
 import { useLayoutEffect, useRef, useState } from "react";
 import useFitText from "use-fit-text";
+import { PASS_FONT_STACK } from "../styles";
 import { PKTextAlignment, type PassField } from "../types";
 
 const getTextAlignment = (textAlignment: PKTextAlignment | undefined): Property.TextAlign => {
@@ -54,21 +55,34 @@ export const PassFieldItem = ({
 // FROM / TO columns scale independently (iOS Wallet behaviour). Mechanism:
 // after mount, read the .passField column width (200/90 px per boarding-pass
 // CSS) and use canvas measureText to compute the rendered width of the value
-// at maxFontSize in the same font stack. If it overflows, scale fontSize
-// down by the ratio (floor at MIN_PRIMARY_PX = profile.min). One layout
-// measurement + one canvas measurement per field, no bisection loop —
-// deterministic and independent per field so BP-2 long FROM shrinks while
-// short TO stays at hero. Re-measures on window resize so responsive layout
-// (currently unused for boarding-pass primary, but cheap insurance) stays
-// correct.
-const MIN_PRIMARY_PX = 10;
-const FONT_STACK =
-  '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+// at maxFontSize in the same PASS_FONT_STACK the CSS renders with. If it
+// overflows, scale fontSize down by the ratio (floor at minFontSize from
+// the caller's FontProfile.min). One layout measurement + one canvas
+// measurement per field, no bisection loop — deterministic and independent
+// per field so BP-2 long FROM shrinks while short TO stays at hero. A
+// ResizeObserver on the container catches both window resizes AND
+// display:none → block transitions (e.g. Storybook docs tabs).
+const BOARDING_PASS_PRIMARY_WEIGHT = 300;
 let _measureCanvas: HTMLCanvasElement | null = null;
 const getMeasureCtx = (): CanvasRenderingContext2D | null => {
   if (typeof document === "undefined") return null;
   if (!_measureCanvas) _measureCanvas = document.createElement("canvas");
   return _measureCanvas.getContext("2d");
+};
+
+// Pure helper extracted so the shrink math is unit-testable independently
+// from the DOM / canvas read. Given the rendered width of the text at
+// maxFontSize, returns the size that fits availableWidth — floored at
+// minFontSize. Returns maxFontSize when the text already fits.
+export const scaledFontSize = (
+  maxFontSize: number,
+  renderedWidth: number,
+  availableWidth: number,
+  minFontSize: number,
+): number => {
+  if (renderedWidth <= availableWidth) return maxFontSize;
+  const scaled = Math.floor((maxFontSize * availableWidth) / renderedWidth);
+  return Math.max(minFontSize, scaled);
 };
 
 export const PassFieldItemFit = ({
@@ -77,39 +91,38 @@ export const PassFieldItemFit = ({
   attributedValue,
   textAlignment,
   maxFontSize,
-}: PassField & { maxFontSize: number }) => {
+  minFontSize,
+}: PassField & { maxFontSize: number; minFontSize: number }) => {
   const textAlign: Property.TextAlign = getTextAlignment(textAlignment);
   const containerRef = useRef<HTMLDivElement>(null);
   const [fontSizePx, setFontSizePx] = useState<number>(maxFontSize);
   const text = attributedValue?.toString() || value?.toString() || "";
 
   useLayoutEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const ctx = getMeasureCtx();
     const recalc = () => {
-      const el = containerRef.current;
-      const ctx = getMeasureCtx();
-      if (!el || !ctx) return;
+      if (!ctx) return;
       const available = el.clientWidth;
       if (available === 0) return;
-      ctx.font = `300 ${maxFontSize}px ${FONT_STACK}`;
+      ctx.font = `${BOARDING_PASS_PRIMARY_WEIGHT} ${maxFontSize}px ${PASS_FONT_STACK}`;
       const rendered = ctx.measureText(text).width;
-      if (rendered <= available) {
-        setFontSizePx(maxFontSize);
-        return;
-      }
-      const scaled = Math.floor((maxFontSize * available) / rendered);
-      setFontSizePx(Math.max(MIN_PRIMARY_PX, scaled));
+      const next = scaledFontSize(maxFontSize, rendered, available, minFontSize);
+      setFontSizePx((prev) => (prev === next ? prev : next));
     };
     recalc();
-    window.addEventListener("resize", recalc);
-    return () => window.removeEventListener("resize", recalc);
-  }, [text, maxFontSize]);
+    const ro = new ResizeObserver(recalc);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [text, maxFontSize, minFontSize]);
 
   return (
     <>
       <div ref={containerRef} className="passField" style={{ textAlign }}>
         <label>{label}</label>
         <span>
-          <span style={{ fontSize: `${fontSizePx}px`, fontWeight: 300 }}>{text}</span>
+          <span style={{ fontSize: `${fontSizePx}px` }}>{text}</span>
         </span>
       </div>{" "}
     </>

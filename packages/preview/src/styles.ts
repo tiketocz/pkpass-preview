@@ -1,3 +1,10 @@
+// TIK-145: shared font stack used by both the rendered CSS rule on the pass
+// root and the canvas `measureText` calls in PassFieldItemFit. Keep them in
+// lockstep so the per-field shrink-to-fit calculation measures glyphs in
+// the same font family the browser actually renders (SF Pro vs Helvetica
+// Neue have ~3-5% cap-height + wider horizontal-metric drift).
+export const PASS_FONT_STACK = '"Helvetica Neue", Helvetica, Arial, sans-serif';
+
 export const getPassStyles = (identifier: string) => `
   #${identifier} {
     width: 100%;
@@ -1132,7 +1139,7 @@ export const getPassStyles = (identifier: string) => `
     margin: 0 auto 1em;
     max-width: 320px;
     max-height: 480px;
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-family: ${PASS_FONT_STACK};
     position: relative;
   }
 
