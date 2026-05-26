@@ -213,10 +213,10 @@ export const getPassStyles = (identifier: string) => `
   }
   /* Transit icon (airplane/etc.) on boarding-pass — rendered inline as
      <svg>. Size to 32×32 so it visually matches iOS Wallet, and fill is
-     driven by the dynamic '#pass-transport-type { fill: labelColor }' rule
+     driven by the dynamic '.pass-transport-type { fill: labelColor }' rule
      above (paths inherit fill via SVG cascade). All 5 transit SVGs use
      square viewBoxes, so width===height is safe. */
-  #${identifier}.boardingPass svg#pass-transport-type {
+  #${identifier}.boardingPass svg.pass-transport-type {
     width: 32px !important;
     height: 32px !important;
     display: inline-block;

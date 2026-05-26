@@ -202,7 +202,7 @@ ${getPassStyles(identifier)}
   background: ${data.backgroundColor};
   color: ${data.foregroundColor};
 }
-#${identifier} #pass-transport-type {
+#${identifier} .pass-transport-type {
   fill: ${data.labelColor};
 }
 
