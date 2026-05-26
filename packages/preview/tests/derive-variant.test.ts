@@ -20,8 +20,8 @@ const bp = (primaryValue: string) => ({
 
 describe("deriveVariant — boarding-pass (TIK-112 collapse)", () => {
   // Short primary (BP1 fixture range, pre-TIK-112 → `-short`).
-  it("BP1 'Prague12345' (11 chars) → boarding-pass", () => {
-    expect(deriveVariant(bp("Prague12345"))).toBe("boarding-pass");
+  it("short primary 'Prague' (6 chars) → boarding-pass", () => {
+    expect(deriveVariant(bp("Prague"))).toBe("boarding-pass");
   });
 
   // Boundary primary (BP3 fixture, pre-TIK-112 → `-short` at exactly the

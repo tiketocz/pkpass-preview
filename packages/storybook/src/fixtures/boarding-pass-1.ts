@@ -38,7 +38,7 @@ export const boardingPass1 = {
         {
           key: "primary-zhsru",
           label: "From",
-          value: "Prague12345",
+          value: "Prague",
           changeMessage: "Departure changed to %@",
         },
         {
