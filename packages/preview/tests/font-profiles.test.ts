@@ -31,18 +31,23 @@ describe("FONT_PROFILES char-density algorithm — minimum spec (TIK-106)", () =
     expect(calculateFontSize(FONT_PROFILES.default, 30, "secondaryFields")).toBeCloseTo(14.933, 2);
   });
 
-  // TC3 — boarding-pass, cap-bound primary. Original TIK-106 spec: 28
-  // (density 1.5, max 28). Post-TIK-108 unification → BASELINE → cap 18.
-  it("boarding-pass / 6ch primaryFields → 18 (BASELINE cap; was 28 in TIK-106 spec pre-TIK-108)", () => {
-    expect(calculateFontSize(FONT_PROFILES["boarding-pass"], 6)).toBe(18);
+  // TC3 — boarding-pass, cap-bound primary. Post-TIK-145 cap 24 (was 18
+  // pre-TIK-145; 28 in original TIK-106 spec pre-TIK-108). Runtime: this
+  // pins the `maxFontSize` fed to PassFieldItemFit, which then uses canvas
+  // measureText against the column width to shrink per-field on overflow
+  // (short primary values like BP-1 "Paris" 5ch stay at 24).
+  it("boarding-pass / 6ch primaryFields → 24 (TIK-145 cap, fed to PassFieldItemFit)", () => {
+    expect(calculateFontSize(FONT_PROFILES["boarding-pass"], 6)).toBe(24);
   });
 
-  // TC4 — boarding-pass, long primary value. Original TIK-106 spec: 11
-  // (boarding-pass-long, density 0.95, max 11). Post-TIK-108 unification →
-  // BASELINE → cap 18. Post-TIK-112 collapse: -short/-long entries removed,
-  // single `boarding-pass` profile handles all primary lengths.
-  it("boarding-pass / 21ch primaryFields → 18 (BASELINE cap; was 11 in TIK-106 spec pre-TIK-108, pre-TIK-112 routed to -long)", () => {
-    expect(calculateFontSize(FONT_PROFILES["boarding-pass"], 21)).toBe(18);
+  // TC4 — boarding-pass, long primary value. Post-TIK-145 density-bound
+  // (320/21*1.4 = 21.33 < cap 24); PassFieldItemFit's canvas measureText
+  // pass shrinks this further at runtime if the value still overflows the
+  // 200/90 px column (BP-2 "LONG TEXT LONG TEXT" case). Pre-TIK-145 was
+  // cap-bound at 18, pre-TIK-108 cap-bound at 11 via the -long variant
+  // split (collapsed in TIK-112).
+  it("boarding-pass / 21ch primaryFields → ~21.33 (density-bound; PassFieldItemFit shrinks per-field at runtime on overflow)", () => {
+    expect(calculateFontSize(FONT_PROFILES["boarding-pass"], 21)).toBeCloseTo(21.333, 2);
   });
 
   // TC5 — event-ticket-5col, packed-row auxiliary cap. 320/5*1.5=96 → cap 13.
@@ -80,12 +85,20 @@ describe("FONT_PROFILES char-density algorithm — extended coverage", () => {
     );
   });
 
-  // TC9 — boarding-pass, short primary value. Original TIK-106 spec: 22
-  // (boarding-pass-short, density 1.5, max 22). Post-TIK-108 → BASELINE →
-  // 18. Post-TIK-112 collapse: same profile as the long-primary case (TC4)
-  // since the variant split was removed.
-  it("boarding-pass / 11ch primaryFields → 18 (BASELINE cap; was 22 in TIK-106 spec pre-TIK-108, pre-TIK-112 routed to -short)", () => {
-    expect(calculateFontSize(FONT_PROFILES["boarding-pass"], 11)).toBe(18);
+  // TC9 — boarding-pass, short primary value. Post-TIK-145 cap 24 (was 18
+  // pre-TIK-145; 22 in original TIK-106 spec pre-TIK-108). 320/11*1.4 =
+  // 40.73 → cap 24 → pins the PassFieldItemFit starting size for BP-1
+  // "Prague12345" (11ch) at the iOS hero tier.
+  it("boarding-pass / 11ch primaryFields → 24 (TIK-145 cap, BP-1 'Prague12345' lands at iOS hero tier)", () => {
+    expect(calculateFontSize(FONT_PROFILES["boarding-pass"], 11)).toBe(24);
+  });
+
+  // TIK-145: boarding-pass header value char-density sizing. "fdhs" (4ch)
+  // → 320/4*1.0 = 80 → cap maxHeader 18. Replaces the pre-TIK-145
+  // PassFieldItemHeaderFit/useFitText fallback (~14 CSS px) that left
+  // "fdhs" undersized vs iOS.
+  it("boarding-pass / 4ch headerFields → 18 (TIK-145 headerDensity 1.0 + maxHeader 18, 'fdhs' iOS-faithful)", () => {
+    expect(calculateFontSize(FONT_PROFILES["boarding-pass"], 4, "headerFields")).toBe(18);
   });
 
   // TC10 — generic primary. Original TIK-106 spec: ~16 (density 2.0).

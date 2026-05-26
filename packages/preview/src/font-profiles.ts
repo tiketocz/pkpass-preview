@@ -136,12 +136,18 @@ export const FONT_PROFILES: Record<PassVariant, FontProfile> = {
   "store-card-4col": BASELINE_PROFILE,
   // coupon: kept at BASELINE_PROFILE — VRT showed iOS reference matches main.
   coupon: BASELINE_PROFILE,
-  // boarding-pass — kept at BASELINE_PROFILE; VRT showed BP1/2/3 are closer
-  // to iOS reference at default values than with previously-tuned caps +
-  // headerDensity. Pre-TIK-112 had a `-short`/`-long` variant split routed by
-  // primary value char count > 12, but post-TIK-108 unification all three
-  // BP entries collapsed to the same profile, making the split vestigial.
-  "boarding-pass": BASELINE_PROFILE,
+  // boarding-pass — TIK-145. Primary value uses per-field shrink-to-fit
+  // (PassFieldItemFit in PKPassPreview's boarding-pass branch, canvas
+  // measureText against the column width) so the FROM / TO sides scale
+  // independently to match iOS Wallet's per-column behaviour (long FROM
+  // "LONG TEXT LONG TEXT" shrinks while short TO "BB" stays at hero cap).
+  // maxPrimary 24 = iOS hero cap (cap-height ~16 CSS px @ 1em line-height);
+  // PassFieldItemFit starts from this and scales down toward profile.min
+  // (10) only when the rendered text would overflow. Header value is
+  // char-density sized (headerDensity 1.0, maxHeader 18) so short header
+  // values like "fdhs" (4 chars) land at the iOS-faithful 18px instead of
+  // the previous PassFieldItemHeaderFit/useFitText fallback ~14px.
+  "boarding-pass": { ...BASELINE_PROFILE, maxPrimary: 24, headerDensity: 1.0, maxHeader: 18 },
   // event-ticket: ET1/ET2 fixtures (no strip image, no logoText). Header value
   // is char-density driven (headerDensity 1.0, maxHeader 17) so a long header
   // like "And it's value" (14 chars) shrinks to fit the row. density 2.1 +

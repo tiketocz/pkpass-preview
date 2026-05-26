@@ -1,5 +1,6 @@
 import type { Property } from "csstype";
 import * as React from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import useFitText from "use-fit-text";
 import { PKTextAlignment, type PassField } from "../types";
 
@@ -43,6 +44,72 @@ export const PassFieldItem = ({
           <span style={{ fontSize: `${globalFontSize}px` }}>
             {attributedValue?.toString() || value?.toString()}
           </span>
+        </span>
+      </div>{" "}
+    </>
+  );
+};
+
+// TIK-145 — per-field shrink-to-fit primary, used by boarding-pass so the
+// FROM / TO columns scale independently (iOS Wallet behaviour). Mechanism:
+// after mount, read the .passField column width (200/90 px per boarding-pass
+// CSS) and use canvas measureText to compute the rendered width of the value
+// at maxFontSize in the same font stack. If it overflows, scale fontSize
+// down by the ratio (floor at MIN_PRIMARY_PX = profile.min). One layout
+// measurement + one canvas measurement per field, no bisection loop —
+// deterministic and independent per field so BP-2 long FROM shrinks while
+// short TO stays at hero. Re-measures on window resize so responsive layout
+// (currently unused for boarding-pass primary, but cheap insurance) stays
+// correct.
+const MIN_PRIMARY_PX = 10;
+const FONT_STACK =
+  '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+let _measureCanvas: HTMLCanvasElement | null = null;
+const getMeasureCtx = (): CanvasRenderingContext2D | null => {
+  if (typeof document === "undefined") return null;
+  if (!_measureCanvas) _measureCanvas = document.createElement("canvas");
+  return _measureCanvas.getContext("2d");
+};
+
+export const PassFieldItemFit = ({
+  label,
+  value,
+  attributedValue,
+  textAlignment,
+  maxFontSize,
+}: PassField & { maxFontSize: number }) => {
+  const textAlign: Property.TextAlign = getTextAlignment(textAlignment);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [fontSizePx, setFontSizePx] = useState<number>(maxFontSize);
+  const text = attributedValue?.toString() || value?.toString() || "";
+
+  useLayoutEffect(() => {
+    const recalc = () => {
+      const el = containerRef.current;
+      const ctx = getMeasureCtx();
+      if (!el || !ctx) return;
+      const available = el.clientWidth;
+      if (available === 0) return;
+      ctx.font = `300 ${maxFontSize}px ${FONT_STACK}`;
+      const rendered = ctx.measureText(text).width;
+      if (rendered <= available) {
+        setFontSizePx(maxFontSize);
+        return;
+      }
+      const scaled = Math.floor((maxFontSize * available) / rendered);
+      setFontSizePx(Math.max(MIN_PRIMARY_PX, scaled));
+    };
+    recalc();
+    window.addEventListener("resize", recalc);
+    return () => window.removeEventListener("resize", recalc);
+  }, [text, maxFontSize]);
+
+  return (
+    <>
+      <div ref={containerRef} className="passField" style={{ textAlign }}>
+        <label>{label}</label>
+        <span>
+          <span style={{ fontSize: `${fontSizePx}px`, fontWeight: 300 }}>{text}</span>
         </span>
       </div>{" "}
     </>

@@ -190,9 +190,11 @@ export const getPassStyles = (identifier: string) => `
     right: 12px;
   }
   #${identifier}.boardingPass #primaryFields span {
-    /* font-size set dynamically per FONT_PROFILE (default cap 20, boarding-pass
-       cap 28) — only the line-height stays static so the value vertically
-       aligns inside the primary box regardless of font size. */
+    /* font-size set dynamically per FONT_PROFILE — outer span pinned to
+       profile.maxPrimary (TIK-145 boarding-pass cap 24), inner span shrunk
+       per-field via useFitText to fit the column (200/90 px). Only the
+       line-height stays static so the value vertically aligns inside the
+       primary box regardless of font size. */
     line-height: 1em;
   }
   /* boarding-pass — widen FROM column so long values (e.g. BP2 "LONG TEXT
