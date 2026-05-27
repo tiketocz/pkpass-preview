@@ -313,6 +313,15 @@ ${secondaryFieldsCount >= 4 ? `max-width: calc(100% / ${secondaryFieldsCount});`
     // Drop one more to 11 makes the math integer-stable. Matches iOS
     // BP-2 cap-height bbox (~30 image px / 0.27 logical-to-image / 0.71
     // cap-to-em ≈ 11.6 logical px).
+    //
+    // Headless / fresh-clone caveat: the 283.64 px reference and the
+    // floor-fit guarantee depend on Helvetica Neue glyph metrics. Real
+    // Safari / Chrome on macOS ship Helvetica Neue; Linux containers
+    // (local dev + GH Actions CI runners) need a fontconfig alias to
+    // Liberation Sans (metric-equivalent free font in fonts-liberation)
+    // — see channel-brain MEM-57. Without the alias, Chromium falls
+    // back to DejaVu Sans, glyphs are ~10 % wider, and BP-2 visually
+    // overlaps the icon by ~10 px in VRT screenshots.
     return scaledRowFontSize(globalFontSizePrimary, fromWidth, 130, 11);
   }, [data.boardingPass, structure?.primaryFields, globalFontSizePrimary]);
 
