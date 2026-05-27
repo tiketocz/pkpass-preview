@@ -306,21 +306,14 @@ ${secondaryFieldsCount >= 4 ? `max-width: calc(100% / ${secondaryFieldsCount});`
     // where FROM and TO cap heights measure ~1:1 even when FROM is
     // heavily shrunk) by the ratio that lands FROM right at the icon
     // left edge with a 2 px safety margin (available = 130). Floor at
-    // 12 px instead of profile.min (10) — iOS BP-2 cap-height measurement
-    // maps to ~12 logical px (cap ~30 image px in the 1170-wide screenshot
-    // at the 320:1170 = 0.27 logical-to-image ratio, ~12 = 30 / 0.71
-    // cap-to-em ratio for Helvetica Neue light).
-    //
-    // Production-environment caveat: floor 12 is calibrated to iOS
-    // Helvetica Neue light glyph metrics. In headless Chromium without
-    // Helvetica Neue installed, the DejaVu Sans fallback is ~10% wider
-    // so "LONG TEXT LONG TEXT" at 12 px DejaVu measures ~142 px (vs ~128
-    // px in real Helvetica Neue), and BP-2 visually overlaps the icon
-    // by ~10 px in VRT screenshots. The production targets — Safari on
-    // macOS+iOS and Chrome on macOS — ship Helvetica Neue and fit the
-    // 130 px constraint cleanly; the VRT overlap is an accepted
-    // headless-rendering artefact.
-    return scaledRowFontSize(globalFontSizePrimary, fromWidth, 130, 12);
+    // 11 px instead of profile.min (10) — calibrated against real
+    // Helvetica Neue / Liberation Sans (metric-equivalent) glyph widths:
+    // "LONG TEXT LONG TEXT" at 24 px measures 283.64 px wide, so the
+    // largest font size that fits 130 px is 130 / 283.64 × 24 ≈ 11.0.
+    // Drop one more to 11 makes the math integer-stable. Matches iOS
+    // BP-2 cap-height bbox (~30 image px / 0.27 logical-to-image / 0.71
+    // cap-to-em ≈ 11.6 logical px).
+    return scaledRowFontSize(globalFontSizePrimary, fromWidth, 130, 11);
   }, [data.boardingPass, structure?.primaryFields, globalFontSizePrimary]);
 
   // Header value font size — only for profiles that opt into char-density header
