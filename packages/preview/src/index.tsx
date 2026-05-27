@@ -269,6 +269,58 @@ ${secondaryFieldsCount >= 4 ? `max-width: calc(100% / ${secondaryFieldsCount});`
     return calculateRowFontSize(structure?.primaryFields);
   }, [calculateRowFontSize, structure?.primaryFields]);
 
+  // TIK-145 width-based row-fit pass — boarding-pass ONLY. The per-row
+  // char-density helper above (calculateGlobalFontSizeForRow) computes a
+  // single size for the FROM/TO row, but char-count is an approximation —
+  // for fixtures like BP-2 "LONG TEXT LONG TEXT" the value still exceeds
+  // the FROM column at the density-bound size and runs into the centred
+  // transit icon. iOS Wallet handles this by shrinking the whole row
+  // (FROM and TO together) until the rendered widths fit. We replicate
+  // that by canvas-measuring the actual glyph widths at the char-density
+  // size and scaling the row further if the combined text plus the icon
+  // reserve overflows the card content width. Other variants are NOT
+  // affected — the override is gated on data.boardingPass.
+  const boardingPassRowFontSize = useMemo(() => {
+    if (!data.boardingPass) return undefined;
+    if (!globalFontSizePrimary || globalFontSizePrimary <= 0) return undefined;
+    if (typeof document === "undefined") return globalFontSizePrimary;
+    const fromText =
+      structure?.primaryFields?.[0]?.attributedValue?.toString() ||
+      structure?.primaryFields?.[0]?.value?.toString() ||
+      "";
+    const toText =
+      structure?.primaryFields?.[1]?.attributedValue?.toString() ||
+      structure?.primaryFields?.[1]?.value?.toString() ||
+      "";
+    if (!fromText && !toText) return globalFontSizePrimary;
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return globalFontSizePrimary;
+    // PASS_FONT_STACK is re-declared inline here (instead of imported) so
+    // the row-fit measurement stays self-contained in the boarding-pass
+    // branch — no shared module surface for what is currently a single
+    // call site.
+    ctx.font = `300 ${globalFontSizePrimary}px "Helvetica Neue", Helvetica, Arial, sans-serif`;
+    const fromWidth = ctx.measureText(fromText).width;
+    // The centred transit icon sits at column-relative x=132 inside the
+    // FROM absolute column (left=12, width=200). FROM text rendered wider
+    // than 132 px reaches into the icon's region — that's the BP-2 case.
+    // Shrink uniformly (TO inherits the same factor, matching iOS BP-2
+    // where FROM and TO cap heights measure ~1:1 even when FROM is
+    // heavily shrunk) by the ratio that lands FROM right at the icon
+    // left edge with a 2 px safety margin. Floor at 12 px instead of
+    // profile.min (10) — iOS BP-2 cap-height measurement maps to ~12
+    // logical px font size (cap ~30 image px in the 1170-wide screenshot
+    // at the 320:1170 = 0.27 logical-to-image ratio, ~12 = 30 / 0.71
+    // cap-to-em ratio for Helvetica Neue light). 12 is also legible vs
+    // the 10 px char-density floor.
+    const fromAvailable = 130;
+    const BP_ROWFIT_FLOOR = 12;
+    if (fromWidth <= fromAvailable) return globalFontSizePrimary;
+    const scaled = Math.floor((globalFontSizePrimary * fromAvailable) / fromWidth);
+    return Math.max(BP_ROWFIT_FLOOR, scaled);
+  }, [data.boardingPass, structure?.primaryFields, globalFontSizePrimary, profile.min]);
+
   // Header value font size — only for profiles that opt into char-density header
   // sizing (headerDensity set); otherwise undefined → PassFieldItemHeader falls
   // back to its useFitText behavior.
@@ -400,7 +452,7 @@ ${secondaryFieldsCount >= 4 ? `max-width: calc(100% / ${secondaryFieldsCount});`
                   {structure?.primaryFields?.[0] && (
                     <PassFieldItem
                       {...structure?.primaryFields[0]}
-                      globalFontSize={globalFontSizePrimary}
+                      globalFontSize={boardingPassRowFontSize ?? globalFontSizePrimary}
                     />
                   )}
                   <span style={transitIconStyle}>
@@ -410,7 +462,7 @@ ${secondaryFieldsCount >= 4 ? `max-width: calc(100% / ${secondaryFieldsCount});`
                     <PassFieldItem
                       {...f}
                       key={f.key || `${i}`}
-                      globalFontSize={globalFontSizePrimary}
+                      globalFontSize={boardingPassRowFontSize ?? globalFontSizePrimary}
                     />
                   ))}
                 </>
