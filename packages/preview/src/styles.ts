@@ -195,13 +195,12 @@ export const getPassStyles = (identifier: string) => `
     text-align: right !important;
     right: 12px;
   }
-  /* TIK-145: gap between label and value rows on boarding-pass primary —
-     iOS reference shows ~4 px breathing room. Default .passField label
-     margin-bottom 2px is too tight here (especially with the BP-2 shrunk
-     value). Scoped to .boardingPass so other variants (storeCard, generic,
-     coupon, event-ticket, id-card) keep their existing label spacing. */
+  /* TIK-145: small reserved label-bottom margin on boarding-pass primary
+     so the label-to-value gap doesn't collapse to ~2 px on the BP-2
+     shrunk case. Scoped to .boardingPass so other variants keep their
+     default 2 px label margin. */
   #${identifier}.boardingPass #primaryFields .passField label {
-    margin-bottom: 4px;
+    margin-bottom: 6px;
   }
   #${identifier}.boardingPass #primaryFields span {
     /* font-size set dynamically per FONT_PROFILE — per-row uniform via
