@@ -198,10 +198,14 @@ export const getPassStyles = (identifier: string) => `
   #${identifier}.boardingPass #primaryFields span {
     /* font-size set dynamically per FONT_PROFILE — per-row uniform via
        calculateGlobalFontSizeForRow (TIK-145 revised: same pattern as
-       every other variant; FROM and TO share one size that shrinks
-       together when the row's totalCharCount overflows cap 21). Only
-       line-height stays static so the value vertically aligns inside
-       the primary box regardless of font size. */
+       every other variant; FROM and TO share one size). Boarding-pass
+       additionally applies a width-based row-fit pass (canvas measureText
+       on FROM at the density-bound size; scales row uniformly via
+       scaledRowFontSize when FROM would reach the centred transit icon)
+       — see boardingPassRowFontSize useMemo in index.tsx. Other variants
+       use the char-density helper alone. Only line-height stays static
+       so the value vertically aligns inside the primary box regardless
+       of font size. */
     line-height: 1em;
   }
   /* boarding-pass — widen FROM column so long values (e.g. BP2 "LONG TEXT

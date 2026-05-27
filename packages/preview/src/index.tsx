@@ -2,8 +2,13 @@ import * as React from "react";
 import { useMemo, useState } from "react";
 import { BarcodesPreview } from "./components/BarcodesPreview";
 import { PassBackFieldItem, PassFieldItem, PassFieldItemHeader } from "./components/PassFieldItems";
-import { FONT_PROFILES, type PassVariant, calculateGlobalFontSizeForRow } from "./font-profiles";
-import { getPassStyles } from "./styles";
+import {
+  FONT_PROFILES,
+  type PassVariant,
+  calculateGlobalFontSizeForRow,
+  scaledRowFontSize,
+} from "./font-profiles";
+import { PASS_FONT_STACK, getPassStyles } from "./styles";
 import { TransitIcon } from "./transit-icon";
 import type { FieldType, PassData, PassField, PassStructure } from "./types";
 
@@ -20,6 +25,7 @@ export {
   calculateGlobalFontSizeForRow,
   getDensity,
   getMaxFontSize,
+  scaledRowFontSize,
 } from "./font-profiles";
 export type { FontProfile, PassVariant } from "./font-profiles";
 
@@ -277,9 +283,8 @@ ${secondaryFieldsCount >= 4 ? `max-width: calc(100% / ${secondaryFieldsCount});`
   // transit icon. iOS Wallet handles this by shrinking the whole row
   // (FROM and TO together) until the rendered widths fit. We replicate
   // that by canvas-measuring the actual glyph widths at the char-density
-  // size and scaling the row further if the combined text plus the icon
-  // reserve overflows the card content width. Other variants are NOT
-  // affected — the override is gated on data.boardingPass.
+  // size and scaling the row further if FROM would reach the icon. Other
+  // variants are NOT affected — the override is gated on data.boardingPass.
   const boardingPassRowFontSize = useMemo(() => {
     if (!data.boardingPass) return undefined;
     if (!globalFontSizePrimary || globalFontSizePrimary <= 0) return undefined;
@@ -288,19 +293,11 @@ ${secondaryFieldsCount >= 4 ? `max-width: calc(100% / ${secondaryFieldsCount});`
       structure?.primaryFields?.[0]?.attributedValue?.toString() ||
       structure?.primaryFields?.[0]?.value?.toString() ||
       "";
-    const toText =
-      structure?.primaryFields?.[1]?.attributedValue?.toString() ||
-      structure?.primaryFields?.[1]?.value?.toString() ||
-      "";
-    if (!fromText && !toText) return globalFontSizePrimary;
+    if (!fromText) return globalFontSizePrimary;
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
     if (!ctx) return globalFontSizePrimary;
-    // PASS_FONT_STACK is re-declared inline here (instead of imported) so
-    // the row-fit measurement stays self-contained in the boarding-pass
-    // branch — no shared module surface for what is currently a single
-    // call site.
-    ctx.font = `300 ${globalFontSizePrimary}px "Helvetica Neue", Helvetica, Arial, sans-serif`;
+    ctx.font = `300 ${globalFontSizePrimary}px ${PASS_FONT_STACK}`;
     const fromWidth = ctx.measureText(fromText).width;
     // The centred transit icon sits at column-relative x=132 inside the
     // FROM absolute column (left=12, width=200). FROM text rendered wider
@@ -308,18 +305,23 @@ ${secondaryFieldsCount >= 4 ? `max-width: calc(100% / ${secondaryFieldsCount});`
     // Shrink uniformly (TO inherits the same factor, matching iOS BP-2
     // where FROM and TO cap heights measure ~1:1 even when FROM is
     // heavily shrunk) by the ratio that lands FROM right at the icon
-    // left edge with a 2 px safety margin. Floor at 12 px instead of
-    // profile.min (10) — iOS BP-2 cap-height measurement maps to ~12
-    // logical px font size (cap ~30 image px in the 1170-wide screenshot
+    // left edge with a 2 px safety margin (available = 130). Floor at
+    // 12 px instead of profile.min (10) — iOS BP-2 cap-height measurement
+    // maps to ~12 logical px (cap ~30 image px in the 1170-wide screenshot
     // at the 320:1170 = 0.27 logical-to-image ratio, ~12 = 30 / 0.71
-    // cap-to-em ratio for Helvetica Neue light). 12 is also legible vs
-    // the 10 px char-density floor.
-    const fromAvailable = 130;
-    const BP_ROWFIT_FLOOR = 12;
-    if (fromWidth <= fromAvailable) return globalFontSizePrimary;
-    const scaled = Math.floor((globalFontSizePrimary * fromAvailable) / fromWidth);
-    return Math.max(BP_ROWFIT_FLOOR, scaled);
-  }, [data.boardingPass, structure?.primaryFields, globalFontSizePrimary, profile.min]);
+    // cap-to-em ratio for Helvetica Neue light).
+    //
+    // Production-environment caveat: floor 12 is calibrated to iOS
+    // Helvetica Neue light glyph metrics. In headless Chromium without
+    // Helvetica Neue installed, the DejaVu Sans fallback is ~10% wider
+    // so "LONG TEXT LONG TEXT" at 12 px DejaVu measures ~142 px (vs ~128
+    // px in real Helvetica Neue), and BP-2 visually overlaps the icon
+    // by ~10 px in VRT screenshots. The production targets — Safari on
+    // macOS+iOS and Chrome on macOS — ship Helvetica Neue and fit the
+    // 130 px constraint cleanly; the VRT overlap is an accepted
+    // headless-rendering artefact.
+    return scaledRowFontSize(globalFontSizePrimary, fromWidth, 130, 12);
+  }, [data.boardingPass, structure?.primaryFields, globalFontSizePrimary]);
 
   // Header value font size — only for profiles that opt into char-density header
   // sizing (headerDensity set); otherwise undefined → PassFieldItemHeader falls

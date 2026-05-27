@@ -17,6 +17,7 @@ import {
   calculateGlobalFontSizeForRow,
   getDensity,
   getMaxFontSize,
+  scaledRowFontSize,
 } from "../src/font-profiles";
 import type { PassField } from "../src/types";
 
@@ -209,6 +210,50 @@ describe("calculateGlobalFontSizeForRow", () => {
     const fields = [{}] as unknown as PassField[];
     // 0 charCount → calculateFontSize early-returns 0.
     expect(calculateGlobalFontSizeForRow(FONT_PROFILES.default, fields)).toBe(0);
+  });
+});
+
+describe("scaledRowFontSize — width-based row-fit math (TIK-145)", () => {
+  // Pure helper used by the boarding-pass branch of PKPassPreview to scale
+  // the FROM/TO row uniformly when the FROM value at the density-bound size
+  // would still reach the centred transit icon. The DOM/canvas read that
+  // produces `renderedWidth` is covered by VRT; this suite pins the math.
+
+  // Happy path: rendered <= available → no shrink, base size returned.
+  it("returns baseFontSize when text already fits availableWidth", () => {
+    expect(scaledRowFontSize(21, 125, 130, 12)).toBe(21);
+  });
+
+  // Edge: exact-fit (rendered == available) is treated as fits, no shrink.
+  it("returns baseFontSize when renderedWidth equals availableWidth", () => {
+    expect(scaledRowFontSize(21, 130, 130, 12)).toBe(21);
+  });
+
+  // BP-2 typical case: "LONG TEXT LONG TEXT" at the density-bound size
+  // (20.36 px) measures ~265 px in DejaVu Sans fallback. Scaled =
+  // floor(20.36 * 130 / 265) = floor(9.99) = 9 → clamp at floor 12.
+  it("clamps to floor when scaled result would drop below it", () => {
+    expect(scaledRowFontSize(20.36, 265, 130, 12)).toBe(12);
+  });
+
+  // Production Helvetica Neue case: same BP-2 text at 20.36 px in real
+  // Helvetica Neue light is ~232 px. Scaled = floor(20.36 * 130 / 232) =
+  // floor(11.41) = 11 → still below floor 12 → 12.
+  it("returns floor when scaled is just under (BP-2 Safari production)", () => {
+    expect(scaledRowFontSize(20.36, 232, 130, 12)).toBe(12);
+  });
+
+  // Mild overflow: rendered just past available → small proportional shrink.
+  // 21 * 130 / 140 = 19.5 → floor 19. Above floor 12 → 19.
+  it("scales down proportionally for mild overflow above floor", () => {
+    expect(scaledRowFontSize(21, 140, 130, 12)).toBe(19);
+  });
+
+  // Floor parameter respected: caller can pass a different floor (e.g.
+  // profile.min 10) and the helper honours it.
+  it("uses caller-supplied minFontSize as the floor", () => {
+    // 20.36 * 130 / 265 = 9.99 → floor 10 (caller-supplied) wins over 9.
+    expect(scaledRowFontSize(20.36, 265, 130, 10)).toBe(10);
   });
 });
 
