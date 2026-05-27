@@ -1,12 +1,7 @@
 import * as React from "react";
 import { useMemo, useState } from "react";
 import { BarcodesPreview } from "./components/BarcodesPreview";
-import {
-  PassBackFieldItem,
-  PassFieldItem,
-  PassFieldItemFit,
-  PassFieldItemHeader,
-} from "./components/PassFieldItems";
+import { PassBackFieldItem, PassFieldItem, PassFieldItemHeader } from "./components/PassFieldItems";
 import { FONT_PROFILES, type PassVariant, calculateGlobalFontSizeForRow } from "./font-profiles";
 import { getPassStyles } from "./styles";
 import { TransitIcon } from "./transit-icon";

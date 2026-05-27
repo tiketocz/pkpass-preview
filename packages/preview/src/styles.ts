@@ -1,8 +1,7 @@
-// TIK-145: shared font stack used by both the rendered CSS rule on the pass
-// root and the canvas `measureText` calls in PassFieldItemFit. Keep them in
-// lockstep so the per-field shrink-to-fit calculation measures glyphs in
-// the same font family the browser actually renders (SF Pro vs Helvetica
-// Neue have ~3-5% cap-height + wider horizontal-metric drift).
+// Shared font stack for the rendered CSS rule on the pass root. Exported as
+// a DRY constant so any future consumer that needs to measure glyphs in the
+// same font family the browser renders (canvas measureText, layout probes)
+// can import the same string and stay in lockstep with the CSS.
 export const PASS_FONT_STACK = '"Helvetica Neue", Helvetica, Arial, sans-serif';
 
 export const getPassStyles = (identifier: string) => `
@@ -197,11 +196,12 @@ export const getPassStyles = (identifier: string) => `
     right: 12px;
   }
   #${identifier}.boardingPass #primaryFields span {
-    /* font-size set dynamically per FONT_PROFILE — outer span pinned to
-       profile.maxPrimary (TIK-145 boarding-pass cap 24), inner span shrunk
-       per-field via PassFieldItemFit (canvas measureText against the column
-       width, 200/90 px). Only the line-height stays static so the value
-       vertically aligns inside the primary box regardless of font size. */
+    /* font-size set dynamically per FONT_PROFILE — per-row uniform via
+       calculateGlobalFontSizeForRow (TIK-145 revised: same pattern as
+       every other variant; FROM and TO share one size that shrinks
+       together when the row's totalCharCount overflows cap 21). Only
+       line-height stays static so the value vertically aligns inside
+       the primary box regardless of font size. */
     line-height: 1em;
   }
   /* boarding-pass — widen FROM column so long values (e.g. BP2 "LONG TEXT

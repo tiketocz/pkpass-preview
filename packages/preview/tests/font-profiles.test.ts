@@ -31,23 +31,24 @@ describe("FONT_PROFILES char-density algorithm — minimum spec (TIK-106)", () =
     expect(calculateFontSize(FONT_PROFILES.default, 30, "secondaryFields")).toBeCloseTo(14.933, 2);
   });
 
-  // TC3 — boarding-pass, cap-bound primary. Post-TIK-145 (revised) cap 22
-  // — was 24 in the first TIK-145 cut, 18 pre-TIK-145, 28 in the original
-  // TIK-106 spec pre-TIK-108. Cap 22 matches iOS Wallet hero size for BP-1
-  // / BP-3 (16-char totals → 28 capped → 22). Per-row pattern (no longer
-  // PassFieldItemFit) — both FROM and TO share this size, scaling together
-  // when the row overflows.
-  it("boarding-pass / 6ch primaryFields → 22 (cap-bound; per-row pattern, FROM=TO same size)", () => {
-    expect(calculateFontSize(FONT_PROFILES["boarding-pass"], 6)).toBe(22);
+  // TC3 — boarding-pass, cap-bound primary. Post-TIK-145 (revised) cap 21
+  // — was 24 in the first TIK-145 per-field cut, 22 in the per-row cut,
+  // 18 pre-TIK-145, 28 in the original TIK-106 spec pre-TIK-108. Cap 21
+  // is the highest where BP-1 "Prague12345" (11ch ~125 px wide at 21)
+  // still clears the centred transit icon at column-relative x=132 with
+  // a 7 px safety gap; cap 22 produced a 3 px overlap per DOM measure.
+  // Per-row pattern — both FROM and TO share this size.
+  it("boarding-pass / 6ch primaryFields → 21 (cap-bound; per-row pattern, FROM=TO same size)", () => {
+    expect(calculateFontSize(FONT_PROFILES["boarding-pass"], 6)).toBe(21);
   });
 
   // TC4 — boarding-pass, long primary value. Post-TIK-145 (revised) density
-  // 1.4 / 21ch → 21.33 < cap 22 (so density-bound). Per-row uniform shrink
-  // applies the same size to FROM and TO. The 21.33 result is for the
-  // total 21-char row; the BP-2 fixture has a higher totalCharCount (~22)
-  // so it shrinks slightly further in practice.
-  it("boarding-pass / 21ch primaryFields → ~21.33 (density-bound; per-row uniform shrink)", () => {
-    expect(calculateFontSize(FONT_PROFILES["boarding-pass"], 21)).toBeCloseTo(21.333, 2);
+  // 1.4 / 21ch → 21.33 → cap 21 → 21 (cap-bound). Per-row uniform shrink
+  // applies the same size to FROM and TO; the BP-2 fixture has a higher
+  // totalCharCount (~22) so it shrinks slightly further in practice
+  // (320/22*1.4 = 20.36 → no cap → 20.36).
+  it("boarding-pass / 21ch primaryFields → 21 (cap-bound; per-row uniform shrink)", () => {
+    expect(calculateFontSize(FONT_PROFILES["boarding-pass"], 21)).toBe(21);
   });
 
   // TC5 — event-ticket-5col, packed-row auxiliary cap. 320/5*1.5=96 → cap 13.
@@ -85,12 +86,13 @@ describe("FONT_PROFILES char-density algorithm — extended coverage", () => {
     );
   });
 
-  // TC9 — boarding-pass, short primary value. Post-TIK-145 (revised) cap 22
-  // — was 24 in the first cut, 18 pre-TIK-145, 22 in original TIK-106 spec.
-  // 320/11*1.4 = 40.73 → cap 22. With per-row pattern this is the SHARED
-  // size for BP-1 "Prague12345" (FROM 11ch) + "Paris" (TO 5ch) row.
-  it("boarding-pass / 11ch primaryFields → 22 (cap-bound; BP-1 'Prague12345' lands at iOS hero tier)", () => {
-    expect(calculateFontSize(FONT_PROFILES["boarding-pass"], 11)).toBe(22);
+  // TC9 — boarding-pass, short primary value. Post-TIK-145 (revised) cap 21
+  // (chosen because cap 22 produced a 3 px overlap with the centred icon
+  // per DOM measure). 320/11*1.4 = 40.73 → cap 21. With per-row pattern
+  // this is the SHARED size for BP-1 "Prague12345" (FROM 11ch) + "Paris"
+  // (TO 5ch) row.
+  it("boarding-pass / 11ch primaryFields → 21 (cap-bound; BP-1 'Prague12345' fits with 7 px gap to icon)", () => {
+    expect(calculateFontSize(FONT_PROFILES["boarding-pass"], 11)).toBe(21);
   });
 
   // TIK-145: boarding-pass header value char-density sizing. "fdhs" (4ch)

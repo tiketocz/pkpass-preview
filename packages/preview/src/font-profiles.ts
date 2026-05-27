@@ -142,12 +142,16 @@ export const FONT_PROFILES: Record<PassVariant, FontProfile> = {
   // iOS BP-2 reference confirms this: FROM and TO shrink together by the
   // same factor when the row overflows (measured cap heights match ~1:1),
   // not the per-field asymmetric pattern the first TIK-145 cut assumed.
-  // maxPrimary 22 = iOS hero cap on BP-1/3 (16-char totals at density 1.4
-  // → 28 capped at 22 = matches iOS Helvetica Neue light cap ~16 CSS px).
-  // Header value is char-density sized (headerDensity 1.0, maxHeader 18)
-  // so short header values like "fdhs" (4 chars) land at the iOS-faithful
-  // 18px instead of the previous PassFieldItemHeaderFit/useFitText fallback.
-  "boarding-pass": { ...BASELINE_PROFILE, maxPrimary: 22, headerDensity: 1.0, maxHeader: 18 },
+  // maxPrimary 21 = highest cap where the BP-1 "Prague12345" 11-char value
+  // (rendered ~125 px wide at 21 in Helvetica Neue light) still clears the
+  // centred transit icon at x=144 (column-relative 132) with a 7 px safety
+  // gap. Cap 22 was tried in the first revised cut but DOM measurement
+  // showed BP-1 textRight=147 vs icon left=144 = 3 px overlap, since
+  // per-row no longer downstream-shrinks via PassFieldItemFit. Header value
+  // is char-density sized (headerDensity 1.0, maxHeader 18) so short
+  // header values like "fdhs" (4 chars) land at the iOS-faithful 18 px
+  // instead of the previous PassFieldItemHeaderFit/useFitText fallback.
+  "boarding-pass": { ...BASELINE_PROFILE, maxPrimary: 21, headerDensity: 1.0, maxHeader: 18 },
   // event-ticket: ET1/ET2 fixtures (no strip image, no logoText). Header value
   // is char-density driven (headerDensity 1.0, maxHeader 17) so a long header
   // like "And it's value" (14 chars) shrinks to fit the row. density 2.1 +
