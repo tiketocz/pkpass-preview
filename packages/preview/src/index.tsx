@@ -403,21 +403,19 @@ ${secondaryFieldsCount >= 4 ? `max-width: calc(100% / ${secondaryFieldsCount});`
               {data.boardingPass ? (
                 <>
                   {structure?.primaryFields?.[0] && (
-                    <PassFieldItemFit
+                    <PassFieldItem
                       {...structure?.primaryFields[0]}
-                      maxFontSize={profile.maxPrimary}
-                      minFontSize={profile.min}
+                      globalFontSize={globalFontSizePrimary}
                     />
                   )}
                   <span style={transitIconStyle}>
                     {structure?.transitType && <TransitIcon transitType={structure?.transitType} />}
                   </span>
                   {structure?.primaryFields?.slice(1)?.map((f, i) => (
-                    <PassFieldItemFit
+                    <PassFieldItem
                       {...f}
                       key={f.key || `${i}`}
-                      maxFontSize={profile.maxPrimary}
-                      minFontSize={profile.min}
+                      globalFontSize={globalFontSizePrimary}
                     />
                   ))}
                 </>
