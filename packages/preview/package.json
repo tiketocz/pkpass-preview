@@ -1,6 +1,6 @@
 {
   "name": "@tiketo/pkpass-preview",
-  "version": "0.0.1-alpha.0",
+  "version": "0.0.2",
   "description": "React component for previewing Apple Wallet passes (.pkpass) in the browser.",
   "license": "MIT",
   "type": "module",
