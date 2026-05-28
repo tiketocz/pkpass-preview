@@ -3,9 +3,11 @@ import type * as React from "react";
 import { PassTransitType } from "./types";
 
 // Inline JSX SVG components. Each <svg> has fill="currentColor" on root so the
-// dynamic '#pass-transport-type { fill: <labelColor> }' rule (see index.tsx)
-// cascades through child paths. No external SVG file imports — keeps the Bun
-// build + Storybook Vite build free of any SVG loader plugin.
+// dynamic '.pass-transport-type { fill: <labelColor> }' rule (see index.tsx)
+// cascades through child paths. Class (not id) keeps HTML valid when multiple
+// PKPassPreview instances render side-by-side on the same page. No external
+// SVG file imports — keeps the Bun build + Storybook Vite build free of any
+// SVG loader plugin.
 
 type TransitIconSvgProps = React.SVGProps<SVGSVGElement>;
 
@@ -89,14 +91,14 @@ const GenericIcon: React.FC<TransitIconSvgProps> = (props) => (
 export const TransitIcon = (props: { transitType?: PassTransitType }) => {
   switch (props.transitType) {
     case PassTransitType.PKTransitTypeAir:
-      return <AirIcon id="pass-transport-type" />;
+      return <AirIcon className="pass-transport-type" />;
     case PassTransitType.PKTransitTypeBoat:
-      return <BoatIcon id="pass-transport-type" />;
+      return <BoatIcon className="pass-transport-type" />;
     case PassTransitType.PKTransitTypeBus:
-      return <BusIcon id="pass-transport-type" />;
+      return <BusIcon className="pass-transport-type" />;
     case PassTransitType.PKTransitTypeTrain:
-      return <TrainIcon id="pass-transport-type" />;
+      return <TrainIcon className="pass-transport-type" />;
     default:
-      return <GenericIcon id="pass-transport-type" />;
+      return <GenericIcon className="pass-transport-type" />;
   }
 };

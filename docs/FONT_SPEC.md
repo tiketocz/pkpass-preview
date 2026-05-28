@@ -101,7 +101,7 @@ What `FONT_PROFILES` doesn't cover (static CSS, not charCount-based):
 | `boarding-pass` family                     | `.boardingPass #primaryFields .passField:first-child` | width              | 200px (from 125)     |
 | `boarding-pass` family                     | `.boardingPass #primaryFields .passField:last-child`  | width              | 90px (from 125)      |
 | `boarding-pass`                            | `.boardingPass #primaryFields > span > span`        | font-weight          | 300                  |
-| `boarding-pass` family                     | `img#pass-transport-type`                           | width/max-width      | 32px (+max-height:none) |
+| `boarding-pass` family                     | `svg.pass-transport-type`                           | width + height       | 32px each            |
 | `event-ticket-generic`                     | `.generic #headerFields h1`                         | font-size            | 1.75em (~17.5px)     |
 | `event-ticket-generic`                     | `.generic #headerFields img`                        | max-height           | 41px                 |
 
