@@ -1,3 +1,9 @@
+// Shared font stack for the rendered CSS rule on the pass root. Exported as
+// a DRY constant so any future consumer that needs to measure glyphs in the
+// same font family the browser renders (canvas measureText, layout probes)
+// can import the same string and stay in lockstep with the CSS.
+export const PASS_FONT_STACK = '"Helvetica Neue", Helvetica, Arial, sans-serif';
+
 export const getPassStyles = (identifier: string) => `
   #${identifier} {
     width: 100%;
@@ -189,10 +195,24 @@ export const getPassStyles = (identifier: string) => `
     text-align: right !important;
     right: 12px;
   }
+  /* TIK-145: small reserved label-bottom margin on boarding-pass primary
+     so the label-to-value gap doesn't collapse to ~2 px on the BP-2
+     shrunk case. Scoped to .boardingPass so other variants keep their
+     default 2 px label margin. */
+  #${identifier}.boardingPass #primaryFields .passField label {
+    margin-bottom: 6px;
+  }
   #${identifier}.boardingPass #primaryFields span {
-    /* font-size set dynamically per FONT_PROFILE (default cap 20, boarding-pass
-       cap 28) — only the line-height stays static so the value vertically
-       aligns inside the primary box regardless of font size. */
+    /* font-size set dynamically per FONT_PROFILE — per-row uniform via
+       calculateGlobalFontSizeForRow (TIK-145 revised: same pattern as
+       every other variant; FROM and TO share one size). Boarding-pass
+       additionally applies a width-based row-fit pass (canvas measureText
+       on FROM at the density-bound size; scales row uniformly via
+       scaledRowFontSize when FROM would reach the centred transit icon)
+       — see boardingPassRowFontSize useMemo in index.tsx. Other variants
+       use the char-density helper alone. Only line-height stays static
+       so the value vertically aligns inside the primary box regardless
+       of font size. */
     line-height: 1em;
   }
   /* boarding-pass — widen FROM column so long values (e.g. BP2 "LONG TEXT
@@ -1130,7 +1150,7 @@ export const getPassStyles = (identifier: string) => `
     margin: 0 auto 1em;
     max-width: 320px;
     max-height: 480px;
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-family: ${PASS_FONT_STACK};
     position: relative;
   }
 

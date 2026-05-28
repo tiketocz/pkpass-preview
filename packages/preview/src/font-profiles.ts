@@ -136,12 +136,33 @@ export const FONT_PROFILES: Record<PassVariant, FontProfile> = {
   "store-card-4col": BASELINE_PROFILE,
   // coupon: kept at BASELINE_PROFILE — VRT showed iOS reference matches main.
   coupon: BASELINE_PROFILE,
-  // boarding-pass — kept at BASELINE_PROFILE; VRT showed BP1/2/3 are closer
-  // to iOS reference at default values than with previously-tuned caps +
-  // headerDensity. Pre-TIK-112 had a `-short`/`-long` variant split routed by
-  // primary value char count > 12, but post-TIK-108 unification all three
-  // BP entries collapsed to the same profile, making the split vestigial.
-  "boarding-pass": BASELINE_PROFILE,
+  // boarding-pass — TIK-145 (revised). Two-layer primary sizing:
+  //
+  //   1. Per-row char-density helper (calculateGlobalFontSizeForRow) —
+  //      same call as every other variant. Both FROM and TO share one
+  //      font size that scales with totalCharCount. iOS BP-2 reference
+  //      confirms this — FROM and TO cap heights measure ~1:1 even when
+  //      the row overflows. maxPrimary 21 is the highest cap where the
+  //      BP-1 "Prague12345" 11-char value (rendered ~125 px wide at 21
+  //      in Helvetica Neue light) still clears the centred transit icon
+  //      at column-relative x=132 with a 7 px safety gap. Cap 22 was
+  //      tried in the first per-row cut but DOM measurement showed BP-1
+  //      textRight=147 vs icon left=144 = 3 px overlap.
+  //
+  //   2. Width-based row-fit pass (boardingPassRowFontSize useMemo in
+  //      index.tsx, gated on data.boardingPass) — runs only for
+  //      boarding-pass, only when the FROM value at the density-bound
+  //      size would still reach the centred icon. Canvas measureText
+  //      on FROM, scaledRowFontSize() shrinks the row uniformly by
+  //      the ratio that lands FROM at the icon left edge minus a 2 px
+  //      safety. Floors at 12 px (iOS BP-2 cap height ~30 image px /
+  //      0.27 logical-to-image ratio / 0.71 cap-to-em = ~12 logical px).
+  //      Other variants use the char-density helper alone.
+  //
+  // Header value is char-density sized (headerDensity 1.0, maxHeader 18)
+  // so short header values like "fdhs" (4 chars) land at the iOS-faithful
+  // 18 px instead of the previous PassFieldItemHeaderFit/useFitText fallback.
+  "boarding-pass": { ...BASELINE_PROFILE, maxPrimary: 21, headerDensity: 1.0, maxHeader: 18 },
   // event-ticket: ET1/ET2 fixtures (no strip image, no logoText). Header value
   // is char-density driven (headerDensity 1.0, maxHeader 17) so a long header
   // like "And it's value" (14 chars) shrinks to fit the row. density 2.1 +
@@ -248,4 +269,23 @@ export const calculateGlobalFontSizeForRow = (
     );
   }, 0);
   return calculateFontSize(profile, totalCharCount, fieldType);
+};
+
+// TIK-145 width-based row-fit pure helper, exported so the math can be
+// unit-tested independently of the DOM/canvas read that produces
+// `renderedWidth`. Given the row's char-density-bound `baseFontSize` and
+// the measured width of the constraining field at that size, returns
+// the size that fits `availableWidth` — floored at `minFontSize`. Returns
+// `baseFontSize` unchanged when the text already fits. Used by the
+// boarding-pass branch of `PKPassPreview` to shrink the FROM/TO row
+// uniformly when the FROM value would reach the centred transit icon.
+export const scaledRowFontSize = (
+  baseFontSize: number,
+  renderedWidth: number,
+  availableWidth: number,
+  minFontSize: number,
+): number => {
+  if (renderedWidth <= availableWidth) return baseFontSize;
+  const scaled = Math.floor((baseFontSize * availableWidth) / renderedWidth);
+  return Math.max(minFontSize, scaled);
 };

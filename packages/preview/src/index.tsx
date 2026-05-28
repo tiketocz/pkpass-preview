@@ -2,8 +2,13 @@ import * as React from "react";
 import { useMemo, useState } from "react";
 import { BarcodesPreview } from "./components/BarcodesPreview";
 import { PassBackFieldItem, PassFieldItem, PassFieldItemHeader } from "./components/PassFieldItems";
-import { FONT_PROFILES, type PassVariant, calculateGlobalFontSizeForRow } from "./font-profiles";
-import { getPassStyles } from "./styles";
+import {
+  FONT_PROFILES,
+  type PassVariant,
+  calculateGlobalFontSizeForRow,
+  scaledRowFontSize,
+} from "./font-profiles";
+import { PASS_FONT_STACK, getPassStyles } from "./styles";
 import { TransitIcon } from "./transit-icon";
 import type { FieldType, PassData, PassField, PassStructure } from "./types";
 
@@ -20,6 +25,7 @@ export {
   calculateGlobalFontSizeForRow,
   getDensity,
   getMaxFontSize,
+  scaledRowFontSize,
 } from "./font-profiles";
 export type { FontProfile, PassVariant } from "./font-profiles";
 
@@ -269,6 +275,56 @@ ${secondaryFieldsCount >= 4 ? `max-width: calc(100% / ${secondaryFieldsCount});`
     return calculateRowFontSize(structure?.primaryFields);
   }, [calculateRowFontSize, structure?.primaryFields]);
 
+  // TIK-145 width-based row-fit pass — boarding-pass ONLY. The per-row
+  // char-density helper above (calculateGlobalFontSizeForRow) computes a
+  // single size for the FROM/TO row, but char-count is an approximation —
+  // for fixtures like BP-2 "LONG TEXT LONG TEXT" the value still exceeds
+  // the FROM column at the density-bound size and runs into the centred
+  // transit icon. iOS Wallet handles this by shrinking the whole row
+  // (FROM and TO together) until the rendered widths fit. We replicate
+  // that by canvas-measuring the actual glyph widths at the char-density
+  // size and scaling the row further if FROM would reach the icon. Other
+  // variants are NOT affected — the override is gated on data.boardingPass.
+  const boardingPassRowFontSize = useMemo(() => {
+    if (!data.boardingPass) return undefined;
+    if (!globalFontSizePrimary || globalFontSizePrimary <= 0) return undefined;
+    if (typeof document === "undefined") return globalFontSizePrimary;
+    const fromText =
+      structure?.primaryFields?.[0]?.attributedValue?.toString() ||
+      structure?.primaryFields?.[0]?.value?.toString() ||
+      "";
+    if (!fromText) return globalFontSizePrimary;
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return globalFontSizePrimary;
+    ctx.font = `300 ${globalFontSizePrimary}px ${PASS_FONT_STACK}`;
+    const fromWidth = ctx.measureText(fromText).width;
+    // The centred transit icon sits at column-relative x=132 inside the
+    // FROM absolute column (left=12, width=200). FROM text rendered wider
+    // than 132 px reaches into the icon's region — that's the BP-2 case.
+    // Shrink uniformly (TO inherits the same factor, matching iOS BP-2
+    // where FROM and TO cap heights measure ~1:1 even when FROM is
+    // heavily shrunk) by the ratio that lands FROM right at the icon
+    // left edge with a 2 px safety margin (available = 130). Floor at
+    // 11 px instead of profile.min (10) — calibrated against real
+    // Helvetica Neue / Liberation Sans (metric-equivalent) glyph widths:
+    // "LONG TEXT LONG TEXT" at 24 px measures 283.64 px wide, so the
+    // largest font size that fits 130 px is 130 / 283.64 × 24 ≈ 11.0.
+    // Drop one more to 11 makes the math integer-stable. Matches iOS
+    // BP-2 cap-height bbox (~30 image px / 0.27 logical-to-image / 0.71
+    // cap-to-em ≈ 11.6 logical px).
+    //
+    // Headless / fresh-clone caveat: the 283.64 px reference and the
+    // floor-fit guarantee depend on Helvetica Neue glyph metrics. Real
+    // Safari / Chrome on macOS ship Helvetica Neue; Linux containers
+    // (local dev + GH Actions CI runners) need a fontconfig alias to
+    // Liberation Sans (metric-equivalent free font in fonts-liberation)
+    // — see channel-brain MEM-57. Without the alias, Chromium falls
+    // back to DejaVu Sans, glyphs are ~10 % wider, and BP-2 visually
+    // overlaps the icon by ~10 px in VRT screenshots.
+    return scaledRowFontSize(globalFontSizePrimary, fromWidth, 130, 11);
+  }, [data.boardingPass, structure?.primaryFields, globalFontSizePrimary]);
+
   // Header value font size — only for profiles that opt into char-density header
   // sizing (headerDensity set); otherwise undefined → PassFieldItemHeader falls
   // back to its useFitText behavior.
@@ -400,7 +456,7 @@ ${secondaryFieldsCount >= 4 ? `max-width: calc(100% / ${secondaryFieldsCount});`
                   {structure?.primaryFields?.[0] && (
                     <PassFieldItem
                       {...structure?.primaryFields[0]}
-                      globalFontSize={globalFontSizePrimary}
+                      globalFontSize={boardingPassRowFontSize ?? globalFontSizePrimary}
                     />
                   )}
                   <span style={transitIconStyle}>
@@ -410,7 +466,7 @@ ${secondaryFieldsCount >= 4 ? `max-width: calc(100% / ${secondaryFieldsCount});`
                     <PassFieldItem
                       {...f}
                       key={f.key || `${i}`}
-                      globalFontSize={globalFontSizePrimary}
+                      globalFontSize={boardingPassRowFontSize ?? globalFontSizePrimary}
                     />
                   ))}
                 </>

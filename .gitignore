@@ -22,3 +22,7 @@ wwdr*.cer
 # Build artefacts from tools/sign-fixture.ts (M1.2)
 tools/out/
 visual-regression-output/
+
+# Per-PR proposal / scratchpad docs (e.g. TIK-145-proposals.md). Pre-merge
+# design notes live here while a branch is in flight; not committed to main.
+.planning/

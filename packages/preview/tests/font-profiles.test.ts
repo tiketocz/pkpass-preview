@@ -17,6 +17,7 @@ import {
   calculateGlobalFontSizeForRow,
   getDensity,
   getMaxFontSize,
+  scaledRowFontSize,
 } from "../src/font-profiles";
 import type { PassField } from "../src/types";
 
@@ -31,18 +32,24 @@ describe("FONT_PROFILES char-density algorithm — minimum spec (TIK-106)", () =
     expect(calculateFontSize(FONT_PROFILES.default, 30, "secondaryFields")).toBeCloseTo(14.933, 2);
   });
 
-  // TC3 — boarding-pass, cap-bound primary. Original TIK-106 spec: 28
-  // (density 1.5, max 28). Post-TIK-108 unification → BASELINE → cap 18.
-  it("boarding-pass / 6ch primaryFields → 18 (BASELINE cap; was 28 in TIK-106 spec pre-TIK-108)", () => {
-    expect(calculateFontSize(FONT_PROFILES["boarding-pass"], 6)).toBe(18);
+  // TC3 — boarding-pass, cap-bound primary. Post-TIK-145 (revised) cap 21
+  // — was 24 in the first TIK-145 per-field cut, 22 in the per-row cut,
+  // 18 pre-TIK-145, 28 in the original TIK-106 spec pre-TIK-108. Cap 21
+  // is the highest where BP-1 "Prague12345" (11ch ~125 px wide at 21)
+  // still clears the centred transit icon at column-relative x=132 with
+  // a 7 px safety gap; cap 22 produced a 3 px overlap per DOM measure.
+  // Per-row pattern — both FROM and TO share this size.
+  it("boarding-pass / 6ch primaryFields → 21 (cap-bound; per-row pattern, FROM=TO same size)", () => {
+    expect(calculateFontSize(FONT_PROFILES["boarding-pass"], 6)).toBe(21);
   });
 
-  // TC4 — boarding-pass, long primary value. Original TIK-106 spec: 11
-  // (boarding-pass-long, density 0.95, max 11). Post-TIK-108 unification →
-  // BASELINE → cap 18. Post-TIK-112 collapse: -short/-long entries removed,
-  // single `boarding-pass` profile handles all primary lengths.
-  it("boarding-pass / 21ch primaryFields → 18 (BASELINE cap; was 11 in TIK-106 spec pre-TIK-108, pre-TIK-112 routed to -long)", () => {
-    expect(calculateFontSize(FONT_PROFILES["boarding-pass"], 21)).toBe(18);
+  // TC4 — boarding-pass, long primary value. Post-TIK-145 (revised) density
+  // 1.4 / 21ch → 21.33 → cap 21 → 21 (cap-bound). Per-row uniform shrink
+  // applies the same size to FROM and TO; the BP-2 fixture has a higher
+  // totalCharCount (~22) so it shrinks slightly further in practice
+  // (320/22*1.4 = 20.36 → no cap → 20.36).
+  it("boarding-pass / 21ch primaryFields → 21 (cap-bound; per-row uniform shrink)", () => {
+    expect(calculateFontSize(FONT_PROFILES["boarding-pass"], 21)).toBe(21);
   });
 
   // TC5 — event-ticket-5col, packed-row auxiliary cap. 320/5*1.5=96 → cap 13.
@@ -80,12 +87,21 @@ describe("FONT_PROFILES char-density algorithm — extended coverage", () => {
     );
   });
 
-  // TC9 — boarding-pass, short primary value. Original TIK-106 spec: 22
-  // (boarding-pass-short, density 1.5, max 22). Post-TIK-108 → BASELINE →
-  // 18. Post-TIK-112 collapse: same profile as the long-primary case (TC4)
-  // since the variant split was removed.
-  it("boarding-pass / 11ch primaryFields → 18 (BASELINE cap; was 22 in TIK-106 spec pre-TIK-108, pre-TIK-112 routed to -short)", () => {
-    expect(calculateFontSize(FONT_PROFILES["boarding-pass"], 11)).toBe(18);
+  // TC9 — boarding-pass, short primary value. Post-TIK-145 (revised) cap 21
+  // (chosen because cap 22 produced a 3 px overlap with the centred icon
+  // per DOM measure). 320/11*1.4 = 40.73 → cap 21. With per-row pattern
+  // this is the SHARED size for BP-1 "Prague12345" (FROM 11ch) + "Paris"
+  // (TO 5ch) row.
+  it("boarding-pass / 11ch primaryFields → 21 (cap-bound; BP-1 'Prague12345' fits with 7 px gap to icon)", () => {
+    expect(calculateFontSize(FONT_PROFILES["boarding-pass"], 11)).toBe(21);
+  });
+
+  // TIK-145: boarding-pass header value char-density sizing. "fdhs" (4ch)
+  // → 320/4*1.0 = 80 → cap maxHeader 18. Replaces the pre-TIK-145
+  // PassFieldItemHeaderFit/useFitText fallback (~14 CSS px) that left
+  // "fdhs" undersized vs iOS.
+  it("boarding-pass / 4ch headerFields → 18 (TIK-145 headerDensity 1.0 + maxHeader 18, 'fdhs' iOS-faithful)", () => {
+    expect(calculateFontSize(FONT_PROFILES["boarding-pass"], 4, "headerFields")).toBe(18);
   });
 
   // TC10 — generic primary. Original TIK-106 spec: ~16 (density 2.0).
@@ -194,6 +210,50 @@ describe("calculateGlobalFontSizeForRow", () => {
     const fields = [{}] as unknown as PassField[];
     // 0 charCount → calculateFontSize early-returns 0.
     expect(calculateGlobalFontSizeForRow(FONT_PROFILES.default, fields)).toBe(0);
+  });
+});
+
+describe("scaledRowFontSize — width-based row-fit math (TIK-145)", () => {
+  // Pure helper used by the boarding-pass branch of PKPassPreview to scale
+  // the FROM/TO row uniformly when the FROM value at the density-bound size
+  // would still reach the centred transit icon. The DOM/canvas read that
+  // produces `renderedWidth` is covered by VRT; this suite pins the math.
+
+  // Happy path: rendered <= available → no shrink, base size returned.
+  it("returns baseFontSize when text already fits availableWidth", () => {
+    expect(scaledRowFontSize(21, 125, 130, 12)).toBe(21);
+  });
+
+  // Edge: exact-fit (rendered == available) is treated as fits, no shrink.
+  it("returns baseFontSize when renderedWidth equals availableWidth", () => {
+    expect(scaledRowFontSize(21, 130, 130, 12)).toBe(21);
+  });
+
+  // BP-2 typical case: "LONG TEXT LONG TEXT" at the density-bound size
+  // (20.36 px) measures ~265 px in DejaVu Sans fallback. Scaled =
+  // floor(20.36 * 130 / 265) = floor(9.99) = 9 → clamp at floor 12.
+  it("clamps to floor when scaled result would drop below it", () => {
+    expect(scaledRowFontSize(20.36, 265, 130, 12)).toBe(12);
+  });
+
+  // Production Helvetica Neue case: same BP-2 text at 20.36 px in real
+  // Helvetica Neue light is ~232 px. Scaled = floor(20.36 * 130 / 232) =
+  // floor(11.41) = 11 → still below floor 12 → 12.
+  it("returns floor when scaled is just under (BP-2 Safari production)", () => {
+    expect(scaledRowFontSize(20.36, 232, 130, 12)).toBe(12);
+  });
+
+  // Mild overflow: rendered just past available → small proportional shrink.
+  // 21 * 130 / 140 = 19.5 → floor 19. Above floor 12 → 19.
+  it("scales down proportionally for mild overflow above floor", () => {
+    expect(scaledRowFontSize(21, 140, 130, 12)).toBe(19);
+  });
+
+  // Floor parameter respected: caller can pass a different floor (e.g.
+  // profile.min 10) and the helper honours it.
+  it("uses caller-supplied minFontSize as the floor", () => {
+    // 20.36 * 130 / 265 = 9.99 → floor 10 (caller-supplied) wins over 9.
+    expect(scaledRowFontSize(20.36, 265, 130, 10)).toBe(10);
   });
 });
 
