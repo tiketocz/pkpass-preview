@@ -486,25 +486,36 @@ ${secondaryFieldsCount >= 4 ? `max-width: calc(100% / ${secondaryFieldsCount});`
                   </div>
                 ) : null}
               </div>
-              <BarcodesPreview barcodes={data.barcodes} expired={isExpired} qrSize={116} />
+              <BarcodesPreview barcodes={data.barcodes} expired={isExpired} qrSize={110} />
             </div>
             <div className="poster-bottom">
-              <div className="poster-primary-fields">
-                {structure?.primaryFields?.[0] && (
-                  <div className="poster-title">
-                    {structure.primaryFields[0].attributedValue?.toString() ||
-                      structure.primaryFields[0].value?.toString()}
-                  </div>
-                )}
-                {structure?.primaryFields?.[1] && (
-                  <div className="poster-field poster-member">
-                    <label>{structure.primaryFields[1].label}</label>
-                    <span>
-                      {structure.primaryFields[1].attributedValue?.toString() ||
-                        structure.primaryFields[1].value?.toString()}
-                    </span>
-                  </div>
-                )}
+              <div
+                className={`poster-primary-fields poster-primary-count-${structure?.primaryFields?.length ?? 0}`}
+              >
+                {structure?.primaryFields?.map((field, index) => {
+                  const value = field.attributedValue?.toString() || field.value?.toString() || "";
+
+                  if (index === 0) {
+                    return (
+                      <div
+                        className={`poster-title${value.length > 24 ? " poster-title-long" : ""}`}
+                        key={field.key || `${index}`}
+                      >
+                        {value}
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div
+                      className={`poster-field poster-primary-column${value.length > 18 ? " poster-primary-column-long" : ""}`}
+                      key={field.key || `${index}`}
+                    >
+                      <label>{field.label}</label>
+                      <span>{value}</span>
+                    </div>
+                  );
+                })}
               </div>
               {structure?.footerFields?.length ? (
                 <div className="poster-footer-fields">

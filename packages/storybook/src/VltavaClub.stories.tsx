@@ -65,6 +65,14 @@ export const Ios270PosterGeneric: Story = {
   name: "iOS 27.0 (posterGeneric)",
   tags: ["vrt"],
   args: posterArgs,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "The web poster follows the iOS 27 structure: constrained logoText, a single-line header value, a large title plus right-aligned member column, and a value-only footer. Remaining differences are browser font metrics and the QR/artwork raster scaling.",
+      },
+    },
+  },
 };
 
 export const PosterShortText: Story = {
@@ -82,7 +90,7 @@ export const PosterShortText: Story = {
     docs: {
       description: {
         story:
-          'Observed on iPhone 17 Pro with iOS 27.0: the bottom band contains only the Vltava Club title; the top-right header slot and footer are empty, while the logo and truncated logoText ("Vltava…") remain top-left. The web render matches the omitted header/footer and single-title bottom band, but shows the full "Vltava Club" logoText.',
+          'Observed on iPhone 17 Pro with iOS 27.0: the bottom band contains only the Vltava Club title; the top-right header slot and footer are empty, while the logo and truncated logoText ("Vltava…") remain top-left. The web render now matches that field structure and logoText truncation; only browser font metrics and raster scaling remain different.',
       },
     },
   },
@@ -127,7 +135,7 @@ export const PosterLongCzechText: Story = {
     docs: {
       description: {
         story:
-          'Observed on iPhone 17 Pro with iOS 27.0: the header value is a single truncated line ("Zlaté celoroční s výh…"); the smaller title uses two lines and cuts off after "Vltavský klub přátel / Pražského hradu a Karlova"; the member name truncates to "Žofie Přemyslovna Dvořáčk…"; logoText truncates to "Vltava…"; and the full footer value "VC-2026-ŽLUŤOUČKÝ-0024-PRAHA" appears without its label. The web render instead wraps the full header value onto two lines, keeps a much larger one-line title with an ellipsis, truncates the member name earlier, and also truncates logoText ("Vltava …") because the long header narrows the top row; like iOS, it fits the footer value on one line and omits the footer label.',
+          'Observed on iPhone 17 Pro with iOS 27.0: the header value is a single truncated line ("Zlaté celoroční s výh…"); the smaller title uses two lines and cuts off after "Vltavský klub přátel / Pražského hradu a Karlova"; the member name truncates to "Žofie Přemyslovna Dvořáčk…"; logoText truncates to "Vltava…"; and the full footer value "VC-2026-ŽLUŤOUČKÝ-0024-PRAHA" appears without its label. The web render now follows the same one-line/two-line clamps, single-row field structure, logoText constraint, and value-only footer. Exact ellipsis points can still vary slightly with browser font metrics.',
       },
     },
   },
@@ -155,7 +163,7 @@ export const PosterMorePrimaryFields: Story = {
     docs: {
       description: {
         story:
-          'Observed on iPhone 17 Pro with iOS 27.0: Wallet shows all four primary fields in one bottom-band row—large "Vltava Club" on the left, then Členka/Anna, Úroveň/Gold, and Body/1 250 label/value columns—shrinking the title and values to fit. It shows footer value "VC-0024" without its label and truncates logoText to "Vltava…". Known web↔iOS difference: the web renderer shows only the first two primary fields, so ÚROVEŇ and BODY are missing and the remaining title is larger; it shows the full logoText. Both renders omit the footer label.',
+          'Observed on iPhone 17 Pro with iOS 27.0: Wallet shows all four primary fields in one bottom-band row—large "Vltava Club" on the left, then Členka/Anna, Úroveň/Gold, and Body/1 250 label/value columns—shrinking the title and values to fit. The web renderer now preserves all four fields in that order and row, shows footer value "VC-0024" without its label, and constrains logoText to "Vltava…". Remaining differences are limited to browser font metrics and raster scaling.',
       },
     },
   },

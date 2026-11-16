@@ -76,4 +76,32 @@ describe("poster optional front field groups", () => {
     expect(rendered.querySelector(".poster-footer-fields")).toBeNull();
     expect(rendered.querySelector(".poster-title")?.textContent).toBe("Vltava Club");
   });
+
+  it("renders all four poster primary fields in source order", () => {
+    const data = pass();
+    if (!data.posterGeneric) throw new Error("posterGeneric fixture is required");
+    data.posterGeneric.primaryFields = [
+      { key: "title", value: "Vltava Club" },
+      { key: "member", label: "ČLENKA", value: "Anna" },
+      { key: "level", label: "ÚROVEŇ", value: "Gold" },
+      { key: "points", label: "BODY", value: "1 250" },
+    ];
+
+    const markup = renderToStaticMarkup(
+      createElement(PKPassPreview, {
+        values: { "pass.json": data },
+        variant: "poster",
+      }),
+    );
+    const rendered = new DOMParser().parseFromString(markup, "text/html");
+    const fields = Array.from(rendered.querySelectorAll(".poster-primary-fields > *"));
+
+    expect(fields).toHaveLength(4);
+    expect(fields.map((field) => field.textContent)).toEqual([
+      "Vltava Club",
+      "ČLENKAAnna",
+      "ÚROVEŇGold",
+      "BODY1 250",
+    ]);
+  });
 });

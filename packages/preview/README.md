@@ -81,9 +81,9 @@ iOS 27 `posterGeneric` structure:
 - Omitting `variant` preserves the existing classic rendering behaviour.
 
 The initial poster renderer covers the full-bleed `artwork` image, logo and
-header, centered barcode, primary fields, and footer fields. It is intended for
-previewing and is not yet a pixel-perfect implementation of every iOS 27 poster
-size or feature.
+header, centered barcode, all primary fields in one responsive bottom-band row,
+and footer fields. It is intended for previewing and is not yet a pixel-perfect
+implementation of every iOS 27 poster size or feature.
 
 ## Frozen API contract
 
