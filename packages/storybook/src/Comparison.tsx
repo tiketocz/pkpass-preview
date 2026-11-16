@@ -1,9 +1,13 @@
-import { PKPassPreview } from "@tiketo/pkpass-preview";
+import { PKPassPreview, type PreviewVariant } from "@tiketo/pkpass-preview";
 import { useState } from "react";
 
 export type ComparisonArgs = {
   values: Record<string, unknown>;
   screenshot: string;
+  screenshotExtension?: "jpg" | "png";
+  referenceLabel?: string;
+  referencePlaceholder?: string;
+  variant?: PreviewVariant;
 };
 
 const styles = {
@@ -53,17 +57,24 @@ const styles = {
 // Screenshots live in packages/storybook/public/screenshots/ and are
 // served at /screenshots/* by Storybook's staticDirs. Missing image
 // => placeholder (no console errors).
-export const Comparison = ({ values, screenshot }: ComparisonArgs) => {
+export const Comparison = ({
+  values,
+  screenshot,
+  screenshotExtension = "jpg",
+  referenceLabel = "iOS Wallet",
+  referencePlaceholder,
+  variant,
+}: ComparisonArgs) => {
   const [hasShot, setHasShot] = useState(true);
-  const src = `screenshots/${screenshot}.jpg`;
+  const src = `screenshots/${screenshot}.${screenshotExtension}`;
   return (
     <div style={styles.wrap}>
       <div style={styles.col}>
         <div style={styles.label}>Our render</div>
-        <PKPassPreview values={values} />
+        <PKPassPreview values={values} variant={variant} />
       </div>
       <div style={styles.col}>
-        <div style={styles.label}>iOS Wallet</div>
+        <div style={styles.label}>{referenceLabel}</div>
         {hasShot ? (
           <img
             src={src}
@@ -73,7 +84,11 @@ export const Comparison = ({ values, screenshot }: ComparisonArgs) => {
           />
         ) : (
           <div style={styles.placeholder}>
-            iOS screenshot pending — add <code style={{ fontSize: 12 }}>public/{src}</code>
+            {referencePlaceholder ?? (
+              <>
+                iOS screenshot pending — add <code style={{ fontSize: 12 }}>public/{src}</code>
+              </>
+            )}
           </div>
         )}
       </div>

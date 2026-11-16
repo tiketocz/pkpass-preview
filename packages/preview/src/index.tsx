@@ -29,15 +29,71 @@ export {
 } from "./font-profiles";
 export type { FontProfile, PassVariant } from "./font-profiles";
 
+const imageSource = (value: unknown): string | undefined => {
+  if (typeof value !== "string" || value.length === 0) return undefined;
+  if (/^(?:data:|blob:|https?:\/\/|\/)/.test(value)) return value;
+  return `data:image/png;base64,${value}`;
+};
+
 export interface PreviewProps {
   values: { [key: string]: any };
   removeVariablePlaceholders?: boolean;
+  /**
+   * Selects the experimental iOS 27 posterGeneric layout or its classic
+   * pass-type fallback. Omit this prop to preserve the existing behaviour.
+   */
+  variant?: "poster" | "fallback";
 }
+
+export type PreviewVariant = NonNullable<PreviewProps["variant"]>;
+
+export interface PassPresentation {
+  editorClassName: string;
+  structure: PassStructure | undefined;
+  isPoster: boolean;
+}
+
+/** Pure pass-layout selection shared by the component and unit tests. */
+export const resolvePassPresentation = (
+  data: PassData,
+  variant?: PreviewVariant,
+): PassPresentation => {
+  if (variant === "poster" && data.posterGeneric) {
+    return {
+      editorClassName: "posterGeneric",
+      structure: data.posterGeneric,
+      isPoster: true,
+    };
+  }
+
+  if (data.boardingPass) {
+    return { editorClassName: "boardingPass", structure: data.boardingPass, isPoster: false };
+  }
+  if (data.coupon) {
+    return { editorClassName: "coupon", structure: data.coupon, isPoster: false };
+  }
+  if (data.eventTicket) {
+    return {
+      editorClassName: "eventTicket background",
+      structure: data.eventTicket,
+      isPoster: false,
+    };
+  }
+  if (data.generic) {
+    return { editorClassName: "generic", structure: data.generic, isPoster: false };
+  }
+  if (data.storeCard) {
+    return { editorClassName: "storeCard", structure: data.storeCard, isPoster: false };
+  }
+
+  return { editorClassName: "unknown", structure: undefined, isPoster: false };
+};
 
 // Deterministic variant detection from `values` (pkpass type + field shape).
 // Pure function — no DOM measurement, no content heuristics. Falls back to
-// `default` when no recognised pkpass class is present. `PKPassPreview` calls
-// this on every render; the public API of the component stays `values`-only.
+// `default` when no recognised classic pkpass class is present. `PKPassPreview`
+// calls this on every render; the optional preview variant is resolved
+// separately so existing typography profiles remain unchanged.
 //
 // Rules are evaluated top-to-bottom; first match wins. Each rule references the
 // fixture shape that anchored it so the mapping remains traceable for future
@@ -126,13 +182,11 @@ export const deriveVariant = (values: { [key: string]: any }): PassVariant => {
   return "default";
 };
 
-export const PKPassPreview = ({ values, removeVariablePlaceholders }: PreviewProps) => {
+export const PKPassPreview = ({ values, removeVariablePlaceholders, variant }: PreviewProps) => {
   const [flipped, setFlipped] = useState(false);
 
-  // Variant is derived from `values` (pkpass type + field shape). The
-  // public API only takes `values` — no `variant` prop — so production
-  // consumers (`tiketo-cms` editor, `tiketo-pass-share`) keep using the
-  // component unchanged.
+  // Typography is still derived from `values` (pkpass type + field shape).
+  // The optional public preview variant only selects poster vs classic layout.
   const resolvedVariant = deriveVariant(values);
   // Defensive fallback: deriveVariant returns a typed union member, but
   // if a future code path ever returns an unknown string this keeps the
@@ -164,29 +218,13 @@ export const PKPassPreview = ({ values, removeVariablePlaceholders }: PreviewPro
   }, [values["pass.json"], removeVariablePlaceholders]);
 
   // Fix 8: Memoize editorClassName and structure to prevent recreation on every render
-  const { editorClassName, structure } = useMemo(() => {
-    let className = "unknown";
-    let passStructure: PassStructure | undefined = undefined;
-
-    if (data.boardingPass) {
-      className = "boardingPass";
-      passStructure = data.boardingPass;
-    } else if (data.coupon) {
-      className = "coupon";
-      passStructure = data.coupon;
-    } else if (data.eventTicket) {
-      className = "eventTicket background";
-      passStructure = data.eventTicket;
-    } else if (data.generic) {
-      className = "generic";
-      passStructure = data.generic;
-    } else if (data.storeCard) {
-      className = "storeCard";
-      passStructure = data.storeCard;
-    }
-
-    return { editorClassName: className, structure: passStructure };
-  }, [data]);
+  const { editorClassName, structure, isPoster } = useMemo(
+    () => resolvePassPresentation(data, variant),
+    [data, variant],
+  );
+  const artworkSource = imageSource(values["artwork.png"]);
+  const logoSource = imageSource(values["logo.png"]);
+  const thumbnailSource = imageSource(values["thumbnail.png"]);
 
   // Fix 3: Memoize secondary fields font size calculation
   const secondaryFieldsFontSize = useMemo(() => {
@@ -243,8 +281,8 @@ ${secondaryFieldsCount >= 4 ? `max-width: calc(100% / ${secondaryFieldsCount});`
 }
 #${identifier} #passCard > div::before {
   ${
-    values["background.png"]
-      ? `background-image: url("data:application/octet-stream;base64,${values["background.png"]}");`
+    imageSource(values["background.png"])
+      ? `background-image: url("${imageSource(values["background.png"])}");`
       : ""
   }
 }
@@ -374,8 +412,8 @@ ${secondaryFieldsCount >= 4 ? `max-width: calc(100% / ${secondaryFieldsCount});`
   const primaryFieldsStyle = useMemo(
     () => ({
       backgroundImage:
-        values["strip.png"] && editorClassName !== "generic"
-          ? `url(data:application/octet-stream;base64,${values["strip.png"]})`
+        imageSource(values["strip.png"]) && editorClassName !== "generic"
+          ? `url(${imageSource(values["strip.png"])})`
           : "none",
     }),
     [values["strip.png"], editorClassName],
@@ -424,113 +462,180 @@ ${secondaryFieldsCount >= 4 ? `max-width: calc(100% / ${secondaryFieldsCount});`
   return (
     <div id={identifier} className={`${editorClassName} pkpass-variant-${resolvedVariant}`}>
       <div id="passCard" className={`flipper ${flipped ? "flipped" : ""}`}>
-        <div id="passFront" className={`pass${data.coupon ? "" : " shadow"}`}>
-          <div className="decoration" />
-          <div className="decoration" />
-          <div id="headerFields">
-            {values["logo.png"] && (
-              <img alt="" src={`data:application/octet-stream;base64,${values["logo.png"]}`} />
-            )}
-            <h1>{data.logoText}</h1>
-            <div>
-              {headerFields.map((f, i) => (
-                <PassFieldItemHeader
-                  {...f}
-                  valueFontSize={globalFontSizeHeader}
-                  key={f.key || `${i}`}
-                />
-              ))}
+        {isPoster ? (
+          <div id="passFront" className="pass shadow poster-front">
+            <div
+              className="poster-artwork"
+              style={{
+                backgroundImage: artworkSource ? `url(${artworkSource})` : undefined,
+              }}
+            >
+              <div className="poster-header">
+                <div className="poster-brand">
+                  {logoSource && <img alt="" src={logoSource} />}
+                  {data.logoText && <span>{data.logoText}</span>}
+                </div>
+                {structure?.headerFields?.length ? (
+                  <div className="poster-header-fields">
+                    {structure.headerFields.map((field, index) => (
+                      <div className="poster-field" key={field.key || `${index}`}>
+                        <label>{field.label}</label>
+                        <span>{field.attributedValue?.toString() || field.value?.toString()}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+              <BarcodesPreview barcodes={data.barcodes} expired={isExpired} qrSize={110} />
             </div>
-          </div>
-          <div
-            id="primaryFields"
-            className={values["strip.png"] && editorClassName !== "generic" ? "strip" : undefined}
-            style={primaryFieldsStyle}
-          >
-            {values["thumbnail.png"] && (
-              <img alt="" src={`data:application/octet-stream;base64,${values["thumbnail.png"]}`} />
-            )}
-            <div className={values["thumbnail.png"] ? "with-thumbnail" : undefined}>
-              {data.boardingPass ? (
-                <>
-                  {structure?.primaryFields?.[0] && (
-                    <PassFieldItem
-                      {...structure?.primaryFields[0]}
-                      globalFontSize={boardingPassRowFontSize ?? globalFontSizePrimary}
-                    />
-                  )}
-                  <span style={transitIconStyle}>
-                    {structure?.transitType && <TransitIcon transitType={structure?.transitType} />}
-                  </span>
-                  {structure?.primaryFields?.slice(1)?.map((f, i) => (
-                    <PassFieldItem
-                      {...f}
-                      key={f.key || `${i}`}
-                      globalFontSize={boardingPassRowFontSize ?? globalFontSizePrimary}
-                    />
-                  ))}
-                </>
-              ) : (
-                <>
-                  {data.storeCard ? (
-                    <>
-                      {structure?.primaryFields && (
-                        <div className="row">
-                          {structure.primaryFields.map((field, i) => (
-                            <PassFieldItem
-                              {...field}
-                              key={field.key || `${i}`}
-                              globalFontSize={globalFontSizePrimary}
-                            />
-                          ))}
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <>
-                      {structure?.primaryFields?.map((f, i) => (
-                        <PassFieldItem
-                          {...f}
-                          key={f.key || `${i}`}
-                          globalFontSize={globalFontSizePrimary}
-                        />
-                      ))}
-                    </>
-                  )}
-                </>
-              )}
-            </div>
-          </div>
+            <div className="poster-bottom">
+              <div
+                className={`poster-primary-fields poster-primary-count-${structure?.primaryFields?.length ?? 0}`}
+              >
+                {structure?.primaryFields?.map((field, index) => {
+                  const value = field.attributedValue?.toString() || field.value?.toString() || "";
 
-          <div id="secondaryFields">
-            <div>
-              {secondaryFields?.map((f, i) => (
-                <PassFieldItem
-                  {...f}
-                  key={f.key || `${i}`}
-                  globalFontSize={globalFontSizeSecondary}
-                />
-              ))}
+                  if (index === 0) {
+                    return (
+                      <div
+                        className={`poster-title${value.length > 24 ? " poster-title-long" : ""}`}
+                        key={field.key || `${index}`}
+                      >
+                        {value}
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div
+                      className={`poster-field poster-primary-column${value.length > 18 ? " poster-primary-column-long" : ""}`}
+                      key={field.key || `${index}`}
+                    >
+                      <label>{field.label}</label>
+                      <span>{value}</span>
+                    </div>
+                  );
+                })}
+              </div>
+              {structure?.footerFields?.length ? (
+                <div className="poster-footer-fields">
+                  {structure.footerFields.map((field, index) => (
+                    <div className="poster-field" key={field.key || `${index}`}>
+                      <label>{field.label}</label>
+                      <span>{field.attributedValue?.toString() || field.value?.toString()}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
             </div>
           </div>
-          {auxiliaryFields?.length > 0 ? (
-            <div id="auxiliaryFields">
+        ) : (
+          <div id="passFront" className={`pass${data.coupon ? "" : " shadow"}`}>
+            <div className="decoration" />
+            <div className="decoration" />
+            <div id="headerFields">
+              {logoSource && <img alt="" src={logoSource} />}
+              <h1>{data.logoText}</h1>
               <div>
-                {auxiliaryFields?.map((f, i) => (
-                  <PassFieldItem
+                {headerFields.map((f, i) => (
+                  <PassFieldItemHeader
                     {...f}
+                    valueFontSize={globalFontSizeHeader}
                     key={f.key || `${i}`}
-                    globalFontSize={globalFontSizeAuxiliary}
                   />
                 ))}
               </div>
             </div>
-          ) : null}
-          <BarcodesPreview barcodes={data.barcodes} expired={isExpired} qrSize={qrSize} />
-          <span className="infoButton" onClick={() => setFlipped(!flipped)}>
-            i
-          </span>
-        </div>
+            <div
+              id="primaryFields"
+              className={values["strip.png"] && editorClassName !== "generic" ? "strip" : undefined}
+              style={primaryFieldsStyle}
+            >
+              {thumbnailSource && <img alt="" src={thumbnailSource} />}
+              <div className={thumbnailSource ? "with-thumbnail" : undefined}>
+                {data.boardingPass ? (
+                  <>
+                    {structure?.primaryFields?.[0] && (
+                      <PassFieldItem
+                        {...structure?.primaryFields[0]}
+                        globalFontSize={boardingPassRowFontSize ?? globalFontSizePrimary}
+                      />
+                    )}
+                    <span style={transitIconStyle}>
+                      {structure?.transitType && (
+                        <TransitIcon transitType={structure?.transitType} />
+                      )}
+                    </span>
+                    {structure?.primaryFields?.slice(1)?.map((f, i) => (
+                      <PassFieldItem
+                        {...f}
+                        key={f.key || `${i}`}
+                        globalFontSize={boardingPassRowFontSize ?? globalFontSizePrimary}
+                      />
+                    ))}
+                  </>
+                ) : (
+                  <>
+                    {data.storeCard ? (
+                      <>
+                        {structure?.primaryFields && (
+                          <div className="row">
+                            {structure.primaryFields.map((field, i) => (
+                              <PassFieldItem
+                                {...field}
+                                key={field.key || `${i}`}
+                                globalFontSize={globalFontSizePrimary}
+                              />
+                            ))}
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        {structure?.primaryFields?.map((f, i) => (
+                          <PassFieldItem
+                            {...f}
+                            key={f.key || `${i}`}
+                            globalFontSize={globalFontSizePrimary}
+                          />
+                        ))}
+                      </>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
+
+            <div id="secondaryFields">
+              <div>
+                {secondaryFields?.map((f, i) => (
+                  <PassFieldItem
+                    {...f}
+                    key={f.key || `${i}`}
+                    globalFontSize={globalFontSizeSecondary}
+                  />
+                ))}
+              </div>
+            </div>
+            {auxiliaryFields?.length > 0 ? (
+              <div id="auxiliaryFields">
+                <div>
+                  {auxiliaryFields?.map((f, i) => (
+                    <PassFieldItem
+                      {...f}
+                      key={f.key || `${i}`}
+                      globalFontSize={globalFontSizeAuxiliary}
+                    />
+                  ))}
+                </div>
+              </div>
+            ) : null}
+            <BarcodesPreview barcodes={data.barcodes} expired={isExpired} qrSize={qrSize} />
+            <span className="infoButton" onClick={() => setFlipped(!flipped)}>
+              i
+            </span>
+          </div>
+        )}
         <div id="passBack" className={`pass${data.coupon ? "" : " shadow"}`}>
           <button className="doneButton" onClick={() => setFlipped(!flipped)}>
             Done

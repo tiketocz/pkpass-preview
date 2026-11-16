@@ -1,6 +1,12 @@
 // Reference docs:
 // https://developer.apple.com/library/archive/documentation/UserExperience/Reference/PassKit_Bundle/Chapters/Introduction.html#//apple_ref/doc/uid/TP40012026
-export type PassType = "storeCard" | "eventTicket" | "boardingPass" | "coupon" | "generic";
+export type PassType =
+  | "storeCard"
+  | "eventTicket"
+  | "boardingPass"
+  | "coupon"
+  | "generic"
+  | "posterGeneric";
 export type FieldType =
   | "primaryFields"
   | "secondaryFields"
@@ -143,6 +149,8 @@ export interface PassStructure {
   headerFields?: PassField[];
   // Fields to be displayed prominently on the front of the pass.
   primaryFields?: PassField[];
+  // Fields displayed in the bottom footer of an iOS 27 posterGeneric pass.
+  footerFields?: PassField[];
   // Fields to be displayed on the front of the pass.
   secondaryFields?: PassField[];
   // Required for boarding passes; otherwise not allowed. Type of transit.
@@ -199,6 +207,8 @@ export interface PassData {
   coupon?: PassStructure;
   eventTicket?: PassStructure;
   generic?: PassStructure;
+  /** Experimental iOS 27 full-bleed generic pass layout. */
+  posterGeneric?: PassStructure;
   storeCard?: PassStructure;
 
   //  Visual Appearance Keys

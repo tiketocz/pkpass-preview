@@ -92,6 +92,194 @@ export const getPassStyles = (identifier: string) => `
   #${identifier} #passFront.shadow {
     box-shadow: 0 3px 4px 0 rgb(0 0 0 / 20%), 0 2px 5px 0 rgb(0 0 0 / 19%);
   }
+  /* Experimental iOS 27 posterGeneric layout. The artwork owns the upper
+     three quarters of the card, while the bottom band uses the pass colors. */
+  #${identifier}.posterGeneric #passFront.poster-front {
+    box-sizing: border-box;
+    width: 320px;
+    height: 420px;
+    padding: 0;
+  }
+  #${identifier}.posterGeneric .poster-artwork {
+    position: relative;
+    height: 318px;
+    background-color: inherit;
+    background-position: center top;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+  #${identifier}.posterGeneric .poster-header {
+    position: absolute;
+    z-index: 1;
+    top: 12px;
+    left: 14px;
+    right: 14px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    text-shadow: 0 1px 2px rgb(0 0 0 / 35%);
+  }
+  #${identifier}.posterGeneric .poster-brand {
+    display: flex;
+    flex: 0 0 auto;
+    min-width: 0;
+    align-items: center;
+    gap: 7px;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 34px;
+  }
+  #${identifier}.posterGeneric .poster-brand img {
+    width: 34px;
+    height: 34px;
+    flex: 0 0 auto;
+    object-fit: contain;
+  }
+  #${identifier}.posterGeneric .poster-brand span {
+    max-width: 78px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  #${identifier}.posterGeneric .poster-header-fields {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-align: right;
+  }
+  #${identifier}.posterGeneric .poster-field label,
+  #${identifier}.posterGeneric .poster-field span {
+    display: block;
+  }
+  #${identifier}.posterGeneric .poster-field label {
+    color: inherit;
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1.15;
+    text-transform: uppercase;
+  }
+  #${identifier}.posterGeneric .poster-field span {
+    font-size: 15px;
+    line-height: 1.2;
+  }
+  #${identifier}.posterGeneric .poster-header-fields label {
+    font-size: 12px;
+  }
+  #${identifier}.posterGeneric .poster-header-fields span {
+    overflow: hidden;
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+    font-size: 15px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  #${identifier}.posterGeneric .poster-artwork #barcode {
+    z-index: 2;
+    top: 187px;
+    bottom: auto;
+    min-height: 0;
+  }
+  #${identifier}.posterGeneric .poster-artwork #barcode:before {
+    display: none;
+  }
+  #${identifier}.posterGeneric .poster-artwork #barcode.PKBarcodeFormatQR #barcode-wrapper {
+    padding: 10px 10px 5px;
+    border-radius: 5px;
+  }
+  #${identifier}.posterGeneric .poster-artwork #barcode .text {
+    line-height: 15px;
+  }
+  #${identifier}.posterGeneric .poster-bottom {
+    position: relative;
+    box-sizing: border-box;
+    height: 102px;
+    padding: 28px 12px 8px;
+    background: inherit;
+  }
+  #${identifier}.posterGeneric .poster-primary-fields {
+    display: flex;
+    min-width: 0;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  #${identifier}.posterGeneric .poster-title {
+    overflow: hidden;
+    min-width: 0;
+    font-size: 27px;
+    font-weight: 700;
+    line-height: 1.1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  #${identifier}.posterGeneric .poster-title-long {
+    display: block;
+    max-height: 2.3em;
+    font-size: 10.5px;
+    line-height: 1.15;
+    text-overflow: clip;
+    white-space: normal;
+  }
+  #${identifier}.posterGeneric .poster-primary-column {
+    min-width: 0;
+    text-align: right;
+  }
+  #${identifier}.posterGeneric .poster-primary-column label {
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+    font-size: 11px;
+    font-weight: 400;
+    text-transform: lowercase;
+  }
+  #${identifier}.posterGeneric .poster-primary-column label::first-letter {
+    text-transform: uppercase;
+  }
+  #${identifier}.posterGeneric .poster-primary-column span {
+    overflow: hidden;
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+    font-size: 14px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  #${identifier}.posterGeneric .poster-primary-column-long span {
+    font-size: 10px;
+  }
+  #${identifier}.posterGeneric .poster-primary-count-2 .poster-title {
+    flex: 0 1 52%;
+    width: 52%;
+  }
+  #${identifier}.posterGeneric .poster-primary-count-2 .poster-primary-column {
+    flex: 0 1 44%;
+    width: 44%;
+  }
+  #${identifier}.posterGeneric .poster-primary-count-3 .poster-title {
+    flex: 1 1 42%;
+    font-size: 23px;
+  }
+  #${identifier}.posterGeneric .poster-primary-count-3 .poster-primary-column {
+    flex: 0 1 25%;
+  }
+  #${identifier}.posterGeneric .poster-primary-count-4 .poster-title {
+    flex: 0 1 auto;
+    font-size: 20px;
+  }
+  #${identifier}.posterGeneric .poster-primary-count-4 .poster-primary-column {
+    flex: 0 1 48px;
+    width: 48px;
+  }
+  #${identifier}.posterGeneric .poster-footer-fields {
+    position: absolute;
+    right: 12px;
+    bottom: 8px;
+    left: 12px;
+    margin-top: 0;
+  }
+  #${identifier}.posterGeneric .poster-footer-fields label {
+    display: none;
+  }
+  #${identifier}.posterGeneric .poster-footer-fields span {
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+    font-size: 12px;
+  }
   #${identifier} #primaryFields {
     clear: both;
     position: relative;
