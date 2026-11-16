@@ -127,7 +127,7 @@ export const PosterLongCzechText: Story = {
     docs: {
       description: {
         story:
-          'Observed on iPhone 17 Pro with iOS 27.0: the header value is a single truncated line ("Zlaté celoroční s výh…"); the smaller title uses two lines and cuts off after "Vltavský klub přátel / Pražského hradu a Karlova"; the member name truncates to "Žofie Přemyslovna Dvořáčk…"; logoText truncates to "Vltava…"; and the full footer value "VC-2026-ŽLUŤOUČKÝ-0024-PRAHA" appears without its label. The web render instead wraps the full header value onto two lines, keeps a much larger one-line title with an ellipsis, truncates the member name earlier, and shows the full logoText; like iOS, it fits the footer value on one line and omits the footer label.',
+          'Observed on iPhone 17 Pro with iOS 27.0: the header value is a single truncated line ("Zlaté celoroční s výh…"); the smaller title uses two lines and cuts off after "Vltavský klub přátel / Pražského hradu a Karlova"; the member name truncates to "Žofie Přemyslovna Dvořáčk…"; logoText truncates to "Vltava…"; and the full footer value "VC-2026-ŽLUŤOUČKÝ-0024-PRAHA" appears without its label. The web render instead wraps the full header value onto two lines, keeps a much larger one-line title with an ellipsis, truncates the member name earlier, and also truncates logoText ("Vltava …") because the long header narrows the top row; like iOS, it fits the footer value on one line and omits the footer label.',
       },
     },
   },
