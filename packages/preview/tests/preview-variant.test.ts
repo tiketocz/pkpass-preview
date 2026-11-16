@@ -1,0 +1,61 @@
+import { describe, expect, it } from "vitest";
+import { resolvePassPresentation } from "../src/index";
+import type { PassData } from "../src/types";
+
+const pass = (includePoster = true): PassData => ({
+  description: "Vltava Club",
+  formatVersion: 1,
+  organizationName: "Tiketo Demo",
+  generic: {
+    primaryFields: [{ key: "member", value: "Anna Nováková" }],
+  },
+  ...(includePoster
+    ? {
+        posterGeneric: {
+          primaryFields: [{ key: "title", value: "Vltava Club" }],
+        },
+      }
+    : {}),
+});
+
+describe("resolvePassPresentation", () => {
+  it("selects posterGeneric only when the poster variant is requested", () => {
+    const data = pass();
+
+    expect(resolvePassPresentation(data, "poster")).toMatchObject({
+      editorClassName: "posterGeneric",
+      structure: data.posterGeneric,
+      isPoster: true,
+    });
+  });
+
+  it("selects the classic generic structure for the fallback variant", () => {
+    const data = pass();
+
+    expect(resolvePassPresentation(data, "fallback")).toMatchObject({
+      editorClassName: "generic",
+      structure: data.generic,
+      isPoster: false,
+    });
+  });
+
+  it("preserves classic rendering when the variant is omitted", () => {
+    const data = pass();
+
+    expect(resolvePassPresentation(data)).toMatchObject({
+      editorClassName: "generic",
+      structure: data.generic,
+      isPoster: false,
+    });
+  });
+
+  it("falls back to the classic structure when posterGeneric is missing", () => {
+    const data = pass(false);
+
+    expect(resolvePassPresentation(data, "poster")).toMatchObject({
+      editorClassName: "generic",
+      structure: data.generic,
+      isPoster: false,
+    });
+  });
+});

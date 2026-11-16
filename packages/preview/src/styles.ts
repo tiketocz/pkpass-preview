@@ -92,6 +92,143 @@ export const getPassStyles = (identifier: string) => `
   #${identifier} #passFront.shadow {
     box-shadow: 0 3px 4px 0 rgb(0 0 0 / 20%), 0 2px 5px 0 rgb(0 0 0 / 19%);
   }
+  /* Experimental iOS 27 posterGeneric layout. The artwork owns the upper
+     three quarters of the card, while the bottom band uses the pass colors. */
+  #${identifier}.posterGeneric #passFront.poster-front {
+    box-sizing: border-box;
+    width: 320px;
+    height: 420px;
+    padding: 0;
+  }
+  #${identifier}.posterGeneric .poster-artwork {
+    position: relative;
+    height: 318px;
+    background-color: inherit;
+    background-position: center top;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+  #${identifier}.posterGeneric .poster-header {
+    position: absolute;
+    z-index: 1;
+    top: 12px;
+    left: 14px;
+    right: 14px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    text-shadow: 0 1px 2px rgb(0 0 0 / 35%);
+  }
+  #${identifier}.posterGeneric .poster-brand {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 7px;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 34px;
+  }
+  #${identifier}.posterGeneric .poster-brand img {
+    width: 34px;
+    height: 34px;
+    flex: 0 0 auto;
+    object-fit: contain;
+  }
+  #${identifier}.posterGeneric .poster-brand span {
+    max-width: 116px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  #${identifier}.posterGeneric .poster-header-fields {
+    min-width: 82px;
+    text-align: right;
+  }
+  #${identifier}.posterGeneric .poster-field label,
+  #${identifier}.posterGeneric .poster-field span {
+    display: block;
+  }
+  #${identifier}.posterGeneric .poster-field label {
+    color: inherit;
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1.15;
+    text-transform: uppercase;
+  }
+  #${identifier}.posterGeneric .poster-field span {
+    font-size: 15px;
+    line-height: 1.2;
+  }
+  #${identifier}.posterGeneric .poster-header-fields label {
+    font-size: 12px;
+  }
+  #${identifier}.posterGeneric .poster-header-fields span {
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+    font-size: 15px;
+  }
+  #${identifier}.posterGeneric .poster-artwork #barcode {
+    top: 187px;
+    bottom: auto;
+    min-height: 0;
+  }
+  #${identifier}.posterGeneric .poster-artwork #barcode:before {
+    display: none;
+  }
+  #${identifier}.posterGeneric .poster-artwork #barcode.PKBarcodeFormatQR #barcode-wrapper {
+    padding: 7px 7px 3px;
+    border-radius: 5px;
+  }
+  #${identifier}.posterGeneric .poster-artwork #barcode .text {
+    line-height: 15px;
+  }
+  #${identifier}.posterGeneric .poster-bottom {
+    box-sizing: border-box;
+    height: 102px;
+    padding: 21px 12px 8px;
+    background: inherit;
+  }
+  #${identifier}.posterGeneric .poster-primary-fields {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  #${identifier}.posterGeneric .poster-title {
+    overflow: hidden;
+    max-width: 180px;
+    font-size: 27px;
+    font-weight: 700;
+    line-height: 1.1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  #${identifier}.posterGeneric .poster-member {
+    max-width: 136px;
+    text-align: right;
+  }
+  #${identifier}.posterGeneric .poster-member label {
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+    font-weight: 400;
+    text-transform: none;
+  }
+  #${identifier}.posterGeneric .poster-member span {
+    overflow: hidden;
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+    font-size: 14px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  #${identifier}.posterGeneric .poster-footer-fields {
+    margin-top: 20px;
+  }
+  #${identifier}.posterGeneric .poster-footer-fields label {
+    display: none;
+  }
+  #${identifier}.posterGeneric .poster-footer-fields span {
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+    font-size: 12px;
+  }
   #${identifier} #primaryFields {
     clear: both;
     position: relative;

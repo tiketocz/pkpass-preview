@@ -1,0 +1,94 @@
+{
+  "formatVersion": 1,
+  "passTypeIdentifier": "pass.eu.tiketo",
+  "teamIdentifier": "MVBMPD7HWW",
+  "serialNumber": "tiketo-demo-vltava-club-0024",
+  "organizationName": "Tiketo Demo",
+  "description": "Vltava Club – testovací členství",
+  "logoText": "Vltava Club",
+  "backgroundColor": "rgb(20, 30, 57)",
+  "foregroundColor": "rgb(255, 246, 233)",
+  "labelColor": "rgb(200, 212, 240)",
+  "barcodes": [
+    {
+      "format": "PKBarcodeFormatQR",
+      "message": "VLTAVA-DEMO-0024",
+      "messageEncoding": "iso-8859-1",
+      "altText": "VC-0024"
+    }
+  ],
+  "posterGeneric": {
+    "headerFields": [
+      {
+        "key": "level",
+        "value": "Gold",
+        "label": "ČLENSTVÍ"
+      }
+    ],
+    "primaryFields": [
+      {
+        "key": "title",
+        "value": "Vltava Club"
+      },
+      {
+        "key": "member",
+        "value": "Anna Nováková",
+        "label": "ČLENKA"
+      }
+    ],
+    "footerFields": [
+      {
+        "key": "member-id",
+        "value": "VC-0024",
+        "label": "ČLENSKÉ ČÍSLO"
+      }
+    ],
+    "backFields": [
+      {
+        "key": "about",
+        "value": "Ukázková členská karta pro testování Apple Wallet.",
+        "label": "O KARTĚ"
+      },
+      {
+        "key": "issuer",
+        "value": "https://tiketo.eu",
+        "label": "VYDAVATEL"
+      }
+    ]
+  },
+  "generic": {
+    "headerFields": [
+      {
+        "key": "level",
+        "value": "Gold",
+        "label": "ČLENSTVÍ"
+      }
+    ],
+    "primaryFields": [
+      {
+        "key": "member",
+        "value": "Anna Nováková",
+        "label": "ČLENKA"
+      }
+    ],
+    "secondaryFields": [
+      {
+        "key": "member-id",
+        "value": "VC-0024",
+        "label": "ČLENSKÉ ČÍSLO"
+      }
+    ],
+    "backFields": [
+      {
+        "key": "about",
+        "value": "Ukázková členská karta pro testování Apple Wallet.",
+        "label": "O KARTĚ"
+      },
+      {
+        "key": "issuer",
+        "value": "https://tiketo.eu",
+        "label": "VYDAVATEL"
+      }
+    ]
+  }
+}

@@ -63,6 +63,28 @@ bun run test:watch    # vitest (watch mode)
 bun run test:coverage # vitest run + v8 coverage report (html in coverage/)
 ```
 
+## Poster generic previews (experimental)
+
+`PKPassPreview` accepts an optional `variant` prop for passes that contain the
+iOS 27 `posterGeneric` structure:
+
+```tsx
+<PKPassPreview values={passFiles} variant="poster" />
+<PKPassPreview values={passFiles} variant="fallback" />
+```
+
+- `variant="poster"` renders the experimental iOS 27 full-bleed artwork layout.
+  If `posterGeneric` is absent, the renderer falls back to the pass's classic
+  structure.
+- `variant="fallback"` always renders the classic structure (for example,
+  `generic`) even when `posterGeneric` is present.
+- Omitting `variant` preserves the existing classic rendering behaviour.
+
+The initial poster renderer covers the full-bleed `artwork` image, logo and
+header, centered barcode, primary fields, and footer fields. It is intended for
+previewing and is not yet a pixel-perfect implementation of every iOS 27 poster
+size or feature.
+
 ## Frozen API contract
 
 The published package `@tiketo/pkpass-preview` is the public successor to the private `pkpass-builder-ui`. Consumers must be able to swap their import path with **zero code changes**.
