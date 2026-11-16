@@ -16,7 +16,9 @@ concurrency:
 jobs:
   vrt:
     name: visual regression
-    runs-on: ubuntu-latest
+    # Playwright does not yet provide Chromium dependencies for the
+    # ubuntu-latest 26.04 image. Pin the supported LTS runner explicitly.
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
       - name: check out PR head
