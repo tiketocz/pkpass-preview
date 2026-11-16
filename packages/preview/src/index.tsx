@@ -22,6 +22,7 @@ export type { PassData, PassField, PassStructure, PKTextAlignment, FieldType } f
 export type { FeaturedAction, KnownFeaturedActionType, PreviewTargetOs } from "./types";
 export {
   FEATURED_ACTION_LABELS,
+  FEATURED_ACTION_SUBTITLE,
   MAX_FEATURED_ACTIONS,
   UNKNOWN_FEATURED_ACTION_LABEL,
   resolveFeaturedActions,
@@ -64,7 +65,8 @@ export interface PreviewProps {
    * - omitted (default) or `"ios26"`: no Featured Actions — identical output
    *   to previous releases.
    * - `"ios27"`: renders up to two top-level `featuredActions` as tiles below
-   *   the card front (proposal design, pending native reference).
+   *   the card front (look aligned to a native iOS 27.0 Wallet reference;
+   *   unknown types and the single-action layout remain a proposal).
    */
   targetOs?: PreviewTargetOs;
 }
@@ -691,13 +693,7 @@ ${secondaryFieldsCount >= 4 ? `max-width: calc(100% / ${secondaryFieldsCount});`
       </div>
       {hasFeaturedActions ? <FeaturedActionsRow actions={featuredActions} /> : null}
       <style>
-        {hasFeaturedActions
-          ? dynamicStyles +
-            getFeaturedActionStyles(identifier, {
-              backgroundColor: data.backgroundColor,
-              foregroundColor: data.foregroundColor,
-            })
-          : dynamicStyles}
+        {hasFeaturedActions ? dynamicStyles + getFeaturedActionStyles(identifier) : dynamicStyles}
       </style>
     </div>
   );

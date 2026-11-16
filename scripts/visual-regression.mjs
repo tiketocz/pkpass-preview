@@ -133,16 +133,23 @@ async function captureStory(page, storyId) {
   const imgHandle = await page.$('img[alt^="iOS Wallet screenshot"]');
   const iosSrc = imgHandle ? await imgHandle.getAttribute("src") : null;
 
-  const ourBuf = await cardHandle.screenshot({ omitBackground: false });
-  return { storyId, iosSrc, ourBuf };
+  // TIK-318: when Featured Actions tiles render (below #passCard), the iOS
+  // reference is cropped to card + tile row, so compare against the whole
+  // preview (tight, no padding) instead of #passCard alone. Stories without
+  // tiles keep the #passCard capture, so their metrics are unchanged.
+  const hasFeaturedActions = (await page.$(".featured-actions")) !== null;
+  const ourBuf =
+    (hasFeaturedActions ? await captureFullPreview(page, 0) : null) ??
+    (await cardHandle.screenshot({ omitBackground: false }));
+  return { storyId, iosSrc, ourBuf, hasFeaturedActions };
 }
 
 // Render-only baseline for stories without an iOS reference (e.g. TIK-318
 // Featured Actions, whose tiles sit BELOW #passCard). Captures the whole
 // PKPassPreview root including content that overflows it (the classic front
 // is taller than #passCard). Never feeds the metrics/report.
-async function captureFullPreview(page) {
-  const clip = await page.evaluate(() => {
+async function captureFullPreview(page, pad = 8) {
+  const clip = await page.evaluate((pad) => {
     const root = document.querySelector("#passCard")?.parentElement;
     if (!root) return null;
     const { left, top, right } = root.getBoundingClientRect();
@@ -154,15 +161,14 @@ async function captureFullPreview(page) {
       // bottom; decorations poking out above/sideways are not wanted.
       bottom = Math.max(bottom, r.bottom);
     }
-    // Small margin so box-shadows are not cut off.
-    const pad = 8;
+    // `pad`: small margin so box-shadows are not cut off (0 = tight).
     return {
       x: Math.max(0, left - pad + window.scrollX),
       y: Math.max(0, top - pad + window.scrollY),
       width: right - left + 2 * pad,
       height: bottom - top + 2 * pad,
     };
-  });
+  }, pad);
   if (!clip) return null;
   return page.screenshot({ clip, fullPage: true });
 }
@@ -303,6 +309,14 @@ async function main() {
       }
 
       const slug = slugify(story);
+      if (captured.hasFeaturedActions) {
+        // Keep a padded render-only PNG for tile stories even when they have
+        // a reference, for side-by-side review (not part of the metrics).
+        const renderBuf = await captureFullPreview(page).catch(() => null);
+        if (renderBuf) {
+          await fs.writeFile(path.join(OUT_DIR, "render-only", `${slug}.png`), renderBuf);
+        }
+      }
       const metrics = await compareOne({
         ourBuf: captured.ourBuf,
         iosPath,

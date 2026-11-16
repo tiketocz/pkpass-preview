@@ -27,6 +27,8 @@ For each in-scope story:
 
 Stories without an iOS reference are still discovered via the tag but skipped at metric time with a log line. For those stories the script also saves a render-only baseline, `render-only/<slug>.png`. It captures the whole `PKPassPreview` root, including content that overflows `#passCard` such as the classic front's bottom edge and the iOS 27 Featured Actions tiles (TIK-318). These PNGs are not part of `report.json` or the metrics.
 
+Stories that render iOS 27 Featured Actions tiles (TIK-318) and do have a reference (the native refs are cropped to card + tile row) are compared using a tight capture of the whole preview (card + tiles) instead of `#passCard` alone; they also save a padded `render-only/<slug>.png`. Stories without tiles are captured exactly as before, so their metrics are unaffected.
+
 ## Local run
 
 ```sh

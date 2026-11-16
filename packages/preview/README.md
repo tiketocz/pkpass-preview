@@ -106,8 +106,15 @@ which iOS features are shown.
 With `targetOs="ios27"`, the top-level `featuredActions` array of `pass.json`
 (schema per apple/pass-builder `Pass+Action.swift`: `identifier` required and
 unique, `type` required, `url` optional) is rendered as a row of up to two
-rounded tiles (icon + label) directly below the card front, in input order.
-This works for every pass style, including `generic` and `eventTicket`.
+white rounded tiles directly below the card front, in input order. This works
+for every pass style, including `generic` and `eventTicket`. Each tile has a
+green circle icon (top left), a bold label and a grey "Open Link" subtitle:
+
+| `type`         | Icon (white glyph on iOS green `#34C759`) | Label            | Subtitle    | Status                 |
+| -------------- | ----------------------------------------- | ---------------- | ----------- | ---------------------- |
+| `addToBalance` | credit card                               | "Add to Balance" | "Open Link" | native reference       |
+| `call`         | phone handset                             | "Call"           | "Open Link" | native reference       |
+| anything else  | arrow                                     | "Open"           | "Open Link" | proposal (unverified)  |
 
 Invalid input never throws. The rules are exported as `resolveFeaturedActions(featuredActions, targetOs)`:
 
@@ -116,22 +123,25 @@ Invalid input never throws. The rules are exported as `resolveFeaturedActions(fe
   or `type`, or have a non-string `url`, are skipped.
 - A later entry that repeats an `identifier` is skipped.
 - Unknown `type` values are kept and rendered as a generic tile with the label
-  "Open" and a neutral arrow icon.
+  "Open" and an arrow icon.
 - Only the first two valid entries are rendered. Zero valid entries means no
   tile container at all.
 
-> **Proposal, pending native reference.** The tile design, labels
-> (`addToBalance` → "Add to Balance", `call` → "Call", unknown → "Open") and
-> icons (plus, phone handset, arrow) have not been checked against native
-> Apple Wallet yet. Expect them to change once a native iOS 27 reference is
-> captured ([TIK-318](https://jakubknejzlik.atlassian.net/browse/TIK-318)).
+> **Native reference vs proposal.** The two-tile row for `addToBalance` +
+> `call` (tile proportions, green icons, labels, "Open Link" subtitle) is
+> aligned to native Apple Wallet iOS 27.0 (24A434) on an iPhone 17 Pro
+> Simulator, for both `generic` and `eventTicket`. It is an approximation,
+> not pixel-perfect (web fonts, glyph shapes, shadow). Still a **proposal**
+> without native reference: the unknown-type tile ("Open" + arrow) and the
+> single-action layout (one tile spanning the card width)
+> ([TIK-318](https://jakubknejzlik.atlassian.net/browse/TIK-318)).
 > The preview is static: tiles are not links, and `url` is only exposed via
 > `title` / `data-url`.
 
 New exports: types `FeaturedAction`, `KnownFeaturedActionType`,
 `PreviewTargetOs` and `ResolvedFeaturedAction`, plus `resolveFeaturedActions`,
-`supportsFeaturedActions`, `MAX_FEATURED_ACTIONS`, `FEATURED_ACTION_LABELS` and
-`UNKNOWN_FEATURED_ACTION_LABEL`.
+`supportsFeaturedActions`, `MAX_FEATURED_ACTIONS`, `FEATURED_ACTION_LABELS`,
+`FEATURED_ACTION_SUBTITLE` and `UNKNOWN_FEATURED_ACTION_LABEL`.
 
 ## Frozen API contract
 

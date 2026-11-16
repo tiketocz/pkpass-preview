@@ -4,13 +4,18 @@ import type { FeaturedAction, KnownFeaturedActionType, PreviewTargetOs } from ".
 
 // iOS 27 Featured Actions (TIK-318).
 //
-// NÁVRH / PROPOSAL, PENDING NATIVE REFERENCE: the tile layout, labels and
-// icons below are a plausible approximation designed from the WWDC26
-// session 209 description only. They have NOT been verified against a
-// native Apple Wallet screenshot yet — the system "Add pass" preview on
-// iOS 27.0 does not show the tiles; a native reference has to be captured
-// from the detail of an added pass. Treat every label/icon here as a
-// proposal until that reference lands.
+// Native reference: Apple Wallet iOS 27.0 (24A434), iPhone 17 Pro Simulator,
+// detail of the added Vltava Club pass (generic + eventTicket) with
+// [addToBalance, call]. Native-verified (look approximated, not
+// pixel-perfect): two white rounded tiles side by side below the card,
+// green circle icon (credit card / phone handset), bold label
+// ("Add to Balance" / "Call") and grey subtitle "Open Link".
+//
+// NÁVRH / PROPOSAL, still UNVERIFIED vs native Wallet:
+// - unknown action types (green circle + arrow, "Open" / "Open Link"),
+// - the single-action layout (one tile spanning the card width),
+// - whether the subtitle ever differs from "Open Link" (e.g. tel: URLs show
+//   "Open Link" in the reference too).
 
 /** Wallet shows at most two featured actions. */
 export const MAX_FEATURED_ACTIONS = 2;
@@ -26,12 +31,14 @@ export const supportsFeaturedActions = (targetOs?: PreviewTargetOs): boolean =>
 export interface ResolvedFeaturedAction extends FeaturedAction {
   /** False when `type` has no dedicated tile (rendered as a generic tile). */
   known: boolean;
-  /** Proposal label shown on the tile (unverified vs native Wallet). */
+  /** Bold tile label ("Add to Balance", "Call"; unknown types → "Open"). */
   label: string;
+  /** Grey secondary line under the label (native reference: "Open Link"). */
+  subtitle: string;
 }
 
 /**
- * Proposal labels (EN) — UNVERIFIED vs native Wallet, pending reference.
+ * Tile labels (EN) — match the native iOS 27.0 Wallet reference.
  * Unknown types fall back to `UNKNOWN_FEATURED_ACTION_LABEL`.
  */
 export const FEATURED_ACTION_LABELS: Readonly<Record<KnownFeaturedActionType, string>> = {
@@ -39,8 +46,14 @@ export const FEATURED_ACTION_LABELS: Readonly<Record<KnownFeaturedActionType, st
   call: "Call",
 };
 
-/** Proposal label for action types without a dedicated tile. */
+/** Proposal label for action types without a dedicated tile (unverified). */
 export const UNKNOWN_FEATURED_ACTION_LABEL = "Open";
+
+/**
+ * Grey subtitle under every tile label. The native iOS 27.0 reference shows
+ * "Open Link" for both `addToBalance` (https URL) and `call` (tel: URL).
+ */
+export const FEATURED_ACTION_SUBTITLE = "Open Link";
 
 const isNonEmptyString = (value: unknown): value is string =>
   typeof value === "string" && value.trim().length > 0;
@@ -64,7 +77,8 @@ const isKnownType = (type: string): type is KnownFeaturedActionType =>
  * - Identifiers must be unique: a later entry repeating an identifier is
  *   skipped.
  * - Unknown `type` values are kept and rendered as a generic tile with the
- *   `UNKNOWN_FEATURED_ACTION_LABEL` label and a neutral icon.
+ *   `UNKNOWN_FEATURED_ACTION_LABEL` label and an arrow icon (proposal).
+ * - Every tile carries the `FEATURED_ACTION_SUBTITLE` subtitle.
  * - The first `MAX_FEATURED_ACTIONS` (2) valid entries are returned, in
  *   input order; the rest are dropped.
  */
@@ -95,45 +109,53 @@ export const resolveFeaturedActions = (
       ...(url !== undefined ? { url } : {}),
       known,
       label: known ? FEATURED_ACTION_LABELS[type] : UNKNOWN_FEATURED_ACTION_LABEL,
+      subtitle: FEATURED_ACTION_SUBTITLE,
     });
   }
 
   return resolved;
 };
 
-// Proposal icons (UNVERIFIED vs native Wallet). Inline SVG, stroke-based,
-// `currentColor` so the badge colour cascades. Kept dependency-free like
-// transit-icon.tsx.
+// Tile icons: filled white glyph on an iOS system-green circle. The
+// credit-card (addToBalance) and phone-handset (call) glyphs follow the
+// native iOS 27.0 Wallet reference; the arrow for unknown types is a
+// proposal. Inline SVG, `currentColor`, dependency-free like transit-icon.tsx.
 type IconProps = React.SVGProps<SVGSVGElement>;
 
 const svgBase = {
   viewBox: "0 0 24 24",
   xmlns: "http://www.w3.org/2000/svg",
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: 2,
-  strokeLinecap: "round",
-  strokeLinejoin: "round",
+  fill: "currentColor",
 } as const;
 
-/** addToBalance → plus sign. */
+/** addToBalance → credit card (native-verified glyph shape, approximated). */
 const AddToBalanceIcon = (props: IconProps) => (
   <svg aria-hidden="true" {...svgBase} {...props}>
-    <path d="M12 5v14M5 12h14" />
+    <path
+      fillRule="evenodd"
+      d="M5.5 6h13A2.5 2.5 0 0 1 21 8.5v7a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 15.5v-7A2.5 2.5 0 0 1 5.5 6zM3 9v2.4h18V9zm3 4.6v1.6h3.2v-1.6z"
+    />
   </svg>
 );
 
-/** call → phone handset. */
+/** call → phone handset (native-verified glyph shape, approximated). */
 const CallIcon = (props: IconProps) => (
   <svg aria-hidden="true" {...svgBase} {...props}>
-    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" />
+    <path d="M7.3 3.4c.5-.4 1.3-.3 1.7.3l1.9 2.7c.4.5.3 1.2-.1 1.7L9.6 9.3c-.2.2-.2.5-.1.8.9 1.8 2.6 3.5 4.4 4.4.3.1.6.1.8-.1l1.2-1.2c.5-.4 1.2-.5 1.7-.1l2.7 1.9c.6.4.7 1.2.3 1.7l-1.2 1.6c-.7.9-1.9 1.3-3 1-5.2-1.4-9.2-5.4-10.6-10.6-.3-1.1.1-2.3 1-3z" />
   </svg>
 );
 
-/** Unknown type → neutral "open" arrow. */
+/** Unknown type → arrow (proposal, no native reference). */
 const GenericActionIcon = (props: IconProps) => (
   <svg aria-hidden="true" {...svgBase} {...props}>
-    <path d="M7 17 17 7M8 7h9v9" />
+    <path
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2.6}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M7.5 16.5 16.5 7.5M9 7.5h7.5V15"
+    />
   </svg>
 );
 
@@ -152,10 +174,7 @@ const iconFor = (action: ResolvedFeaturedAction) =>
 export const FeaturedActionsRow = ({ actions }: { actions: ResolvedFeaturedAction[] }) => {
   if (actions.length === 0) return null;
   return (
-    <div
-      className={`featured-actions featured-actions-count-${actions.length}`}
-      data-proposal="unverified-vs-native-wallet"
-    >
+    <div className={`featured-actions featured-actions-count-${actions.length}`}>
       {actions.map((action) => {
         const Icon = iconFor(action);
         return (
@@ -164,13 +183,17 @@ export const FeaturedActionsRow = ({ actions }: { actions: ResolvedFeaturedActio
             data-identifier={action.identifier}
             data-type={action.type}
             data-url={action.url}
+            data-proposal={action.known ? undefined : "unverified-vs-native-wallet"}
             title={action.url}
             key={action.identifier}
           >
             <span className="featured-action-icon">
-              <Icon width={16} height={16} />
+              <Icon width={17} height={17} />
             </span>
-            <span className="featured-action-label">{action.label}</span>
+            <span className="featured-action-text">
+              <span className="featured-action-label">{action.label}</span>
+              <span className="featured-action-subtitle">{action.subtitle}</span>
+            </span>
           </div>
         );
       })}
@@ -183,26 +206,28 @@ export const FeaturedActionsRow = ({ actions }: { actions: ResolvedFeaturedActio
  * previews keep byte-identical markup. The root drops its fixed height so
  * the row below the card takes part in layout.
  *
+ * Proportions are taken from the native iOS 27.0 Wallet reference (iPhone 17
+ * Pro Simulator, card 1110 px wide → 320 px here, scale ≈ 0.288): gap card →
+ * tiles ≈ 70 px → 20 px, tile height ≈ 342 px → 99 px, gap between tiles
+ * ≈ 24 px → 7 px, icon circle ≈ 88 px → 25 px, label/subtitle ≈ 13 px.
+ *
  * Geometry: `#passCard` is 320×420 but the classic front is 450px tall plus
- * 2×10px padding (470px), so the row needs a 62px offset (470 − 420 + 12px
- * gap). The poster front is exactly 420px → 12px gap.
+ * 2×10px padding (470px), so the row needs a 70px offset (470 − 420 + 20px
+ * gap). The poster front is exactly 420px → 20px gap.
  */
-export const getFeaturedActionStyles = (
-  identifier: string,
-  colors: { backgroundColor?: string; foregroundColor?: string },
-) => `
+export const getFeaturedActionStyles = (identifier: string) => `
   #${identifier}.has-featured-actions {
     height: auto;
   }
   #${identifier} .featured-actions {
     box-sizing: border-box;
     display: flex;
-    gap: 8px;
+    gap: 7px;
     width: 320px;
-    margin-top: 62px;
+    margin-top: 70px;
   }
   #${identifier}.posterGeneric .featured-actions {
-    margin-top: 12px;
+    margin-top: 20px;
   }
   #${identifier} .featured-action {
     box-sizing: border-box;
@@ -212,31 +237,46 @@ export const getFeaturedActionStyles = (
     flex-direction: column;
     align-items: flex-start;
     justify-content: space-between;
-    height: 76px;
-    padding: 10px 12px;
-    border-radius: 14px;
+    height: 99px;
+    padding: 11px 12px 11px 13px;
+    border-radius: 17px;
     background: #ffffff;
-    color: #1c1c1e;
-    box-shadow: 0 3px 4px 0 rgb(0 0 0 / 20%), 0 2px 5px 0 rgb(0 0 0 / 19%);
+    color: #000000;
+    text-align: left;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 12%), 0 0 0 0.5px rgb(0 0 0 / 6%);
   }
   #${identifier} .featured-action-icon {
     flex: none;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 30px;
-    height: 30px;
+    width: 25px;
+    height: 25px;
     border-radius: 50%;
-    background: ${colors.backgroundColor || "#1c1c1e"};
-    color: ${colors.foregroundColor || "#ffffff"};
+    background: #34c759;
+    color: #ffffff;
   }
-  #${identifier} .featured-action-label {
+  #${identifier} .featured-action-text {
+    display: flex;
+    flex-direction: column;
     max-width: 100%;
-    font-size: 14px;
-    font-weight: 600;
-    line-height: 18px;
+    min-width: 0;
+  }
+  #${identifier} .featured-action-label,
+  #${identifier} .featured-action-subtitle {
+    max-width: 100%;
+    font-size: 13px;
+    line-height: 16px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+  #${identifier} .featured-action-label {
+    font-weight: 600;
+  }
+  #${identifier} .featured-action-subtitle {
+    font-weight: 400;
+    color: #8a8a8e;
   }
 `;

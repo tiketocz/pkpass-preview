@@ -250,7 +250,7 @@ export interface PassData {
 }
 
 /**
- * Action types the preview has a dedicated (proposal) tile for. Any other
+ * Action types the preview has a dedicated tile for (native-referenced). Any other
  * string is still accepted and rendered as a generic tile.
  */
 export type KnownFeaturedActionType = "addToBalance" | "call";

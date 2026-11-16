@@ -2,6 +2,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import {
+  FEATURED_ACTION_SUBTITLE,
   MAX_FEATURED_ACTIONS,
   PKPassPreview,
   type PreviewProps,
@@ -124,6 +125,7 @@ describe("resolveFeaturedActions", () => {
       type: "orderFood",
       known: false,
       label: UNKNOWN_FEATURED_ACTION_LABEL,
+      subtitle: FEATURED_ACTION_SUBTITLE,
     });
   });
 });
@@ -140,6 +142,15 @@ describe("PKPassPreview featured actions", () => {
     expect(row?.previousElementSibling?.id).toBe("passCard");
     expect(doc.querySelector("#passCard .featured-actions")).toBeNull();
     expect(tileIds(doc)).toEqual(["vltava-balance", "vltava-support"]);
+  });
+
+  it("renders native-reference labels and the Open Link subtitle", () => {
+    const doc = render(genericPass([BALANCE, SUPPORT]), { targetOs: "ios27" });
+    const text = (sel: string) => Array.from(doc.querySelectorAll(sel)).map((el) => el.textContent);
+    expect(text(".featured-action-label")).toEqual(["Add to Balance", "Call"]);
+    expect(text(".featured-action-subtitle")).toEqual(["Open Link", "Open Link"]);
+    // Every tile has an icon badge with an SVG glyph.
+    expect(doc.querySelectorAll(".featured-action-icon svg")).toHaveLength(2);
   });
 
   it("renders a single tile for one action", () => {
@@ -206,9 +217,12 @@ describe("PKPassPreview featured actions", () => {
       doc = render(genericPass(malformed), { targetOs: "ios27" });
     }).not.toThrow();
     expect(doc && tileIds(doc)).toEqual(["mystery"]);
-    expect(doc?.querySelector(".featured-action-unknown")?.textContent).toBe(
+    expect(doc?.querySelector(".featured-action-unknown .featured-action-label")?.textContent).toBe(
       UNKNOWN_FEATURED_ACTION_LABEL,
     );
+    expect(
+      doc?.querySelector(".featured-action-unknown .featured-action-subtitle")?.textContent,
+    ).toBe(FEATURED_ACTION_SUBTITLE);
 
     for (const bad of [null, "x", 1, { a: 1 }]) {
       expect(() => render(genericPass(bad), { targetOs: "ios27" })).not.toThrow();
