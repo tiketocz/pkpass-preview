@@ -11,11 +11,6 @@ const withPosterGeneric = (posterGeneric: PassStructure): Record<string, unknown
   return values;
 };
 
-const webOnlyReferenceLabel = "iOS Wallet — iOS 27 reference pending";
-
-const webOnlyPlaceholder = (details: string) =>
-  `Web render only — awaiting iOS 27 reference screenshot. ${details}`;
-
 const fallbackArgs = {
   values: vltavaClub,
   screenshot: "vltava-club-ios-26.5",
@@ -80,17 +75,14 @@ export const PosterShortText: Story = {
       primaryFields: [{ key: "title", value: "Vltava Club" }],
     }),
     screenshot: "vltava-club-poster-short-text-ios-27",
-    referenceLabel: webOnlyReferenceLabel,
-    referencePlaceholder: webOnlyPlaceholder(
-      "Web omits the optional header, second primary field, and footer; the corresponding iOS layout is unknown.",
-    ),
+    referenceLabel: "iOS Wallet — iOS 27.0",
     variant: "poster",
   },
   parameters: {
     docs: {
       description: {
         story:
-          "Web render only — awaiting iOS 27 reference screenshot. Exercises a single primary field with headerFields, a second primary field, and footerFields omitted; the corresponding iOS layout is unknown.",
+          'Observed on iPhone 17 Pro with iOS 27.0: the bottom band contains only the Vltava Club title; the top-right header slot and footer are empty, while the logo and truncated logoText ("Vltava…") remain top-left. The web render matches the omitted header/footer and single-title bottom band, but shows the full "Vltava Club" logoText.',
       },
     },
   },
@@ -128,17 +120,14 @@ export const PosterLongCzechText: Story = {
       ],
     }),
     screenshot: "vltava-club-poster-long-czech-text-ios-27",
-    referenceLabel: webOnlyReferenceLabel,
-    referencePlaceholder: webOnlyPlaceholder(
-      "Web wraps the header, truncates the title and member with ellipses, and fits the footer on one line; no text shrinks, and exact iOS fitting is unknown.",
-    ),
+    referenceLabel: "iOS Wallet — iOS 27.0",
     variant: "poster",
   },
   parameters: {
     docs: {
       description: {
         story:
-          "Web render only — awaiting iOS 27 reference screenshot. The web header wraps, title and member truncate with ellipses, footer fits on one line, and no text shrinks; exact iOS fitting is unknown.",
+          'Observed on iPhone 17 Pro with iOS 27.0: the header value is a single truncated line ("Zlaté celoroční s výh…"); the smaller title uses two lines and cuts off after "Vltavský klub přátel / Pražského hradu a Karlova"; the member name truncates to "Žofie Přemyslovna Dvořáčk…"; logoText truncates to "Vltava…"; and the full footer value "VC-2026-ŽLUŤOUČKÝ-0024-PRAHA" appears without its label. The web render instead wraps the full header value onto two lines, keeps a much larger one-line title with an ellipsis, truncates the member name earlier, and shows the full logoText; like iOS, it fits the footer value on one line and omits the footer label.',
       },
     },
   },
@@ -159,17 +148,14 @@ export const PosterMorePrimaryFields: Story = {
       footerFields: [{ key: "member-id", label: "ČLENSKÉ ČÍSLO", value: "VC-0024" }],
     }),
     screenshot: "vltava-club-poster-more-primary-fields-ios-27",
-    referenceLabel: webOnlyReferenceLabel,
-    referencePlaceholder: webOnlyPlaceholder(
-      "Web renders only the first two primary fields; ÚROVEŇ and BODY are ignored. Apple documents up to four primary fields for posterGeneric; the iOS 27 layout of this variant is not yet verified by a screenshot.",
-    ),
+    referenceLabel: "iOS Wallet — iOS 27.0",
     variant: "poster",
   },
   parameters: {
     docs: {
       description: {
         story:
-          "Web render only — awaiting iOS 27 reference screenshot. The current web renderer intentionally displays only the first two primary fields, so ÚROVEŇ and BODY are ignored. Apple documents up to four primary fields for posterGeneric (https://developer.apple.com/documentation/walletpasses/creating-a-poster-generic-pass); the concrete iOS 27 layout of this variant is not yet verified by a screenshot.",
+          'Observed on iPhone 17 Pro with iOS 27.0: Wallet shows all four primary fields in one bottom-band row—large "Vltava Club" on the left, then Členka/Anna, Úroveň/Gold, and Body/1 250 label/value columns—shrinking the title and values to fit. It shows footer value "VC-0024" without its label and truncates logoText to "Vltava…". Known web↔iOS difference: the web renderer shows only the first two primary fields, so ÚROVEŇ and BODY are missing and the remaining title is larger; it shows the full logoText. Both renders omit the footer label.',
       },
     },
   },
