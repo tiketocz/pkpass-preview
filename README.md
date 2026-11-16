@@ -90,6 +90,7 @@ That's it. No theme provider, no portal, no global CSS — the component scopes 
 | **All five pass styles** | `boardingPass`, `coupon`, `eventTicket`, `generic`, `storeCard`. |
 | **Auto-variant detection** | id-card / store-card-3col / boarding-pass / coupon / event-ticket-strip and 10+ others, derived from field shape. Manual override available. |
 | **Barcodes** | PDF417, QR, Code 128, Aztec — placement matches iOS (header, footer, strip-overlay). |
+| **iOS 27 Featured Actions (experimental)** | Opt in with `targetOs="ios27"` to render up to two `featuredActions` tiles below the card. Default output is unchanged. The design is a proposal pending a native reference; see the [package README](packages/preview/README.md#target-ios-version--featured-actions-ios-27-experimental). |
 | **Transit icons** | Airplane / train / bus / boat / generic, inline JSX SVG, `fill: currentColor` follows `labelColor`. |
 | **Back fields & dark mode** | iOS-accurate dark back side with link/separator treatment. |
 | **Scoped styles** | Unique container id per instance — no global CSS, no portal, safe to render many cards on one page. |

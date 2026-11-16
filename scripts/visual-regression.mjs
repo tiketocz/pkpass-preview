@@ -137,6 +137,36 @@ async function captureStory(page, storyId) {
   return { storyId, iosSrc, ourBuf };
 }
 
+// Render-only baseline for stories without an iOS reference (e.g. TIK-318
+// Featured Actions, whose tiles sit BELOW #passCard). Captures the whole
+// PKPassPreview root including content that overflows it (the classic front
+// is taller than #passCard). Never feeds the metrics/report.
+async function captureFullPreview(page) {
+  const clip = await page.evaluate(() => {
+    const root = document.querySelector("#passCard")?.parentElement;
+    if (!root) return null;
+    const { left, top, right } = root.getBoundingClientRect();
+    let { bottom } = root.getBoundingClientRect();
+    for (const el of root.querySelectorAll("*")) {
+      const r = el.getBoundingClientRect();
+      if (r.width === 0 || r.height === 0) continue;
+      // Only grow downwards: the classic front overflows the root at the
+      // bottom; decorations poking out above/sideways are not wanted.
+      bottom = Math.max(bottom, r.bottom);
+    }
+    // Small margin so box-shadows are not cut off.
+    const pad = 8;
+    return {
+      x: Math.max(0, left - pad + window.scrollX),
+      y: Math.max(0, top - pad + window.scrollY),
+      width: right - left + 2 * pad,
+      height: bottom - top + 2 * pad,
+    };
+  });
+  if (!clip) return null;
+  return page.screenshot({ clip, fullPage: true });
+}
+
 async function compareOne({ ourBuf, iosPath, outDir, slug }) {
   const iosOriginal = await fs.readFile(iosPath);
   const ourPng = PNG.sync.read(ourBuf);
@@ -214,6 +244,7 @@ async function main() {
   await fs.mkdir(path.join(OUT_DIR, "diff"), { recursive: true });
   await fs.mkdir(path.join(OUT_DIR, "ours"), { recursive: true });
   await fs.mkdir(path.join(OUT_DIR, "ref"), { recursive: true });
+  await fs.mkdir(path.join(OUT_DIR, "render-only"), { recursive: true });
 
   const stories = await discoverStories(STORYBOOK_DIR);
   if (stories.length === 0) {
@@ -253,7 +284,13 @@ async function main() {
       });
       if (!captured) continue;
       if (!captured.iosSrc) {
-        console.log(`  ${story.padEnd(40)} skip (no iOS reference)`);
+        const renderBuf = await captureFullPreview(page).catch(() => null);
+        if (renderBuf) {
+          await fs.writeFile(path.join(OUT_DIR, "render-only", `${slugify(story)}.png`), renderBuf);
+        }
+        console.log(
+          `  ${story.padEnd(40)} skip (no iOS reference)${renderBuf ? " — render saved to render-only/" : ""}`,
+        );
         continue;
       }
 

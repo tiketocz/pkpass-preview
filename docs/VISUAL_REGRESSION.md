@@ -25,7 +25,7 @@ For each in-scope story:
 3. `pixelmatch` diff count → reported as %-of-pixels-different.
 4. `ssim.js` mssim score (0..1, higher = closer match).
 
-Stories without an iOS reference are still discovered via the tag but skipped at metric time with a log line.
+Stories without an iOS reference are still discovered via the tag but skipped at metric time with a log line. For those stories the script also saves a render-only baseline, `render-only/<slug>.png`. It captures the whole `PKPassPreview` root, including content that overflows `#passCard` such as the classic front's bottom edge and the iOS 27 Featured Actions tiles (TIK-318). These PNGs are not part of `report.json` or the metrics.
 
 ## Local run
 
@@ -41,6 +41,7 @@ Outputs:
 - `visual-regression-output/report.json`
 - `visual-regression-output/report.md`
 - `visual-regression-output/{ours,ref,diff}/*.png`
+- `visual-regression-output/render-only/*.png` (stories without an iOS reference)
 
 Env overrides: `STORYBOOK_DIR`, `STORYBOOK_PORT`, `OUT_DIR`, `DPR`, `VRT_TAG` (default `vrt`).
 

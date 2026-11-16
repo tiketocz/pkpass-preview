@@ -239,6 +239,41 @@ export interface PassData {
 
   // NFC-Enabled Pass Keys
   nfc?: NFC;
+
+  /**
+   * iOS 27 Featured Actions (TIK-318): up to two action tiles Wallet shows
+   * below the pass front. Typed loosely on purpose — pass.json is untrusted
+   * input, so the renderer validates every entry at runtime
+   * (see `resolveFeaturedActions`) instead of trusting this shape.
+   */
+  featuredActions?: FeaturedAction[];
 }
+
+/**
+ * Action types the preview has a dedicated (proposal) tile for. Any other
+ * string is still accepted and rendered as a generic tile.
+ */
+export type KnownFeaturedActionType = "addToBalance" | "call";
+
+/**
+ * One entry of the top-level `featuredActions` array, following
+ * apple/pass-builder `Pass+Action.swift`: `identifier` (required, unique
+ * within the pass), `type` (required) and `url` (optional).
+ */
+export interface FeaturedAction {
+  identifier: string;
+  // `string & {}` keeps editor autocompletion for the known types while
+  // still allowing types Apple adds later.
+  type: KnownFeaturedActionType | (string & {});
+  url?: string;
+}
+
+/**
+ * iOS release the preview should emulate for capability-gated features.
+ * Independent from `variant` (which only picks poster vs classic layout).
+ * - `"ios26"`: pre-iOS 27 Wallet — no Featured Actions.
+ * - `"ios27"`: renders Featured Actions tiles below the card front.
+ */
+export type PreviewTargetOs = "ios26" | "ios27";
 
 export type PassFiles = { [key: string]: string | null };

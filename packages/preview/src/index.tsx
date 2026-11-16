@@ -3,6 +3,11 @@ import { useMemo, useState } from "react";
 import { BarcodesPreview } from "./components/BarcodesPreview";
 import { PassBackFieldItem, PassFieldItem, PassFieldItemHeader } from "./components/PassFieldItems";
 import {
+  FeaturedActionsRow,
+  getFeaturedActionStyles,
+  resolveFeaturedActions,
+} from "./featured-actions";
+import {
   FONT_PROFILES,
   type PassVariant,
   calculateGlobalFontSizeForRow,
@@ -10,9 +15,19 @@ import {
 } from "./font-profiles";
 import { PASS_FONT_STACK, getPassStyles } from "./styles";
 import { TransitIcon } from "./transit-icon";
-import type { FieldType, PassData, PassField, PassStructure } from "./types";
+import type { FieldType, PassData, PassField, PassStructure, PreviewTargetOs } from "./types";
 
 export type { PassData, PassField, PassStructure, PKTextAlignment, FieldType } from "./types";
+// TIK-318: iOS 27 Featured Actions (additive exports).
+export type { FeaturedAction, KnownFeaturedActionType, PreviewTargetOs } from "./types";
+export {
+  FEATURED_ACTION_LABELS,
+  MAX_FEATURED_ACTIONS,
+  UNKNOWN_FEATURED_ACTION_LABEL,
+  resolveFeaturedActions,
+  supportsFeaturedActions,
+} from "./featured-actions";
+export type { ResolvedFeaturedAction } from "./featured-actions";
 export { PassTransitType } from "./types";
 // TIK-106: re-exported from ./font-profiles so the char-density algorithm
 // lives in a standalone module (testable without rendering React, coverage
@@ -43,6 +58,15 @@ export interface PreviewProps {
    * pass-type fallback. Omit this prop to preserve the existing behaviour.
    */
   variant?: "poster" | "fallback";
+  /**
+   * iOS release to emulate for capability-gated features (TIK-318).
+   * Independent from `variant`, which only chooses the layout.
+   * - omitted (default) or `"ios26"`: no Featured Actions — identical output
+   *   to previous releases.
+   * - `"ios27"`: renders up to two top-level `featuredActions` as tiles below
+   *   the card front (proposal design, pending native reference).
+   */
+  targetOs?: PreviewTargetOs;
 }
 
 export type PreviewVariant = NonNullable<PreviewProps["variant"]>;
@@ -182,7 +206,12 @@ export const deriveVariant = (values: { [key: string]: any }): PassVariant => {
   return "default";
 };
 
-export const PKPassPreview = ({ values, removeVariablePlaceholders, variant }: PreviewProps) => {
+export const PKPassPreview = ({
+  values,
+  removeVariablePlaceholders,
+  variant,
+  targetOs,
+}: PreviewProps) => {
   const [flipped, setFlipped] = useState(false);
 
   // Typography is still derived from `values` (pkpass type + field shape).
@@ -222,6 +251,12 @@ export const PKPassPreview = ({ values, removeVariablePlaceholders, variant }: P
     () => resolvePassPresentation(data, variant),
     [data, variant],
   );
+  // TIK-318: validated + capped list; [] unless targetOs is "ios27".
+  const featuredActions = useMemo(
+    () => resolveFeaturedActions(data.featuredActions, targetOs),
+    [data.featuredActions, targetOs],
+  );
+  const hasFeaturedActions = featuredActions.length > 0;
   const artworkSource = imageSource(values["artwork.png"]);
   const logoSource = imageSource(values["logo.png"]);
   const thumbnailSource = imageSource(values["thumbnail.png"]);
@@ -460,7 +495,12 @@ ${secondaryFieldsCount >= 4 ? `max-width: calc(100% / ${secondaryFieldsCount});`
   ]);
 
   return (
-    <div id={identifier} className={`${editorClassName} pkpass-variant-${resolvedVariant}`}>
+    <div
+      id={identifier}
+      className={`${editorClassName} pkpass-variant-${resolvedVariant}${
+        hasFeaturedActions ? " has-featured-actions" : ""
+      }`}
+    >
       <div id="passCard" className={`flipper ${flipped ? "flipped" : ""}`}>
         {isPoster ? (
           <div id="passFront" className="pass shadow poster-front">
@@ -649,7 +689,16 @@ ${secondaryFieldsCount >= 4 ? `max-width: calc(100% / ${secondaryFieldsCount});`
           </div>
         </div>
       </div>
-      <style>{dynamicStyles}</style>
+      {hasFeaturedActions ? <FeaturedActionsRow actions={featuredActions} /> : null}
+      <style>
+        {hasFeaturedActions
+          ? dynamicStyles +
+            getFeaturedActionStyles(identifier, {
+              backgroundColor: data.backgroundColor,
+              foregroundColor: data.foregroundColor,
+            })
+          : dynamicStyles}
+      </style>
     </div>
   );
 };
