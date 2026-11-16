@@ -168,3 +168,32 @@ export const PosterMorePrimaryFields: Story = {
     },
   },
 };
+
+export const PosterThreePrimaryFields: Story = {
+  name: "Poster front text — three primary fields",
+  tags: ["vrt"],
+  args: {
+    values: withPosterGeneric({
+      headerFields: [{ key: "status", label: "STAV", value: "Aktivní" }],
+      primaryFields: [
+        { key: "title", value: "Vltava Club" },
+        { key: "member", label: "ČLENKA", value: "Anna" },
+        { key: "level", label: "ÚROVEŇ", value: "Gold" },
+      ],
+      footerFields: [{ key: "member-id", label: "ČLENSKÉ ČÍSLO", value: "VC-0024" }],
+    }),
+    screenshot: "vltava-club-poster-three-primary-fields-ios-27",
+    referenceLabel: "iOS Wallet — iOS 27 reference pending",
+    referencePlaceholder:
+      "Web render only — awaiting iOS 27 reference screenshot. Checks the three-field bottom-band layout (title + two label/value columns).",
+    variant: "poster",
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Web render only — awaiting iOS 27 reference screenshot. Three primary fields: the title stays on the left (slightly smaller than with one or two fields) and Členka/Anna and Úroveň/Gold render as label/value columns in the same row. iOS 27 layout for exactly three fields is not yet verified by a screenshot.",
+      },
+    },
+  },
+};

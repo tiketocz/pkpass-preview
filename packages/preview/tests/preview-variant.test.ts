@@ -104,4 +104,26 @@ describe("poster optional front field groups", () => {
       "BODY1 250",
     ]);
   });
+  it.each([1, 2, 3])("renders %i poster primary fields with a count class", (count) => {
+    const data = pass();
+    if (!data.posterGeneric) throw new Error("posterGeneric fixture is required");
+    data.posterGeneric.primaryFields = [
+      { key: "title", value: "Vltava Club" },
+      { key: "member", label: "ČLENKA", value: "Anna" },
+      { key: "level", label: "ÚROVEŇ", value: "Gold" },
+    ].slice(0, count);
+
+    const markup = renderToStaticMarkup(
+      createElement(PKPassPreview, {
+        values: { "pass.json": data },
+        variant: "poster",
+      }),
+    );
+    const rendered = new DOMParser().parseFromString(markup, "text/html");
+    const row = rendered.querySelector(".poster-primary-fields");
+
+    expect(row?.classList.contains(`poster-primary-count-${count}`)).toBe(true);
+    expect(row?.children).toHaveLength(count);
+    expect(row?.querySelectorAll(".poster-primary-column")).toHaveLength(count - 1);
+  });
 });
