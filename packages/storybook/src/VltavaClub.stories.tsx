@@ -161,7 +161,7 @@ export const PosterMorePrimaryFields: Story = {
     screenshot: "vltava-club-poster-more-primary-fields-ios-27",
     referenceLabel: webOnlyReferenceLabel,
     referencePlaceholder: webOnlyPlaceholder(
-      "Web renders only the first two primary fields; ÚROVEŇ and BODY are ignored. The iOS field limit is unknown.",
+      "Web renders only the first two primary fields; ÚROVEŇ and BODY are ignored. Apple documents up to four primary fields for posterGeneric; the iOS 27 layout of this variant is not yet verified by a screenshot.",
     ),
     variant: "poster",
   },
@@ -169,7 +169,7 @@ export const PosterMorePrimaryFields: Story = {
     docs: {
       description: {
         story:
-          "Web render only — awaiting iOS 27 reference screenshot. The current web renderer intentionally displays only the first two primary fields, so ÚROVEŇ and BODY are ignored; the iOS 27 field limit is unknown.",
+          "Web render only — awaiting iOS 27 reference screenshot. The current web renderer intentionally displays only the first two primary fields, so ÚROVEŇ and BODY are ignored. Apple documents up to four primary fields for posterGeneric (https://developer.apple.com/documentation/walletpasses/creating-a-poster-generic-pass); the concrete iOS 27 layout of this variant is not yet verified by a screenshot.",
       },
     },
   },
