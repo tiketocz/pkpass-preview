@@ -1,0 +1,69 @@
+{
+  "formatVersion": 1,
+  "passTypeIdentifier": "pass.eu.tiketo",
+  "teamIdentifier": "MVBMPD7HWW",
+  "serialNumber": "vltava-featured-actions-event-ticket",
+  "organizationName": "Tiketo Demo",
+  "description": "Vltava Club – Featured Actions demo",
+  "logoText": "Vltava Club",
+  "backgroundColor": "rgb(20, 30, 57)",
+  "foregroundColor": "rgb(255, 246, 233)",
+  "labelColor": "rgb(200, 212, 240)",
+  "barcodes": [
+    {
+      "format": "PKBarcodeFormatQR",
+      "message": "VLTAVA-DEMO-0024",
+      "messageEncoding": "iso-8859-1",
+      "altText": "VC-0024"
+    }
+  ],
+  "eventTicket": {
+    "headerFields": [
+      {
+        "key": "section",
+        "label": "SEKCE",
+        "value": "A"
+      }
+    ],
+    "primaryFields": [
+      {
+        "key": "event",
+        "label": "UDÁLOST",
+        "value": "Vltava Club Night"
+      }
+    ],
+    "secondaryFields": [
+      {
+        "key": "venue",
+        "label": "MÍSTO",
+        "value": "Praha"
+      }
+    ],
+    "auxiliaryFields": [
+      {
+        "key": "seat",
+        "label": "SEDADLO",
+        "value": "12"
+      }
+    ],
+    "backFields": [
+      {
+        "key": "about",
+        "label": "O VSTUPENCE",
+        "value": "Ukázková vstupenka."
+      }
+    ]
+  },
+  "featuredActions": [
+    {
+      "identifier": "vltava-balance",
+      "type": "addToBalance",
+      "url": "https://example.com/vltava-club/balance"
+    },
+    {
+      "identifier": "vltava-support",
+      "type": "call",
+      "url": "tel:+12025550123"
+    }
+  ]
+}

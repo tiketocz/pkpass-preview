@@ -85,6 +85,64 @@ header, centered barcode, all primary fields in one responsive bottom-band row,
 and footer fields. It is intended for previewing and is not yet a pixel-perfect
 implementation of every iOS 27 poster size or feature.
 
+## Target iOS version & Featured Actions (iOS 27, experimental)
+
+`PKPassPreview` accepts an optional `targetOs` prop that says which iOS release
+the preview emulates for capability-gated features. It is independent of
+`variant`: `variant` chooses the layout (poster vs classic), `targetOs` chooses
+which iOS features are shown.
+
+```tsx
+<PKPassPreview values={passFiles} targetOs="ios27" />
+<PKPassPreview values={passFiles} targetOs="ios27" variant="poster" />
+```
+
+| `targetOs`           | Featured Actions                                       |
+| -------------------- | ------------------------------------------------------ |
+| omitted (default)    | not rendered: output identical to previous releases    |
+| `"ios26"`            | not rendered (Wallet before iOS 27 ignores them)       |
+| `"ios27"`            | up to two tiles rendered below the card front           |
+
+With `targetOs="ios27"`, the top-level `featuredActions` array of `pass.json`
+(schema per apple/pass-builder `Pass+Action.swift`: `identifier` required and
+unique, `type` required, `url` optional) is rendered as a row of up to two
+white rounded tiles directly below the card front, in input order. This works
+for every pass style, including `generic` and `eventTicket`. Each tile has a
+green circle icon (top left), a bold label and a grey "Open Link" subtitle:
+
+| `type`         | Icon (white glyph on iOS green `#34C759`) | Label            | Subtitle    | Status                 |
+| -------------- | ----------------------------------------- | ---------------- | ----------- | ---------------------- |
+| `addToBalance` | credit card                               | "Add to Balance" | "Open Link" | native reference       |
+| `call`         | phone handset                             | "Call"           | "Open Link" | native reference       |
+| anything else  | arrow                                     | "Open"           | "Open Link" | proposal (unverified)  |
+
+Invalid input never throws. The rules are exported as `resolveFeaturedActions(featuredActions, targetOs)`:
+
+- A non-array value (missing, `null`, object, …) means no actions.
+- Entries that are not plain objects, or have a missing or blank `identifier`
+  or `type`, or have a non-string `url`, are skipped.
+- A later entry that repeats an `identifier` is skipped.
+- Unknown `type` values are kept and rendered as a generic tile with the label
+  "Open" and an arrow icon.
+- Only the first two valid entries are rendered. Zero valid entries means no
+  tile container at all.
+
+> **Native reference vs proposal.** The two-tile row for `addToBalance` +
+> `call` (tile proportions, green icons, labels, "Open Link" subtitle) is
+> aligned to native Apple Wallet iOS 27.0 (24A434) on an iPhone 17 Pro
+> Simulator, for both `generic` and `eventTicket`. It is an approximation,
+> not pixel-perfect (web fonts, glyph shapes, shadow). Still a **proposal**
+> without native reference: the unknown-type tile ("Open" + arrow) and the
+> single-action layout (one tile spanning the card width)
+> ([TIK-318](https://jakubknejzlik.atlassian.net/browse/TIK-318)).
+> The preview is static: tiles are not links, and `url` is only exposed via
+> `title` / `data-url`.
+
+New exports: types `FeaturedAction`, `KnownFeaturedActionType`,
+`PreviewTargetOs` and `ResolvedFeaturedAction`, plus `resolveFeaturedActions`,
+`supportsFeaturedActions`, `MAX_FEATURED_ACTIONS`, `FEATURED_ACTION_LABELS`,
+`FEATURED_ACTION_SUBTITLE` and `UNKNOWN_FEATURED_ACTION_LABEL`.
+
 ## Frozen API contract
 
 The published package `@tiketo/pkpass-preview` is the public successor to the private `pkpass-builder-ui`. Consumers must be able to swap their import path with **zero code changes**.

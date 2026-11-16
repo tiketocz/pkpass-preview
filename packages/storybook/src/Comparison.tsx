@@ -1,4 +1,4 @@
-import { PKPassPreview, type PreviewVariant } from "@tiketo/pkpass-preview";
+import { PKPassPreview, type PreviewTargetOs, type PreviewVariant } from "@tiketo/pkpass-preview";
 import { useState } from "react";
 
 export type ComparisonArgs = {
@@ -8,6 +8,8 @@ export type ComparisonArgs = {
   referenceLabel?: string;
   referencePlaceholder?: string;
   variant?: PreviewVariant;
+  /** Forwarded to PKPassPreview; omitted = legacy behaviour (TIK-318). */
+  targetOs?: PreviewTargetOs;
 };
 
 const styles = {
@@ -64,6 +66,7 @@ export const Comparison = ({
   referenceLabel = "iOS Wallet",
   referencePlaceholder,
   variant,
+  targetOs,
 }: ComparisonArgs) => {
   const [hasShot, setHasShot] = useState(true);
   const src = `screenshots/${screenshot}.${screenshotExtension}`;
@@ -71,7 +74,7 @@ export const Comparison = ({
     <div style={styles.wrap}>
       <div style={styles.col}>
         <div style={styles.label}>Our render</div>
-        <PKPassPreview values={values} variant={variant} />
+        <PKPassPreview values={values} variant={variant} targetOs={targetOs} />
       </div>
       <div style={styles.col}>
         <div style={styles.label}>{referenceLabel}</div>
