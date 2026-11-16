@@ -475,14 +475,16 @@ ${secondaryFieldsCount >= 4 ? `max-width: calc(100% / ${secondaryFieldsCount});`
                   {logoSource && <img alt="" src={logoSource} />}
                   {data.logoText && <span>{data.logoText}</span>}
                 </div>
-                <div className="poster-header-fields">
-                  {structure?.headerFields?.map((field, index) => (
-                    <div className="poster-field" key={field.key || `${index}`}>
-                      <label>{field.label}</label>
-                      <span>{field.attributedValue?.toString() || field.value?.toString()}</span>
-                    </div>
-                  ))}
-                </div>
+                {structure?.headerFields?.length ? (
+                  <div className="poster-header-fields">
+                    {structure.headerFields.map((field, index) => (
+                      <div className="poster-field" key={field.key || `${index}`}>
+                        <label>{field.label}</label>
+                        <span>{field.attributedValue?.toString() || field.value?.toString()}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
               </div>
               <BarcodesPreview barcodes={data.barcodes} expired={isExpired} qrSize={116} />
             </div>
@@ -504,14 +506,16 @@ ${secondaryFieldsCount >= 4 ? `max-width: calc(100% / ${secondaryFieldsCount});`
                   </div>
                 )}
               </div>
-              <div className="poster-footer-fields">
-                {structure?.footerFields?.map((field, index) => (
-                  <div className="poster-field" key={field.key || `${index}`}>
-                    <label>{field.label}</label>
-                    <span>{field.attributedValue?.toString() || field.value?.toString()}</span>
-                  </div>
-                ))}
-              </div>
+              {structure?.footerFields?.length ? (
+                <div className="poster-footer-fields">
+                  {structure.footerFields.map((field, index) => (
+                    <div className="poster-field" key={field.key || `${index}`}>
+                      <label>{field.label}</label>
+                      <span>{field.attributedValue?.toString() || field.value?.toString()}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
             </div>
           </div>
         ) : (

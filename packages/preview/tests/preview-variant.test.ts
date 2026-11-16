@@ -1,5 +1,7 @@
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { resolvePassPresentation } from "../src/index";
+import { PKPassPreview, resolvePassPresentation } from "../src/index";
 import type { PassData } from "../src/types";
 
 const pass = (includePoster = true): PassData => ({
@@ -57,5 +59,21 @@ describe("resolvePassPresentation", () => {
       structure: data.generic,
       isPoster: false,
     });
+  });
+});
+
+describe("poster optional front field groups", () => {
+  it("does not render empty header or footer containers when their fields are omitted", () => {
+    const markup = renderToStaticMarkup(
+      createElement(PKPassPreview, {
+        values: { "pass.json": pass() },
+        variant: "poster",
+      }),
+    );
+    const rendered = new DOMParser().parseFromString(markup, "text/html");
+
+    expect(rendered.querySelector(".poster-header-fields")).toBeNull();
+    expect(rendered.querySelector(".poster-footer-fields")).toBeNull();
+    expect(rendered.querySelector(".poster-title")?.textContent).toBe("Vltava Club");
   });
 });

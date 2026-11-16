@@ -6,6 +6,7 @@ export type ComparisonArgs = {
   screenshot: string;
   screenshotExtension?: "jpg" | "png";
   referenceLabel?: string;
+  referencePlaceholder?: string;
   variant?: PreviewVariant;
 };
 
@@ -61,6 +62,7 @@ export const Comparison = ({
   screenshot,
   screenshotExtension = "jpg",
   referenceLabel = "iOS Wallet",
+  referencePlaceholder,
   variant,
 }: ComparisonArgs) => {
   const [hasShot, setHasShot] = useState(true);
@@ -82,7 +84,11 @@ export const Comparison = ({
           />
         ) : (
           <div style={styles.placeholder}>
-            iOS screenshot pending — add <code style={{ fontSize: 12 }}>public/{src}</code>
+            {referencePlaceholder ?? (
+              <>
+                iOS screenshot pending — add <code style={{ fontSize: 12 }}>public/{src}</code>
+              </>
+            )}
           </div>
         )}
       </div>
