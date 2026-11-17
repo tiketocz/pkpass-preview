@@ -218,6 +218,7 @@ export const FeaturedActionsRow = ({ actions }: { actions: ResolvedFeaturedActio
 export const getFeaturedActionStyles = (identifier: string) => `
   #${identifier}.has-featured-actions {
     height: auto;
+    max-height: none;
   }
   #${identifier} .featured-actions {
     box-sizing: border-box;
