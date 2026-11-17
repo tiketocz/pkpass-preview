@@ -32,8 +32,17 @@ try {
     const page = await context.newPage();
     const overflows = [];
     const loadFailures = [];
+    const missingReferences = [];
+    let entryReferenceFailures = [];
+    page.on("response", (response) => {
+      const pathname = new URL(response.url()).pathname;
+      if (response.status() === 404 && pathname.startsWith("/screenshots/")) {
+        entryReferenceFailures.push(pathname);
+      }
+    });
 
     for (const entry of entries) {
+      entryReferenceFailures = [];
       const viewMode = entry.type === "docs" ? "docs" : "story";
       const url = `http://127.0.0.1:${port}/iframe.html?id=${encodeURIComponent(entry.id)}&viewMode=${viewMode}`;
       try {
@@ -70,6 +79,9 @@ try {
         if (measurement.documentWidth > measurement.viewportWidth + 1) {
           overflows.push({ id: entry.id, type: entry.type, ...measurement });
         }
+        for (const referencePath of new Set(entryReferenceFailures)) {
+          missingReferences.push({ id: entry.id, path: referencePath });
+        }
       } catch (error) {
         loadFailures.push({ id: entry.id, message: error.message });
       }
@@ -87,8 +99,17 @@ try {
     for (const failure of loadFailures) {
       console.error(`  ${failure.id}: load failed — ${failure.message}`);
     }
+    for (const missing of missingReferences) {
+      console.error(`  ${missing.id}: reference returned 404 — ${missing.path}`);
+    }
 
-    if (loadFailures.length > 0 || (width >= 390 && overflows.length > 0)) failed = true;
+    if (
+      loadFailures.length > 0 ||
+      missingReferences.length > 0 ||
+      (width >= 390 && overflows.length > 0)
+    ) {
+      failed = true;
+    }
     await context.close();
   }
 } finally {

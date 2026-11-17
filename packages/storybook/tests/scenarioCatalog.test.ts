@@ -1,3 +1,6 @@
+import { existsSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 import { backFields1 } from "../src/fixtures/back-fields";
@@ -116,6 +119,16 @@ describe("scenario catalog fixture metadata", () => {
       expect(values, `missing test fixture for ${scenario.fixtureKey}`).toBeDefined();
       if (!values) throw new Error(`missing test fixture for ${scenario.fixtureKey}`);
       expect(getPassStyles(values), scenario.id).toEqual(scenario.passStyles);
+    }
+  });
+
+  it("resolves every metadata reference path to an existing public screenshot", () => {
+    const storybookRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+    for (const scenario of scenarioCatalog) {
+      for (const reference of scenario.references) {
+        const referencePath = path.resolve(storybookRoot, "public", reference.path);
+        expect(existsSync(referencePath), `${scenario.id}: ${reference.path}`).toBe(true);
+      }
     }
   });
 });

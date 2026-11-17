@@ -9,7 +9,8 @@
  *
  * For each in-scope story the script:
  *   - screenshots the rendered PKPassPreview (#passCard inside Comparison)
- *   - loads the iOS reference image (img alt^="iOS Wallet screenshot")
+ *   - loads the Wallet reference image via its stable data hook (with a
+ *     legacy alt-text fallback for older/base Storybook builds)
  *   - resizes the iOS reference to match the screenshot dimensions
  *   - computes pixelmatch %-diff and SSIM
  *   - writes per-fixture diff PNG + aggregate report.{json,md}
@@ -148,10 +149,12 @@ async function captureStory(page, storyId) {
   const cardHandle = await page.$("#passCard");
   if (!cardHandle) return null;
 
-  // Comparison renders the iOS img with alt starting "iOS Wallet screenshot
-  // of <name>". If the file is missing, the component swaps to a placeholder
-  // <div>; querying for the <img> here returns null and we skip the story.
-  const imgHandle = await page.$('img[alt^="iOS Wallet screenshot"]');
+  // New builds expose a stable data hook. Keep the old alt selector as a
+  // fallback because CI runs this head script against both the new build and
+  // the base build, whose Comparison predates the data hook.
+  const imgHandle =
+    (await page.$("img[data-wallet-reference]")) ??
+    (await page.$('img[alt^="iOS Wallet screenshot"]'));
   const iosSrc = imgHandle ? await imgHandle.getAttribute("src") : null;
 
   // TIK-318: when Featured Actions tiles render (below #passCard), the iOS

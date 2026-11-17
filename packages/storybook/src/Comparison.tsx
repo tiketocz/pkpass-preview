@@ -127,6 +127,7 @@ export const WebWalletDetail = (props: WebWalletDetailProps) => {
             <img
               src={reference.path}
               alt={`${referenceLabel(reference)} reference`}
+              data-wallet-reference
               className="pkpass-reference"
               style={styles.img}
               onError={() => setFailedPath(reference.path)}

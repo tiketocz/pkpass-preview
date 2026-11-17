@@ -399,22 +399,23 @@ export const scenarioCatalog: readonly ScenarioMetadata[] = [
   }),
   ...(
     [
-      ["code-128-1", "Code 128 — 1 character"],
-      ["code-128-2", "Code 128 — 3 characters"],
-      ["code-128-3", "Code 128 — 20-character message"],
-      ["code-128-4", "Code 128 — 40-character message"],
-      ["code-128-5", "Code 128 — 80-character message"],
-      ["pdf-417-1", "PDF417 — short alphanumeric message"],
-      ["pdf-417-2", "PDF417 — 20-character message"],
-      ["pdf-417-3", "PDF417 — 40-character message"],
-      ["pdf-417-4", "PDF417 — compact alphanumeric message"],
-      ["large-barcode", "QR code — large payload"],
+      ["code-128-1", "Code 128 — 1 character", "code128-1"],
+      ["code-128-2", "Code 128 — 3 characters", "code128-2"],
+      ["code-128-3", "Code 128 — 20-character message", "code128-3"],
+      ["code-128-4", "Code 128 — 40-character message", "code128-4"],
+      ["code-128-5", "Code 128 — 80-character message", "code128-5"],
+      ["pdf-417-1", "PDF417 — short alphanumeric message", "pdf417-1"],
+      ["pdf-417-2", "PDF417 — 20-character message", "pdf417-2"],
+      ["pdf-417-3", "PDF417 — 40-character message", "pdf417-3"],
+      ["pdf-417-4", "PDF417 — compact alphanumeric message", "pdf417-4"],
+      ["large-barcode", "QR code — large payload", "large-barcode"],
     ] as const
-  ).map(([slug, title]) =>
+  ).map(([slug, title, reference]) =>
     legacyScenario({
       id: `barcode--${slug}`,
       title,
       fixtureKey: slug,
+      reference,
       passStyles: ["generic"],
       features: ["Barcodes", "iOS comparison"],
     }),
