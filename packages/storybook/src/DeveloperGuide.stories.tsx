@@ -97,6 +97,14 @@ const ApiPage = () => (
   </GuidePage>
 );
 
+const ISSUES_URL = "https://github.com/tiketocz/pkpass-preview/issues";
+
+const IssueLink = ({ number }: { number: number }) => (
+  <a href={`${ISSUES_URL}/${number}`} target="_blank" rel="noreferrer">
+    #{number}
+  </a>
+);
+
 const KnownDeviationsPage = () => (
   <GuidePage>
     <p className="guide-eyebrow">Developer guide</p>
@@ -109,13 +117,15 @@ const KnownDeviationsPage = () => (
       <section>
         <h2>One Featured Action</h2>
         <p>
-          <strong>Difference:</strong> {ONE_ACTION_DIFFERENCE} The unknown-action “Open” tile is
-          also an unverified proposal.
+          <strong>Difference:</strong> {ONE_ACTION_DIFFERENCE} Separately, every action type other
+          than <code>addToBalance</code> / <code>call</code> renders as the unverified “Open” tile,
+          including valid Apple types such as <code>place</code> or <code>viewSchedule</code>.
         </p>
         <p>
           <strong>Reference:</strong> iOS 27.0 build 24A434, iPhone 17 Pro Simulator, Generic and
-          Event Ticket passes. <strong>Status:</strong> open visual gap; width and content are based
-          on native captures.
+          Event Ticket passes. <strong>Status:</strong> open. Missing chevron:{" "}
+          <IssueLink number={31} /> (fix in progress). Action types and unknown-type fallback:{" "}
+          <IssueLink number={34} /> (needs Wallet references).
         </p>
       </section>
       <section>
@@ -127,7 +137,9 @@ const KnownDeviationsPage = () => (
         </p>
         <p>
           <strong>Reference:</strong> fixture <code>backFields1</code>, iOS 27.0 build 24A434,
-          iPhone 17 Pro Simulator. <strong>Status:</strong> documented product boundary; compare the{" "}
+          iPhone 17 Pro Simulator. <strong>Status:</strong> open, <IssueLink number={32} /> (iOS 27
+          Pass Details view for <code>targetOs="ios27"</code>; the in-card flip stays for older
+          targets). Compare the{" "}
           <StoryLink storyId="back-fields--ios-27-pass-details">Pass Details story</StoryLink>.
         </p>
       </section>
@@ -139,8 +151,10 @@ const KnownDeviationsPage = () => (
         </p>
         <p>
           <strong>Reference:</strong> Vltava Club iOS 27.0, iPhone 17 Pro Simulator.{" "}
-          <strong>Status:</strong> known approximation; field order, row structure, and clamps are
-          covered by focused stories.
+          <strong>Status:</strong> open, <IssueLink number={33} />: all five native crops are 1110 ×
+          1509 (435 px tall at 320 px width) while the web card is 320 × 420; aspect ratio first,
+          then fonts/truncation. Field order, row structure, and clamps are covered by focused
+          stories.
         </p>
       </section>
       <section>
