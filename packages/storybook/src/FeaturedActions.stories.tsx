@@ -12,6 +12,8 @@ import {
 // Native reference: Apple Wallet iOS 27.0 (24A434), iPhone 17 Pro Simulator,
 // detail of the added Vltava Club pass with [addToBalance, call]. The two
 // 2-action stories show that reference (card + tile row) next to our render;
+// the two older-iOS stories show the same 2-action pass in Apple Wallet
+// iOS 26.5 (Simulator, detail after add): card only, no tiles.
 // the tile look is aligned to it but is not pixel-perfect.
 //
 // NÁVRH / PROPOSAL, still unverified: the unknown-type tile ("Open" + arrow)
@@ -28,6 +30,7 @@ const PENDING_REFERENCE =
   "No native iOS 27 Wallet screenshot for this case yet (TIK-318) — tiles are only visible in the detail of an added pass, not in the Add-pass preview.";
 
 const NATIVE_REFERENCE_LABEL = "Apple Wallet / iOS 27.0 Simulator";
+const OLDER_IOS_REFERENCE_LABEL = "Apple Wallet / iOS 26.5 Simulator";
 
 type Style = "generic" | "eventTicket";
 
@@ -123,13 +126,11 @@ export const GenericOlderIos: Story = {
   args: {
     ...ios27("generic", 2),
     screenshot: "vltava-featured-actions-generic-2-ios-26",
-    referenceLabel: "iOS Wallet — iOS 26",
-    referencePlaceholder:
-      "Native iOS 26 reference pending — Wallet before iOS 27 ignores featuredActions.",
+    referenceLabel: OLDER_IOS_REFERENCE_LABEL,
     targetOs: "ios26",
   },
   parameters: story(
-    'Same pass with two actions but `targetOs="ios26"`: no tiles (identical to omitting `targetOs`).',
+    'Same pass with two actions but `targetOs="ios26"`: no tiles (identical to omitting `targetOs`). Right: native Apple Wallet iOS 26.5 reference — detail of the added pass with two actions in pass.json, no tile row.',
   ),
 };
 
@@ -138,12 +139,10 @@ export const EventTicketOlderIos: Story = {
   args: {
     ...ios27("eventTicket", 2),
     screenshot: "vltava-featured-actions-event-ticket-2-ios-26",
-    referenceLabel: "iOS Wallet — iOS 26",
-    referencePlaceholder:
-      "Native iOS 26 reference pending — Wallet before iOS 27 ignores featuredActions.",
+    referenceLabel: OLDER_IOS_REFERENCE_LABEL,
     targetOs: "ios26",
   },
   parameters: story(
-    'Same pass with two actions but `targetOs="ios26"`: no tiles (identical to omitting `targetOs`).',
+    'Same pass with two actions but `targetOs="ios26"`: no tiles (identical to omitting `targetOs`). Right: native Apple Wallet iOS 26.5 reference — detail of the added pass with two actions in pass.json, no tile row.',
   ),
 };
