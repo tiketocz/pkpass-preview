@@ -18,7 +18,7 @@ const meta: Meta<ComparisonArgs> = {
     docs: {
       description: {
         component:
-          'posterGeneric — the iOS 27 poster layout of a generic pass: full-bleed artwork, logo and constrained logoText top-left, one header value top-right, a bottom band with a large unlabeled title plus up to three label/value columns, a centered barcode and a value-only footer. Rendered with `<PKPassPreview variant="poster" />`: the `posterGeneric` block of pass.json is used when present, otherwise the classic `generic` structure. Wallet before iOS 27 ignores `posterGeneric` and shows `generic` — see [Examples / Vltava Club](?path=/docs/examples-vltava-club--docs) for both side by side. All stories use the signed Vltava Club pass with iPhone 17 Pro / iOS 27.0 references.',
+          'posterGeneric — the iOS 27 pass style: full-bleed artwork, logo and constrained logoText top-left, one header value top-right, a bottom band with a large unlabeled title plus up to three label/value columns, a centered barcode and a value-only footer. `<PKPassPreview variant="poster" />` uses this style when the pass has a `posterGeneric` block, otherwise the classic pass style. In Vltava Club the concrete fallback is `generic`, which Wallet before iOS 27 shows — see [Examples / Vltava Club](?path=/docs/examples-vltava-club--docs) for both side by side. Examples use Vltava Club fixtures with iPhone 17 Pro / iOS 27.0 references.',
       },
     },
   },
