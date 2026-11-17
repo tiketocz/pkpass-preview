@@ -7,7 +7,7 @@ import {
   vltavaFeaturedGeneric,
 } from "./fixtures/vltava-featured-actions";
 import { ONE_ACTION_NOTE } from "./knownDeviations";
-import { getScenario, scenarioTitle } from "./scenarioCatalog";
+import { getScenario } from "./scenarioCatalog";
 
 // TIK-318 — iOS 27 Featured Actions.
 //
@@ -104,7 +104,7 @@ export default meta;
 type Story = StoryObj<FeaturedStoryArgs>;
 
 export const GenericTwoActions: Story = {
-  name: scenarioTitle("examples-featured-actions-ios-27--generic-two-actions"),
+  name: "Generic — 2 actions (iOS 27)",
   args: featuredArgs("examples-featured-actions-ios-27--generic-two-actions", "generic", 2),
   parameters: story(
     "examples-featured-actions-ios-27--generic-two-actions",
@@ -114,7 +114,7 @@ export const GenericTwoActions: Story = {
 };
 
 export const GenericOneAction: Story = {
-  name: scenarioTitle("examples-featured-actions-ios-27--generic-one-action"),
+  name: "Generic — 1 action (iOS 27)",
   args: featuredArgs("examples-featured-actions-ios-27--generic-one-action", "generic", 1),
   parameters: story(
     "examples-featured-actions-ios-27--generic-one-action",
@@ -124,7 +124,7 @@ export const GenericOneAction: Story = {
 };
 
 export const GenericNoActions: Story = {
-  name: scenarioTitle("examples-featured-actions-ios-27--generic-no-actions"),
+  name: "Generic — 0 actions (iOS 27)",
   args: featuredArgs(
     "examples-featured-actions-ios-27--generic-no-actions",
     "generic",
@@ -140,7 +140,7 @@ export const GenericNoActions: Story = {
 };
 
 export const EventTicketTwoActions: Story = {
-  name: scenarioTitle("examples-featured-actions-ios-27--event-ticket-two-actions"),
+  name: "Event ticket — 2 actions (iOS 27)",
   args: featuredArgs(
     "examples-featured-actions-ios-27--event-ticket-two-actions",
     "eventTicket",
@@ -154,7 +154,7 @@ export const EventTicketTwoActions: Story = {
 };
 
 export const EventTicketOneAction: Story = {
-  name: scenarioTitle("examples-featured-actions-ios-27--event-ticket-one-action"),
+  name: "Event ticket — 1 action (iOS 27)",
   args: featuredArgs("examples-featured-actions-ios-27--event-ticket-one-action", "eventTicket", 1),
   parameters: story(
     "examples-featured-actions-ios-27--event-ticket-one-action",
@@ -164,7 +164,7 @@ export const EventTicketOneAction: Story = {
 };
 
 export const EventTicketNoActions: Story = {
-  name: scenarioTitle("examples-featured-actions-ios-27--event-ticket-no-actions"),
+  name: "Event ticket — 0 actions (iOS 27)",
   args: featuredArgs(
     "examples-featured-actions-ios-27--event-ticket-no-actions",
     "eventTicket",
@@ -180,7 +180,7 @@ export const EventTicketNoActions: Story = {
 };
 
 export const GenericOlderIos: Story = {
-  name: scenarioTitle("examples-featured-actions-ios-27--generic-older-ios"),
+  name: "Generic — 2 actions, iOS 26.5",
   args: featuredArgs("examples-featured-actions-ios-27--generic-older-ios", "generic", 2, "ios26"),
   parameters: story(
     "examples-featured-actions-ios-27--generic-older-ios",
@@ -190,7 +190,7 @@ export const GenericOlderIos: Story = {
 };
 
 export const EventTicketOlderIos: Story = {
-  name: scenarioTitle("examples-featured-actions-ios-27--event-ticket-older-ios"),
+  name: "Event ticket — 2 actions, iOS 26.5",
   args: featuredArgs(
     "examples-featured-actions-ios-27--event-ticket-older-ios",
     "eventTicket",

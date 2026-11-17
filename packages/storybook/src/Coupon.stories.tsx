@@ -2,7 +2,6 @@ import type { Meta, StoryObj } from "@storybook/react";
 
 import { Comparison, type ComparisonArgs, comparisonArgs } from "./Comparison";
 import { coupon1 } from "./fixtures/coupon1";
-import { scenarioTitle } from "./scenarioCatalog";
 
 const meta: Meta<ComparisonArgs> = {
   title: "Pass styles/Coupon",
@@ -24,7 +23,7 @@ export default meta;
 type Story = StoryObj<ComparisonArgs>;
 
 export const Coupon1: Story = {
-  name: scenarioTitle("coupon--coupon-1"),
+  name: "Skyrider mobile coupon",
   args: comparisonArgs("coupon--coupon-1", coupon1),
   parameters: { __id: "coupon--coupon-1" },
 };

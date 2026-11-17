@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
 import { Comparison, type ComparisonArgs, comparisonArgs } from "./Comparison";
-import { scenarioTitle } from "./scenarioCatalog";
 import { posterArgs, withPosterGeneric } from "./vltavaClubArgs";
 
 // iOS 27 posterGeneric as its own style next to Generic. The stories were
@@ -34,7 +33,7 @@ export default meta;
 type Story = StoryObj<ComparisonArgs>;
 
 export const Ios270PosterGeneric: Story = {
-  name: scenarioTitle("examples-vltava-club--ios-270-poster-generic"),
+  name: "Vltava Club — iOS 27.0 poster",
   tags: ["vrt"],
   args: posterArgs,
   parameters: {
@@ -55,7 +54,7 @@ export const Ios270PosterGeneric: Story = {
 };
 
 export const PosterShortText: Story = {
-  name: scenarioTitle("examples-vltava-club--poster-short-text"),
+  name: "Poster front text — short",
   tags: ["vrt"],
   args: comparisonArgs(
     "examples-vltava-club--poster-short-text",
@@ -82,7 +81,7 @@ export const PosterShortText: Story = {
 };
 
 export const PosterLongCzechText: Story = {
-  name: scenarioTitle("examples-vltava-club--poster-long-czech-text"),
+  name: "Poster front text — long Czech",
   tags: ["vrt"],
   args: comparisonArgs(
     "examples-vltava-club--poster-long-czech-text",
@@ -133,7 +132,7 @@ export const PosterLongCzechText: Story = {
 };
 
 export const PosterThreePrimaryFields: Story = {
-  name: scenarioTitle("examples-vltava-club--poster-three-primary-fields"),
+  name: "Poster front text — three primary fields",
   tags: ["vrt"],
   args: comparisonArgs(
     "examples-vltava-club--poster-three-primary-fields",
@@ -166,7 +165,7 @@ export const PosterThreePrimaryFields: Story = {
 };
 
 export const PosterMorePrimaryFields: Story = {
-  name: scenarioTitle("examples-vltava-club--poster-more-primary-fields"),
+  name: "Poster front text — four primary fields",
   tags: ["vrt"],
   args: comparisonArgs(
     "examples-vltava-club--poster-more-primary-fields",

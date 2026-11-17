@@ -456,8 +456,6 @@ const scenarioMap = new Map(scenarioCatalog.map((item) => [item.id, item]));
 
 export const getScenario = (id: string): ScenarioMetadata | undefined => scenarioMap.get(id);
 
-export const scenarioTitle = (id: string) => getScenario(id)?.title ?? id;
-
 export const getPassStyles = (values: Record<string, unknown>): PassStyleKey[] => {
   const pass = values["pass.json"] as Record<string, unknown> | undefined;
   if (!pass) return [];

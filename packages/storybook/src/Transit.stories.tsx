@@ -3,7 +3,6 @@ import { PassTransitType } from "@tiketo/pkpass-preview";
 
 import { Comparison, type ComparisonArgs, comparisonArgs } from "./Comparison";
 import { boardingPass1 } from "./fixtures/boarding-pass-1";
-import { scenarioTitle } from "./scenarioCatalog";
 
 // All five transit types render against one fixture. The primary FROM value
 // and header match the native transit reference captures without modifying
@@ -46,7 +45,7 @@ export default meta;
 type Story = StoryObj<ComparisonArgs>;
 
 export const TransitTypeAir: Story = {
-  name: scenarioTitle("boarding-pass--transit-type-air"),
+  name: "Transit icon — Air",
   args: comparisonArgs(
     "boarding-pass--transit-type-air",
     withTransitType(PassTransitType.PKTransitTypeAir),
@@ -55,7 +54,7 @@ export const TransitTypeAir: Story = {
 };
 
 export const TransitTypeTrain: Story = {
-  name: scenarioTitle("boarding-pass--transit-type-train"),
+  name: "Transit icon — Train",
   args: comparisonArgs(
     "boarding-pass--transit-type-train",
     withTransitType(PassTransitType.PKTransitTypeTrain),
@@ -64,7 +63,7 @@ export const TransitTypeTrain: Story = {
 };
 
 export const TransitTypeBus: Story = {
-  name: scenarioTitle("boarding-pass--transit-type-bus"),
+  name: "Transit icon — Bus",
   args: comparisonArgs(
     "boarding-pass--transit-type-bus",
     withTransitType(PassTransitType.PKTransitTypeBus),
@@ -73,7 +72,7 @@ export const TransitTypeBus: Story = {
 };
 
 export const TransitTypeBoat: Story = {
-  name: scenarioTitle("boarding-pass--transit-type-boat"),
+  name: "Transit icon — Boat",
   args: comparisonArgs(
     "boarding-pass--transit-type-boat",
     withTransitType(PassTransitType.PKTransitTypeBoat),
@@ -82,7 +81,7 @@ export const TransitTypeBoat: Story = {
 };
 
 export const TransitTypeGeneric: Story = {
-  name: scenarioTitle("boarding-pass--transit-type-generic"),
+  name: "Transit icon — Generic",
   args: comparisonArgs(
     "boarding-pass--transit-type-generic",
     withTransitType(PassTransitType.PKTransitTypeGeneric),

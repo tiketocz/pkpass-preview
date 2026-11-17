@@ -4,7 +4,6 @@ import { Comparison, type ComparisonArgs, comparisonArgs } from "./Comparison";
 import { boardingPass1 } from "./fixtures/boarding-pass-1";
 import { boardingPass2 } from "./fixtures/boarding-pass-2";
 import { boardingPass3 } from "./fixtures/boarding-pass-3";
-import { scenarioTitle } from "./scenarioCatalog";
 
 const meta: Meta<ComparisonArgs> = {
   title: "Pass styles/Boarding pass",
@@ -26,19 +25,19 @@ export default meta;
 type Story = StoryObj<ComparisonArgs>;
 
 export const BoardingPass1: Story = {
-  name: scenarioTitle("boarding-pass--boarding-pass-1"),
+  name: "Boarding pass — Prague to Paris",
   args: comparisonArgs("boarding-pass--boarding-pass-1", boardingPass1),
   parameters: { __id: "boarding-pass--boarding-pass-1" },
 };
 
 export const BoardingPass2: Story = {
-  name: scenarioTitle("boarding-pass--boarding-pass-2"),
+  name: "Boarding pass — long secondary text",
   args: comparisonArgs("boarding-pass--boarding-pass-2", boardingPass2),
   parameters: { __id: "boarding-pass--boarding-pass-2" },
 };
 
 export const BoardingPass3: Story = {
-  name: scenarioTitle("boarding-pass--boarding-pass-3"),
+  name: "Boarding pass — HTML-like origin text",
   args: comparisonArgs("boarding-pass--boarding-pass-3", boardingPass3),
   parameters: { __id: "boarding-pass--boarding-pass-3" },
 };

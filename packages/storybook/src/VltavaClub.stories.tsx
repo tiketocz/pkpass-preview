@@ -2,7 +2,6 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
 
 import { Comparison, type ComparisonArgs } from "./Comparison";
-import { scenarioTitle } from "./scenarioCatalog";
 import { fallbackArgs, posterArgs } from "./vltavaClubArgs";
 
 const BothVariantsDetail = () => {
@@ -57,7 +56,7 @@ export default meta;
 type Story = StoryObj<ComparisonArgs>;
 
 export const BothVariants: Story = {
-  name: scenarioTitle("examples-vltava-club--both-variants"),
+  name: "Vltava Club — iOS 26.5 and iOS 27.0",
   args: fallbackArgs,
   tags: ["vrt:skip"],
   parameters: {
@@ -69,7 +68,7 @@ export const BothVariants: Story = {
 };
 
 export const Ios265Generic: Story = {
-  name: scenarioTitle("examples-vltava-club--ios-265-generic"),
+  name: "Vltava Club — iOS 26.5 generic fallback",
   tags: ["vrt"],
   args: fallbackArgs,
   parameters: { __id: "examples-vltava-club--ios-265-generic" },

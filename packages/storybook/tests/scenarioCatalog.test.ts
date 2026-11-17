@@ -1,4 +1,4 @@
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createElement } from "react";
@@ -154,5 +154,37 @@ describe("scenario catalog fixture metadata", () => {
 
   it("marks Generic 6 as the intentional compatibility alias of Generic 5", () => {
     expect(getScenario("generic--generic-6")?.aliasOf).toBe("generic--generic-5");
+  });
+
+  it("keeps every catalog story name as a static literal equal to its metadata title", () => {
+    const storybookRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+    const sourceRoot = path.join(storybookRoot, "src");
+    const foundIds = new Set<string>();
+
+    for (const filename of readdirSync(sourceRoot).filter((name) =>
+      name.endsWith(".stories.tsx"),
+    )) {
+      const source = readFileSync(path.join(sourceRoot, filename), "utf8");
+      expect(source, filename).not.toMatch(/name:\s*scenarioTitle/);
+      const matches = [...source.matchAll(/name:\s*("(?:[^"\\]|\\.)*"),/g)];
+      for (const [index, match] of matches.entries()) {
+        const followingSource = source.slice(
+          match.index,
+          matches[index + 1]?.index ?? source.length,
+        );
+        const ids = scenarioCatalog
+          .map((scenario) => scenario.id)
+          .filter((id) => followingSource.includes(`"${id}"`));
+        if (ids.length === 0) continue;
+        expect(ids, `${filename}: ${match[0]}`).toHaveLength(1);
+        const id = ids[0];
+        const literal = match[1];
+        if (!id || !literal) throw new Error(`${filename}: could not resolve static story name`);
+        expect(JSON.parse(literal), id).toBe(getScenario(id)?.title);
+        foundIds.add(id);
+      }
+    }
+
+    expect([...foundIds].sort()).toEqual(scenarioCatalog.map((scenario) => scenario.id).sort());
   });
 });

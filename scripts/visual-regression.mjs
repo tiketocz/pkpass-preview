@@ -11,7 +11,7 @@
  *   - screenshots the rendered PKPassPreview (#passCard inside Comparison)
  *   - loads the Wallet reference image via its stable data hook (with a
  *     legacy alt-text fallback for older/base Storybook builds)
- *   - resizes the iOS reference to match the screenshot dimensions
+ *   - contains both images on the web-render canvas without changing aspect ratio
  *   - computes pixelmatch %-diff and SSIM
  *   - writes per-fixture diff PNG + aggregate report.{json,md}
  *
@@ -202,26 +202,31 @@ async function compareOne({ ourBuf, iosPath, outDir, slug }) {
   const iosOriginal = await fs.readFile(iosPath);
   const ourPng = PNG.sync.read(ourBuf);
   const { width, height } = ourPng;
+  const referenceMetadata = await sharp(iosOriginal).metadata();
+  const referenceWidth = referenceMetadata.width;
+  const referenceHeight = referenceMetadata.height;
+  if (!referenceWidth || !referenceHeight) {
+    throw new Error(`could not read native reference dimensions for ${slug}`);
+  }
 
-  const iosResizedBuf = await sharp(iosOriginal)
-    .resize(width, height, { fit: "fill" })
-    .removeAlpha()
-    .ensureAlpha()
-    .png()
-    .toBuffer();
-
-  const ourFlatBuf = await sharp(ourBuf)
+  const containOptions = {
+    fit: "contain",
+    background: { r: 255, g: 255, b: 255, alpha: 1 },
+  };
+  const ourCanvasBuf = await sharp(ourBuf)
     .flatten({ background: { r: 255, g: 255, b: 255 } })
+    .resize(width, height, containOptions)
     .ensureAlpha()
     .png()
     .toBuffer();
-  const iosFlatBuf = await sharp(iosResizedBuf)
+  const iosCanvasBuf = await sharp(iosOriginal)
     .flatten({ background: { r: 255, g: 255, b: 255 } })
+    .resize(width, height, containOptions)
     .ensureAlpha()
     .png()
     .toBuffer();
-  const ourFlat = PNG.sync.read(ourFlatBuf);
-  const iosFlat = PNG.sync.read(iosFlatBuf);
+  const ourFlat = PNG.sync.read(ourCanvasBuf);
+  const iosFlat = PNG.sync.read(iosCanvasBuf);
 
   const diff = new PNG({ width, height });
   const numDiff = pixelmatch(ourFlat.data, iosFlat.data, diff.data, width, height, {
@@ -242,12 +247,26 @@ async function compareOne({ ourBuf, iosPath, outDir, slug }) {
     console.warn(`SSIM failed for ${slug}: ${e.message}`);
   }
 
-  await fs.writeFile(path.join(outDir, "ours", `${slug}.png`), ourBuf);
-  await fs.writeFile(path.join(outDir, "ref", `${slug}.png`), iosResizedBuf);
+  await fs.writeFile(path.join(outDir, "ours", `${slug}.png`), ourCanvasBuf);
+  await fs.writeFile(path.join(outDir, "ref", `${slug}.png`), iosCanvasBuf);
   await fs.writeFile(path.join(outDir, "diff", `${slug}.png`), PNG.sync.write(diff));
 
-  return { width, height, pixelmatchDiffPct, ssim: ssimMean };
+  return {
+    width,
+    height,
+    webRenderWidth: width,
+    webRenderHeight: height,
+    webRenderAspectRatio: width / height,
+    referenceWidth,
+    referenceHeight,
+    referenceAspectRatio: referenceWidth / referenceHeight,
+    pixelmatchDiffPct,
+    ssim: ssimMean,
+  };
 }
+
+const formatDimensions = (width, height, aspectRatio) =>
+  `${width}×${height} (${aspectRatio.toFixed(4)})`;
 
 function buildMarkdown(results, generatedAt, storybookDir) {
   const lines = [];
@@ -259,12 +278,23 @@ function buildMarkdown(results, generatedAt, storybookDir) {
   lines.push("");
   lines.push("Lower pixelmatch %-diff and higher SSIM (closer to 1.0) = closer match.");
   lines.push("");
-  lines.push("| Story | iOS ref | Pixelmatch diff % | SSIM | Diff |");
-  lines.push("|---|---|---:|---:|---|");
+  lines.push(
+    "Both the web capture and native reference are aspect-preserved with `contain` on the web-render canvas. Original dimensions are retained below so padding or different screen shapes remain visible rather than being stretched.",
+  );
+  lines.push("");
+  lines.push(
+    "**Back fields / Pass Details is informational only:** it compares two different native screens—the web component's in-card back render and native Wallet's full Pass Details screen.",
+  );
+  lines.push("");
+  lines.push(
+    "| Story | Web render px (aspect) | iOS ref | Native original px (aspect) | Pixelmatch diff % | SSIM | Scope | Diff |",
+  );
+  lines.push("|---|---:|---|---:|---:|---:|---|---|");
   for (const r of results) {
     const ssimCell = r.ssim == null ? "—" : r.ssim.toFixed(4);
+    const scope = r.informationalOnly ? "different screens; informational only" : "same screen";
     lines.push(
-      `| \`${r.story}\` | \`${r.iosSrc}\` | ${r.pixelmatchDiffPct.toFixed(2)} | ${ssimCell} | \`diff/${r.slug}.png\` |`,
+      `| \`${r.story}\` | ${formatDimensions(r.webRenderWidth, r.webRenderHeight, r.webRenderAspectRatio)} | \`${r.iosSrc}\` | ${formatDimensions(r.referenceWidth, r.referenceHeight, r.referenceAspectRatio)} | ${r.pixelmatchDiffPct.toFixed(2)} | ${ssimCell} | ${scope} | \`diff/${r.slug}.png\` |`,
     );
   }
   lines.push("");
@@ -333,7 +363,13 @@ async function main() {
         outDir: OUT_DIR,
         slug,
       });
-      results.push({ story, iosSrc: captured.iosSrc, slug, ...metrics });
+      results.push({
+        story,
+        iosSrc: captured.iosSrc,
+        slug,
+        informationalOnly: story === "back-fields--ios-27-pass-details",
+        ...metrics,
+      });
 
       const ssimStr = metrics.ssim == null ? "   —  " : metrics.ssim.toFixed(4);
       console.log(

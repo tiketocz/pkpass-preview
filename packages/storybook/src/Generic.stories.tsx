@@ -10,7 +10,6 @@ import { generic6 } from "./fixtures/generic6";
 import { generic7 } from "./fixtures/generic7";
 import { generic8 } from "./fixtures/generic8";
 import { generic9 } from "./fixtures/generic9";
-import { scenarioTitle } from "./scenarioCatalog";
 
 const meta: Meta<ComparisonArgs> = {
   title: "Pass styles/Generic",
@@ -32,37 +31,37 @@ export default meta;
 type Story = StoryObj<ComparisonArgs>;
 
 export const Generic1: Story = {
-  name: scenarioTitle("generic--generic-1"),
+  name: "Generic — dense fields without logo text",
   args: comparisonArgs("generic--generic-1", generic1),
   parameters: { __id: "generic--generic-1" },
 };
 
 export const Generic2: Story = {
-  name: scenarioTitle("generic--generic-2"),
+  name: "Generic — dense fields with logo text",
   args: comparisonArgs("generic--generic-2", generic2),
   parameters: { __id: "generic--generic-2" },
 };
 
 export const Generic3: Story = {
-  name: scenarioTitle("generic--generic-3"),
+  name: "Generic — reordered field groups",
   args: comparisonArgs("generic--generic-3", generic3),
   parameters: { __id: "generic--generic-3" },
 };
 
 export const Generic4: Story = {
-  name: scenarioTitle("generic--generic-4"),
+  name: "Generic — five-column density",
   args: comparisonArgs("generic--generic-4", generic4),
   parameters: { __id: "generic--generic-4" },
 };
 
 export const Generic5: Story = {
-  name: scenarioTitle("generic--generic-5"),
+  name: "Membership card — rich back fields",
   args: comparisonArgs("generic--generic-5", generic5),
   parameters: { __id: "generic--generic-5" },
 };
 
 export const Generic6: Story = {
-  name: scenarioTitle("generic--generic-6"),
+  name: "Membership card — alias of Generic 5",
   args: comparisonArgs("generic--generic-6", generic6),
   parameters: {
     __id: "generic--generic-6",
@@ -76,19 +75,19 @@ export const Generic6: Story = {
 };
 
 export const Generic7: Story = {
-  name: scenarioTitle("generic--generic-7"),
+  name: "Golf membership — empty member values",
   args: comparisonArgs("generic--generic-7", generic7),
   parameters: { __id: "generic--generic-7" },
 };
 
 export const Generic8: Story = {
-  name: scenarioTitle("generic--generic-8"),
+  name: "Business card",
   args: comparisonArgs("generic--generic-8", generic8),
   parameters: { __id: "generic--generic-8" },
 };
 
 export const Generic9: Story = {
-  name: scenarioTitle("generic--generic-9"),
+  name: "Sales card",
   args: comparisonArgs("generic--generic-9", generic9),
   parameters: { __id: "generic--generic-9" },
 };
