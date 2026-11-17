@@ -1,13 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { PassTransitType } from "@tiketo/pkpass-preview";
 import { Comparison, type ComparisonArgs } from "./Comparison";
 import { boardingPass1 } from "./fixtures/boarding-pass-1";
 import { boardingPass2 } from "./fixtures/boarding-pass-2";
 import { boardingPass3 } from "./fixtures/boarding-pass-3";
 
 const meta: Meta<ComparisonArgs> = {
-  title: "Boarding pass",
+  title: "Pass styles/Boarding pass",
+  id: "boarding-pass",
   render: (args) => <Comparison {...args} />,
   tags: ["autodocs", "vrt"],
   parameters: {
@@ -15,7 +15,7 @@ const meta: Meta<ComparisonArgs> = {
     docs: {
       description: {
         component:
-          "boardingPass — variants by transit type (air/train/bus/boat/generic), with terminal sub-fields and primary destination layout.",
+          "boardingPass — terminal sub-fields, primary destination layout and reference-backed density cases. Transit icon variants live in the dedicated Features / Transit section.",
       },
     },
   },
@@ -27,66 +27,17 @@ type Story = StoryObj<ComparisonArgs>;
 export const BoardingPass1: Story = {
   name: "Boarding pass 1",
   args: { values: boardingPass1, screenshot: "boarding-pass-1" },
+  parameters: { __id: "boarding-pass--boarding-pass-1" },
 };
 
 export const BoardingPass2: Story = {
   name: "Boarding pass 2",
   args: { values: boardingPass2, screenshot: "boarding-pass-2" },
+  parameters: { __id: "boarding-pass--boarding-pass-2" },
 };
 
 export const BoardingPass3: Story = {
   name: "Boarding pass 3",
   args: { values: boardingPass3, screenshot: "boarding-pass-3" },
-};
-
-// All 5 transit types rendered against the same fixture — visual regression
-// guard for the inline-JSX transit icons (TIK-100 port). The primary FROM
-// value and header are overridden here to match the captured iOS Wallet
-// screenshots (`transit-*.jpg`), which were taken from a different source
-// pass than BP1 (FROM "Prague" + header "FLIGHT TIK 100", not BP1's
-// anonymized "Prague12345" + "ASFG/fdhs"). BP1's own story keeps the
-// original fixture untouched so it still matches `boarding-pass-1.jpg`.
-const withTransitType = (transitType: PassTransitType) => {
-  const passJson = boardingPass1["pass.json"] as Record<string, unknown>;
-  const boardingPass = passJson.boardingPass as Record<string, unknown>;
-  const primaryFields = boardingPass.primaryFields as Array<Record<string, unknown>>;
-  return {
-    ...boardingPass1,
-    "pass.json": {
-      ...passJson,
-      boardingPass: {
-        ...boardingPass,
-        transitType,
-        headerFields: [{ key: "header-flight", label: "FLIGHT", value: "TIK 100" }],
-        primaryFields: [{ ...primaryFields[0], value: "Prague" }, primaryFields[1]],
-      },
-    },
-  };
-};
-
-export const TransitTypeAir: Story = {
-  name: "Transit type — Air",
-  args: { values: withTransitType(PassTransitType.PKTransitTypeAir), screenshot: "transit-air" },
-};
-export const TransitTypeTrain: Story = {
-  name: "Transit type — Train",
-  args: {
-    values: withTransitType(PassTransitType.PKTransitTypeTrain),
-    screenshot: "transit-train",
-  },
-};
-export const TransitTypeBus: Story = {
-  name: "Transit type — Bus",
-  args: { values: withTransitType(PassTransitType.PKTransitTypeBus), screenshot: "transit-bus" },
-};
-export const TransitTypeBoat: Story = {
-  name: "Transit type — Boat",
-  args: { values: withTransitType(PassTransitType.PKTransitTypeBoat), screenshot: "transit-boat" },
-};
-export const TransitTypeGeneric: Story = {
-  name: "Transit type — Generic",
-  args: {
-    values: withTransitType(PassTransitType.PKTransitTypeGeneric),
-    screenshot: "transit-generic",
-  },
+  parameters: { __id: "boarding-pass--boarding-pass-3" },
 };

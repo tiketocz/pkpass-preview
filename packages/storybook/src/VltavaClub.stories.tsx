@@ -5,6 +5,7 @@ import { fallbackArgs, posterArgs } from "./vltavaClubArgs";
 
 const meta: Meta<ComparisonArgs> = {
   title: "Examples/Vltava Club",
+  id: "examples-vltava-club",
   render: (args) => <Comparison {...args} />,
   tags: ["autodocs"],
   parameters: {
@@ -25,6 +26,7 @@ export const BothVariants: Story = {
   name: "Both variants",
   args: fallbackArgs,
   tags: ["vrt:skip"],
+  parameters: { __id: "examples-vltava-club--both-variants" },
   render: () => (
     <div className="vltava-variants" style={{ display: "flex", gap: 48, alignItems: "flex-start" }}>
       <Comparison {...fallbackArgs} />
@@ -37,4 +39,5 @@ export const Ios265Generic: Story = {
   name: "iOS 26.5 (generic)",
   tags: ["vrt"],
   args: fallbackArgs,
+  parameters: { __id: "examples-vltava-club--ios-265-generic" },
 };

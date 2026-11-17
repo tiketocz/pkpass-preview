@@ -8,7 +8,8 @@ import { eventTicket4 } from "./fixtures/event-ticket-4";
 import { eventTicket5 } from "./fixtures/event-ticket-5";
 
 const meta: Meta<ComparisonArgs> = {
-  title: "Event ticket",
+  title: "Pass styles/Event ticket",
+  id: "event-ticket",
   render: (args) => <Comparison {...args} />,
   tags: ["autodocs", "vrt"],
   parameters: {
@@ -28,24 +29,29 @@ type Story = StoryObj<ComparisonArgs>;
 export const EventTicket1: Story = {
   name: "Event ticket 1",
   args: { values: eventTicket1, screenshot: "event-ticket-1" },
+  parameters: { __id: "event-ticket--event-ticket-1" },
 };
 
 export const EventTicket2: Story = {
   name: "Event ticket 2",
   args: { values: eventTicket2, screenshot: "event-ticket-2" },
+  parameters: { __id: "event-ticket--event-ticket-2" },
 };
 
 export const EventTicket3: Story = {
   name: "Event ticket 3",
   args: { values: eventTicket3, screenshot: "event-ticket-3" },
+  parameters: { __id: "event-ticket--event-ticket-3" },
 };
 
 export const EventTicket4: Story = {
   name: "Event ticket 4",
   args: { values: eventTicket4, screenshot: "event-ticket-4" },
+  parameters: { __id: "event-ticket--event-ticket-4" },
 };
 
 export const EventTicket5: Story = {
   name: "Event ticket 5",
   args: { values: eventTicket5, screenshot: "event-ticket-5" },
+  parameters: { __id: "event-ticket--event-ticket-5" },
 };

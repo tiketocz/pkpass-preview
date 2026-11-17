@@ -10,7 +10,8 @@ import { posterArgs, withPosterGeneric } from "./vltavaClubArgs";
 // comparison stays in Examples/Vltava Club.
 
 const meta: Meta<ComparisonArgs> = {
-  title: "Poster Generic (iOS 27)",
+  title: "Pass styles/Poster Generic (iOS 27)",
+  id: "poster-generic-ios-27",
   render: (args) => <Comparison {...args} />,
   tags: ["autodocs"],
   parameters: {

@@ -4,7 +4,8 @@ import { Comparison, type ComparisonArgs } from "./Comparison";
 import { backFields1 } from "./fixtures/back-fields";
 
 const meta: Meta<ComparisonArgs> = {
-  title: "Back fields",
+  title: "Features/Back fields",
+  id: "back-fields",
   render: (args) => <Comparison {...args} />,
   tags: ["autodocs", "vrt"],
   parameters: {
@@ -24,4 +25,5 @@ type Story = StoryObj<ComparisonArgs>;
 export const BackFields1: Story = {
   name: "Back fields demo",
   args: { values: backFields1, screenshot: "back-fields-1" },
+  parameters: { __id: "back-fields--back-fields-1" },
 };

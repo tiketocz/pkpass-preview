@@ -12,7 +12,8 @@ import { generic8 } from "./fixtures/generic8";
 import { generic9 } from "./fixtures/generic9";
 
 const meta: Meta<ComparisonArgs> = {
-  title: "Generic",
+  title: "Pass styles/Generic",
+  id: "generic",
   render: (args) => <Comparison {...args} />,
   tags: ["autodocs", "vrt"],
   parameters: {
@@ -32,44 +33,53 @@ type Story = StoryObj<ComparisonArgs>;
 export const Generic1: Story = {
   name: "Generic 1",
   args: { values: generic1, screenshot: "generic1" },
+  parameters: { __id: "generic--generic-1" },
 };
 
 export const Generic2: Story = {
   name: "Generic 2",
   args: { values: generic2, screenshot: "generic2" },
+  parameters: { __id: "generic--generic-2" },
 };
 
 export const Generic3: Story = {
   name: "Generic 3",
   args: { values: generic3, screenshot: "generic3" },
+  parameters: { __id: "generic--generic-3" },
 };
 
 export const Generic4: Story = {
   name: "Generic 4",
   args: { values: generic4, screenshot: "generic4" },
+  parameters: { __id: "generic--generic-4" },
 };
 
 export const Generic5: Story = {
   name: "Generic 5",
   args: { values: generic5, screenshot: "generic5" },
+  parameters: { __id: "generic--generic-5" },
 };
 
 export const Generic6: Story = {
   name: "Generic 6",
   args: { values: generic6, screenshot: "generic6" },
+  parameters: { __id: "generic--generic-6" },
 };
 
 export const Generic7: Story = {
   name: "Generic 7",
   args: { values: generic7, screenshot: "generic7" },
+  parameters: { __id: "generic--generic-7" },
 };
 
 export const Generic8: Story = {
   name: "Generic 8 (business card)",
   args: { values: generic8, screenshot: "generic8" },
+  parameters: { __id: "generic--generic-8" },
 };
 
 export const Generic9: Story = {
   name: "Generic 9 (sales card)",
   args: { values: generic9, screenshot: "generic9" },
+  parameters: { __id: "generic--generic-9" },
 };

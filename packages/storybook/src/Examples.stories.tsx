@@ -5,7 +5,8 @@ import { exampleGeneric } from "./fixtures/example-generic";
 import { exampleStoreCard } from "./fixtures/example-store-card";
 
 const meta: Meta<ComparisonArgs> = {
-  title: "Examples",
+  title: "Start here/iOS comparison",
+  id: "examples",
   render: (args) => <Comparison {...args} />,
   tags: ["autodocs", "vrt"],
   parameters: {
@@ -24,8 +25,10 @@ type Story = StoryObj<ComparisonArgs>;
 
 export const Generic: Story = {
   args: { values: exampleGeneric, screenshot: "example-generic" },
+  parameters: { __id: "examples--generic" },
 };
 
 export const StoreCard: Story = {
   args: { values: exampleStoreCard, screenshot: "example-store-card" },
+  parameters: { __id: "examples--store-card" },
 };

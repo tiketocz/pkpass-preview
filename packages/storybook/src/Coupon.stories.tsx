@@ -4,7 +4,8 @@ import { Comparison, type ComparisonArgs } from "./Comparison";
 import { coupon1 } from "./fixtures/coupon1";
 
 const meta: Meta<ComparisonArgs> = {
-  title: "Coupon",
+  title: "Pass styles/Coupon",
+  id: "coupon",
   render: (args) => <Comparison {...args} />,
   tags: ["autodocs", "vrt"],
   parameters: {
@@ -24,4 +25,5 @@ type Story = StoryObj<ComparisonArgs>;
 export const Coupon1: Story = {
   name: "Coupon 1",
   args: { values: coupon1, screenshot: "coupon1" },
+  parameters: { __id: "coupon--coupon-1" },
 };

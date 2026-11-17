@@ -14,24 +14,25 @@ const preview: Preview = {
       ],
     },
     options: {
-      // Editorial sidebar order (not alphabetical). Welcome leads; the
-      // examples & gallery introduce the lib visually; the per-pass-type
-      // sections walk users through every variant; Back fields and
-      // Barcodes are special-case demos and land at the end.
       storySort: {
         order: [
-          "Welcome",
+          "Start here",
+          ["Welcome", ["Docs", "Quick start"], "Catalog", "iOS comparison"],
+          "Pass styles",
+          [
+            "Generic",
+            "Poster Generic (iOS 27)",
+            "Event ticket",
+            "Boarding pass",
+            "Store card",
+            "Coupon",
+          ],
+          "Features",
+          ["Featured Actions", "Barcodes", "Back fields", "Transit"],
           "Examples",
-          "Samples",
-          "Gallery",
-          "Boarding pass",
-          "Store card",
-          "Event ticket",
-          "Generic",
-          "Poster Generic (iOS 27)",
-          "Coupon",
-          "Back fields",
-          "Barcode",
+          ["Vltava Club", "Other use cases"],
+          "Developer guide",
+          ["API", "Playground", "QA matrix", "Gallery (stress)"],
         ],
       },
     },

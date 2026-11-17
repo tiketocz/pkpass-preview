@@ -116,7 +116,7 @@ const styles = {
   } as const,
 };
 
-// All fixtures rendered side by side. PKPassPreview generates a unique
+// The 43 legacy fixtures rendered side by side. PKPassPreview generates a unique
 // #identifier_<random> per instance and scopes its <style> tags to that
 // id; rendering many instances on the same page catches any leaked /
 // unscoped CSS rule that would otherwise only surface when two cards
@@ -133,7 +133,8 @@ const AllCards = () => (
 );
 
 const meta: Meta = {
-  title: "Gallery",
+  title: "Developer guide/Gallery (stress)",
+  id: "gallery",
   render: () => <AllCards />,
   tags: ["autodocs"],
   parameters: {
@@ -141,7 +142,7 @@ const meta: Meta = {
     docs: {
       description: {
         component:
-          "All fixtures on one screen — mosaic across every pass type, variant and density. Useful for scanning to the closest match for your design.",
+          "A 43-card legacy-fixture stress grid for catching leaked instance styles and scanning many pass densities at once. New signed and generated cases remain in their focused sections.",
       },
     },
   },
@@ -150,4 +151,5 @@ export default meta;
 
 export const AllCardsStory: StoryObj = {
   name: "All cards",
+  parameters: { __id: "gallery--all-cards-story" },
 };
