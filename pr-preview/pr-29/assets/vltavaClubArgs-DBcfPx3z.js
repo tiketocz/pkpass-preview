@@ -1,0 +1,1 @@
+import{v as e}from"./index-SvsTIwFY.js";const l=a=>{const s=structuredClone(e),t=s["pass.json"];return t.posterGeneric=a,s},o={values:e,screenshot:"vltava-club-ios-26.5",referenceLabel:"iOS Wallet — iOS 26.5",variant:"fallback"},c={values:e,screenshot:"vltava-club-ios-27.0",referenceLabel:"iOS Wallet — iOS 27.0",variant:"poster"};export{o as f,c as p,l as w};
