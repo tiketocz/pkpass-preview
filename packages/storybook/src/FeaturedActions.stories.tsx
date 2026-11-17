@@ -9,25 +9,33 @@ import {
 
 // TIK-318 — iOS 27 Featured Actions.
 //
-// Native reference: Apple Wallet iOS 27.0 (24A434), iPhone 17 Pro Simulator,
-// detail of the added Vltava Club pass with [addToBalance, call]. The two
-// 2-action stories show that reference (card + tile row) next to our render;
-// the two older-iOS stories show the same 2-action pass in Apple Wallet
-// iOS 26.5 (Simulator, detail after add): card only, no tiles.
-// the tile look is aligned to it but is not pixel-perfect.
+// Native references: Apple Wallet iOS 27.0 (24A434), iPhone 17 Pro Simulator,
+// detail of the added Vltava Club pass (signed pass.json identical to the
+// fixtures except serialNumber). All six iOS 27 stories (2 / 1 / 0 actions,
+// generic + eventTicket) show that reference (card + tile row, cropped to
+// the current pass) next to our render; the two older-iOS stories show the
+// same 2-action pass in Apple Wallet iOS 26.5 (Simulator): card only, no
+// tiles. The tile look is aligned to the references but is not pixel-perfect.
 //
-// NÁVRH / PROPOSAL, still unverified: the unknown-type tile ("Open" + arrow)
-// and the single-action layout. Stories without a native screenshot keep the
-// "native reference pending" placeholder (no fake screenshots).
+// Known difference: with one action, native Wallet draws one wide tile with a
+// grey chevron on the right; our tile matches the width but has no chevron.
+//
+// NÁVRH / PROPOSAL, still unverified: the unknown-type tile ("Open" + arrow).
 
 const NATIVE_NOTE =
   "**Look based on a native reference** — Apple Wallet iOS 27.0 (24A434), iPhone 17 Pro Simulator: two white tiles, green circle icon (credit card / phone handset), bold label (“Add to Balance” / “Call”) and grey “Open Link” subtitle. Approximation, not pixel-perfect (web fonts, glyph shapes, shadow). The unknown-type tile (“Open” + arrow) remains a **návrh / proposal**.";
 
-const UNVERIFIED_NOTE =
-  "**Tiles follow the native iOS 27.0 two-action reference**, but this exact case has no native screenshot: the single-action layout (one tile spanning the card width) and the unknown-type tile (“Open” + arrow) are a **návrh / proposal, unverified**.";
+const ONE_ACTION_NOTE =
+  "**Native reference** — Apple Wallet iOS 27.0 (24A434), iPhone 17 Pro Simulator: one wide white tile spanning the card width. Our tile matches the width; **difference:** native Wallet shows a grey chevron on the right of the tile, the web preview has none. The unknown-type tile (“Open” + arrow) remains a **návrh / proposal**.";
+
+const NO_ACTIONS_NOTE =
+  "**Native reference** — Apple Wallet iOS 27.0 (24A434), iPhone 17 Pro Simulator: no tile row below the card, same as the web preview.";
 
 const PENDING_REFERENCE =
-  "No native iOS 27 Wallet screenshot for this case yet (TIK-318) — tiles are only visible in the detail of an added pass, not in the Add-pass preview.";
+  "Native reference image missing — every story in this group should have an Apple Wallet screenshot in public/screenshots/.";
+
+const OLDER_IOS_NOTE =
+  "**Native reference** — Apple Wallet iOS 26.5, iPhone 17 Pro Simulator: Wallet before iOS 27 ignores `featuredActions`, no tile row.";
 
 const NATIVE_REFERENCE_LABEL = "Apple Wallet / iOS 27.0 Simulator";
 const OLDER_IOS_REFERENCE_LABEL = "Apple Wallet / iOS 26.5 Simulator";
@@ -45,16 +53,15 @@ const ios27 = (
   zeroMode?: "empty" | "omit",
 ): ComparisonArgs => ({
   values: fixtureFor(style, count, zeroMode),
-  // Only the 2-action files exist (native refs cropped to card + tile row);
-  // the other names are intentionally missing → Comparison placeholder.
+  // Native refs cropped to the current pass (card + tile row) for 0/1/2.
   screenshot: `vltava-featured-actions-${style === "generic" ? "generic" : "event-ticket"}-${count}-ios-27`,
-  referenceLabel: count === 2 ? NATIVE_REFERENCE_LABEL : "iOS Wallet — iOS 27.0",
+  referenceLabel: NATIVE_REFERENCE_LABEL,
   referencePlaceholder: PENDING_REFERENCE,
   variant: "fallback",
   targetOs: "ios27",
 });
 
-const story = (description: string, note: string = UNVERIFIED_NOTE) => ({
+const story = (description: string, note: string) => ({
   docs: { description: { story: `${description}\n\n${note}` } },
 });
 
@@ -91,13 +98,19 @@ export const GenericTwoActions: Story = {
 export const GenericOneAction: Story = {
   name: "Generic — 1 action (iOS 27)",
   args: ios27("generic", 1),
-  parameters: story("Only the first fixture action (`addToBalance`) is kept."),
+  parameters: story(
+    "Only the first fixture action (`addToBalance`) is kept. Right: native Apple Wallet iOS 27.0 reference (card + one wide tile).",
+    ONE_ACTION_NOTE,
+  ),
 };
 
 export const GenericNoActions: Story = {
   name: "Generic — 0 actions (iOS 27)",
   args: ios27("generic", 0, "empty"),
-  parameters: story("`featuredActions: []` → no tile row is rendered."),
+  parameters: story(
+    "`featuredActions: []` → no tile row is rendered. Right: native Apple Wallet iOS 27.0 reference (card only).",
+    NO_ACTIONS_NOTE,
+  ),
 };
 
 export const EventTicketTwoActions: Story = {
@@ -112,13 +125,19 @@ export const EventTicketTwoActions: Story = {
 export const EventTicketOneAction: Story = {
   name: "Event ticket — 1 action (iOS 27)",
   args: ios27("eventTicket", 1),
-  parameters: story("Only the first fixture action (`addToBalance`) is kept."),
+  parameters: story(
+    "Only the first fixture action (`addToBalance`) is kept. Right: native Apple Wallet iOS 27.0 reference (card + one wide tile).",
+    ONE_ACTION_NOTE,
+  ),
 };
 
 export const EventTicketNoActions: Story = {
   name: "Event ticket — 0 actions (iOS 27)",
   args: ios27("eventTicket", 0, "omit"),
-  parameters: story("`featuredActions` key omitted → no tile row is rendered."),
+  parameters: story(
+    "`featuredActions` key omitted → no tile row is rendered. Right: native Apple Wallet iOS 27.0 reference (card only).",
+    NO_ACTIONS_NOTE,
+  ),
 };
 
 export const GenericOlderIos: Story = {
@@ -131,6 +150,7 @@ export const GenericOlderIos: Story = {
   },
   parameters: story(
     'Same pass with two actions but `targetOs="ios26"`: no tiles (identical to omitting `targetOs`). Right: native Apple Wallet iOS 26.5 reference — detail of the added pass with two actions in pass.json, no tile row.',
+    OLDER_IOS_NOTE,
   ),
 };
 
@@ -144,5 +164,6 @@ export const EventTicketOlderIos: Story = {
   },
   parameters: story(
     'Same pass with two actions but `targetOs="ios26"`: no tiles (identical to omitting `targetOs`). Right: native Apple Wallet iOS 26.5 reference — detail of the added pass with two actions in pass.json, no tile row.',
+    OLDER_IOS_NOTE,
   ),
 };
