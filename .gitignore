@@ -27,5 +27,6 @@ visual-regression-output/
 # design notes live here while a branch is in flight; not committed to main.
 .planning/
 
-# Copied from the root README by the prepack script; the root README.md is the only source.
+# Generated copy of the root README (release.yml copies it before npm publish;
+# prepack copies it for local npm pack). The root README.md is the only source.
 packages/preview/README.md

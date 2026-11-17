@@ -31,8 +31,7 @@
   "scripts": {
     "build": "NODE_ENV=production bun ./scripts/build.ts",
     "clean": "rm -rf dist",
-    "prepack": "cp ../../README.md README.md",
-    "postpack": "rm -f README.md"
+    "prepack": "cp ../../README.md README.md"
   },
   "dependencies": {
     "@bwip-js/browser": "^4.7.0",
