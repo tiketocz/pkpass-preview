@@ -88,6 +88,7 @@ const styles = {
 };
 
 const referenceLabel = (reference: NativeReference) => {
+  if (reference.label) return reference.label;
   const ios = reference.iOS ? `iOS ${reference.iOS}` : undefined;
   if (reference.kind === "simulator") {
     return ["Apple Wallet", ios, reference.device, "Simulator"].filter(Boolean).join(" · ");

@@ -28,3 +28,24 @@ export const BackFields1: Story = {
   args: comparisonArgs("back-fields--back-fields-1", backFields1),
   parameters: { __id: "back-fields--back-fields-1" },
 };
+
+export const Ios27PassDetails: Story = {
+  name: scenarioTitle("back-fields--ios-27-pass-details"),
+  args: comparisonArgs("back-fields--ios-27-pass-details", backFields1, {
+    targetOs: "ios27",
+  }),
+  parameters: {
+    __id: "back-fields--ios-27-pass-details",
+    docs: {
+      description: {
+        story:
+          "The web preview is flipped through its existing public interaction and shows the component's in-card back. The native iOS 27 reference is Wallet's full Pass Details screen, with a front-card thumbnail, pass description, Remove Pass control, and light grouped fields. The web component does not implement that screen, so this comparison documents the difference instead of imitating it in Storybook.",
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const infoButton = canvasElement.querySelector<HTMLElement>(".infoButton");
+    infoButton?.click();
+    await new Promise((resolve) => window.setTimeout(resolve, 0));
+  },
+};

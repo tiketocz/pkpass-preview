@@ -133,7 +133,7 @@ describe("scenario catalog fixture metadata", () => {
   });
 
   it("matches every catalog pass style to the keys in the actual fixture pass.json", () => {
-    expect(scenarioCatalog).toHaveLength(63);
+    expect(scenarioCatalog).toHaveLength(64);
     for (const scenario of scenarioCatalog) {
       const values = fixtureValues[scenario.fixtureKey];
       expect(values, `missing test fixture for ${scenario.fixtureKey}`).toBeDefined();

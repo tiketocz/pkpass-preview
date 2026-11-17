@@ -25,19 +25,30 @@ export function assertCaptureCoverage({ baselineIds, discoveredIds, capturedIds,
   }
 }
 
-export function assertPairedCoverage({ expectedIds, baseIds, headIds }) {
-  const missingBase = missingFrom(expectedIds, baseIds);
-  const missingHead = missingFrom(expectedIds, headIds);
-  const baseOnly = missingFrom(baseIds, headIds);
-  const headOnly = missingFrom(headIds, baseIds);
+export function assertPairedCoverage({
+  baseSelectedIds,
+  headSelectedIds,
+  baseCapturedIds,
+  headCapturedIds,
+}) {
+  const missingBaseCaptures = missingFrom(baseSelectedIds, baseCapturedIds);
+  const missingHeadSelection = missingFrom(baseSelectedIds, headSelectedIds);
+  const missingHeadCaptures = missingFrom(baseSelectedIds, headCapturedIds);
+  const newHeadIds = missingFrom(headSelectedIds, baseSelectedIds);
+  const missingNewHeadCaptures = missingFrom(newHeadIds, headCapturedIds);
   const sections = [
-    formatIds("Expected ids missing from base report", missingBase),
-    formatIds("Expected ids missing from head report", missingHead),
-    formatIds("Unpaired base-only ids", baseOnly),
-    formatIds("Unpaired head-only ids", headOnly),
+    formatIds("Base-selected ids without a base capture", missingBaseCaptures),
+    formatIds("Base-selected ids no longer selected on head", missingHeadSelection),
+    formatIds("Base-selected ids without a head capture", missingHeadCaptures),
+    formatIds("New head-selected ids without a verified head capture", missingNewHeadCaptures),
   ].filter(Boolean);
 
   if (sections.length > 0) {
     throw new Error(`VRT pairing failed.\n${sections.join("\n")}`);
   }
+
+  return {
+    pairedIds: unique(baseSelectedIds),
+    newHeadIds,
+  };
 }

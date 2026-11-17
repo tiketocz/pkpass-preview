@@ -25,7 +25,7 @@ export type CatalogSource =
   | "Synthetic";
 
 export type ReferenceKind = "simulator" | "device" | "legacy-unknown";
-export type ReferenceView = "front" | "back" | "pass-details" | "notification";
+export type ReferenceView = "front" | "back" | "add-pass-preview" | "pass-details" | "notification";
 
 export type ReferenceConfiguration = {
   fixtureKey: string;
@@ -36,6 +36,7 @@ export type ReferenceConfiguration = {
 
 export type NativeReference = {
   path: string;
+  label?: string;
   kind: ReferenceKind;
   device?: string;
   iOS?: string;
@@ -164,8 +165,10 @@ const featuredScenario = (
 const vltavaStyles = ["generic", "posterGeneric"] as const;
 const vltavaFallbackReference: NativeReference = {
   ...legacyReference("vltava-club-ios-26.5", "vltava-club"),
+  kind: "simulator",
+  device: "iPhone 17 Pro",
   iOS: "26.5",
-  view: "pass-details",
+  view: "add-pass-preview",
 };
 const vltavaPosterReference = simulatorReference(
   "vltava-club-ios-27.0",
@@ -396,6 +399,30 @@ export const scenarioCatalog: readonly ScenarioMetadata[] = [
     passStyles: ["storeCard"],
     reference: "back-fields-1",
     features: ["Back fields", "iOS comparison"],
+  }),
+  scenario({
+    id: "back-fields--ios-27-pass-details",
+    title: "Back fields — iOS 27 Pass Details",
+    labels: ["Back fields", "iOS 27 Pass Details"],
+    passStyles: ["storeCard"],
+    features: ["Back fields", "iOS comparison"],
+    source: "Legacy reference",
+    fixtureKey: "back-fields-1",
+    references: [
+      {
+        path: "screenshots/back-fields-wallet-ios-27.0-pass-details.png",
+        label: "iOS 27 Pass Details",
+        kind: "simulator",
+        device: "iPhone 17 Pro",
+        iOS: "27.0",
+        view: "pass-details",
+        configuration: {
+          fixtureKey: "back-fields-1",
+          variant: "fallback",
+          targetOs: "ios27",
+        },
+      },
+    ],
   }),
   ...(
     [

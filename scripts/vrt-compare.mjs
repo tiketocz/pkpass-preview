@@ -34,10 +34,13 @@ const mean = (arr, sel) => (arr.length ? arr.reduce((s, x) => s + sel(x), 0) / a
 const baseRows = fixturesOf(base);
 const headRows = fixturesOf(head);
 
-assertPairedCoverage({
-  expectedIds: [...new Set([...(base.baselineStoryIds ?? []), ...(head.baselineStoryIds ?? [])])],
-  baseIds: baseRows.map((row) => row.story),
-  headIds: headRows.map((row) => row.story),
+const baseSelectedIds = base.discoveredStoryIds ?? baseRows.map((row) => row.story);
+const headSelectedIds = head.discoveredStoryIds ?? headRows.map((row) => row.story);
+const { newHeadIds } = assertPairedCoverage({
+  baseSelectedIds,
+  headSelectedIds,
+  baseCapturedIds: baseRows.map((row) => row.story),
+  headCapturedIds: headRows.map((row) => row.story),
 });
 
 // Head-only fallback: base report flagged as empty (typically the PR that
@@ -144,9 +147,20 @@ const out = [];
 out.push("### :bar_chart: Visual regression report");
 out.push("");
 out.push(
-  `Fixtures: **${rows.length}** · improved: **${improved.length}** · regressed: **${regressed.length}** · unchanged: **${unchanged}**`,
+  `Paired: **${rows.length}** · new on head, no delta: **${newHeadIds.length}** · improved: **${improved.length}** · regressed: **${regressed.length}** · unchanged: **${unchanged}**`,
 );
 out.push("");
+
+if (newHeadIds.length > 0) {
+  out.push("#### New on head, no delta");
+  out.push("");
+  out.push(
+    "Each story below was selected only on head and has a verified Wallet-reference capture.",
+  );
+  out.push("");
+  for (const id of newHeadIds) out.push(`- \`${id}\``);
+  out.push("");
+}
 out.push(`| metric | ${baseLabel} | ${headLabel} | delta |`);
 out.push("|---|---:|---:|---:|");
 out.push(
