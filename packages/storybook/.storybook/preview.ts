@@ -27,6 +27,7 @@ const preview: Preview = {
           "Store card",
           "Event ticket",
           "Generic",
+          "Poster Generic (iOS 27)",
           "Coupon",
           "Back fields",
           "Barcode",
