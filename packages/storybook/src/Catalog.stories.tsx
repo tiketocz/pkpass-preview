@@ -99,8 +99,13 @@ const Catalog = () => {
             ) : null}
             <div className="catalog-result-copy">
               <StoryLink storyId={scenario.id}>{scenario.title}</StoryLink>
-              <span>{scenario.passStyles.map((style) => passStyleLabels[style]).join(" · ")}</span>
-              <span>{scenario.source}</span>
+              <div className="catalog-meta">
+                <span>
+                  {scenario.passStyles.map((style) => passStyleLabels[style]).join(" · ")}
+                </span>
+                <span>{scenario.source}</span>
+                {scenario.aliasOf ? <span>Alias of Generic 5</span> : null}
+              </div>
               <small>{scenario.features.join(" · ")}</small>
             </div>
           </li>
@@ -113,7 +118,11 @@ const Catalog = () => {
 const meta: Meta = {
   title: "Start here/Catalog",
   id: "start-here-catalog",
-  parameters: { layout: "fullscreen" },
+  parameters: {
+    layout: "fullscreen",
+    controls: { disable: true },
+    options: { showPanel: false },
+  },
 };
 export default meta;
 

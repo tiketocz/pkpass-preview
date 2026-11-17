@@ -151,4 +151,8 @@ describe("scenario catalog fixture metadata", () => {
       }
     }
   });
+
+  it("marks Generic 6 as the intentional compatibility alias of Generic 5", () => {
+    expect(getScenario("generic--generic-6")?.aliasOf).toBe("generic--generic-5");
+  });
 });

@@ -55,6 +55,8 @@ export type ScenarioMetadata = {
   source: CatalogSource;
   fixtureKey: string;
   references: readonly NativeReference[];
+  /** Permanent scenario id this entry intentionally duplicates, when applicable. */
+  aliasOf?: string;
 };
 
 export const passStyleLabels: Record<PassStyleKey, string> = {
@@ -91,7 +93,7 @@ const simulatorReference = (
   kind: "simulator",
   device: "iPhone 17 Pro",
   iOS,
-  view: "pass-details",
+  view: "front",
   configuration,
 });
 
@@ -372,19 +374,20 @@ export const scenarioCatalog: readonly ScenarioMetadata[] = [
       "Generic — reordered field groups",
       "Generic — five-column density",
       "Membership card — rich back fields",
-      "Membership card — duplicate baseline",
+      "Membership card — alias of Generic 5",
       "Golf membership — empty member values",
       "Business card",
       "Sales card",
     ] as const
   ).map((title, index) => {
     const number = index + 1;
-    return legacyScenario({
+    const metadata = legacyScenario({
       id: `generic--generic-${number}`,
       title,
       fixtureKey: `generic${number}`,
       passStyles: ["generic"],
     });
+    return number === 6 ? { ...metadata, aliasOf: "generic--generic-5" } : metadata;
   }),
   legacyScenario({
     id: "coupon--coupon-1",

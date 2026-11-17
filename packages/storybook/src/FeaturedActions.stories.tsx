@@ -6,6 +6,7 @@ import {
   vltavaFeaturedEventTicket,
   vltavaFeaturedGeneric,
 } from "./fixtures/vltava-featured-actions";
+import { ONE_ACTION_NOTE } from "./knownDeviations";
 import { getScenario, scenarioTitle } from "./scenarioCatalog";
 
 // TIK-318 — iOS 27 Featured Actions.
@@ -25,9 +26,6 @@ import { getScenario, scenarioTitle } from "./scenarioCatalog";
 
 const NATIVE_NOTE =
   "**Look based on a native reference** — Apple Wallet iOS 27.0 (24A434), iPhone 17 Pro Simulator: two white tiles, green circle icon (credit card / phone handset), bold label (“Add to Balance” / “Call”) and grey “Open Link” subtitle. Approximation, not pixel-perfect (web fonts, glyph shapes, shadow). The unknown-type tile (“Open” + arrow) remains a **návrh / proposal**.";
-
-const ONE_ACTION_NOTE =
-  "**Native reference** — Apple Wallet iOS 27.0 (24A434), iPhone 17 Pro Simulator: one wide white tile spanning the card width. Our tile matches the width; **difference:** native Wallet shows a grey chevron on the right of the tile, the web preview has none. The unknown-type tile (“Open” + arrow) remains a **návrh / proposal**.";
 
 const NO_ACTIONS_NOTE =
   "**Native reference** — Apple Wallet iOS 27.0 (24A434), iPhone 17 Pro Simulator: no tile row below the card, same as the web preview.";
@@ -69,7 +67,13 @@ const featuredArgs = (
 
 const story = (id: string, description: string, note: string) => ({
   __id: id,
-  docs: { description: { story: `${description}\n\n${note}` } },
+  docs: {
+    description: { story: `${description}\n\n${note}` },
+    source: {
+      code: `<PKPassPreview\n  values={passFiles}\n  variant="fallback"\n  targetOs="${id.endsWith("older-ios") ? "ios26" : "ios27"}"\n/>`,
+      language: "tsx",
+    },
+  },
 });
 
 const meta: Meta<FeaturedStoryArgs> = {

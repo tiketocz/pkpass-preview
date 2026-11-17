@@ -65,8 +65,9 @@ export interface PreviewProps {
    * - omitted (default) or `"ios26"`: no Featured Actions — identical output
    *   to previous releases.
    * - `"ios27"`: renders up to two top-level `featuredActions` as tiles below
-   *   the card front (look aligned to a native iOS 27.0 Wallet reference;
-   *   unknown types and the single-action layout remain a proposal).
+   *   the card front (look aligned to native iOS 27.0 Wallet references;
+   *   the single-action tile lacks Wallet's grey chevron and unknown types
+   *   remain a proposal).
    */
   targetOs?: PreviewTargetOs;
 }

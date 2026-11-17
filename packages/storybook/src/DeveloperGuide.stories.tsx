@@ -6,6 +6,7 @@ import { WebWalletDetail } from "./Comparison";
 import { StoryLink } from "./StoryLink";
 import { vltavaClub } from "./fixtures/vltava-club";
 import { vltavaFeaturedGeneric } from "./fixtures/vltava-featured-actions";
+import { ONE_ACTION_DIFFERENCE } from "./knownDeviations";
 
 const GuidePage = ({ children }: { children: ReactNode }) => (
   <main className="guide-page">{children}</main>
@@ -28,11 +29,134 @@ const ApiPage = () => (
   removeVariablePlaceholders
 />`}</code>
     </pre>
+    <table className="api-table">
+      <thead>
+        <tr>
+          <th>Prop</th>
+          <th>Type / default</th>
+          <th>Purpose</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <code>values</code>
+          </td>
+          <td>
+            <code>{"Record<string, unknown>"}</code> · required
+          </td>
+          <td>
+            A <code>pass.json</code> value plus optional image entries. Image values are base64,
+            data/blob URLs, absolute paths, or HTTP(S) URLs.
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <code>removeVariablePlaceholders</code>
+          </td>
+          <td>
+            <code>boolean</code> · <code>false</code>
+          </td>
+          <td>
+            Removes <code>{"${…}"}</code> placeholders from a cloned <code>pass.json</code> before
+            rendering. The supplied values object is not mutated.
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <code>variant</code>
+          </td>
+          <td>
+            <code>"poster" | "fallback"</code> · omitted
+          </td>
+          <td>
+            Chooses the experimental <code>posterGeneric</code> layout or the pass's classic
+            structure. Omission preserves classic rendering.
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <code>targetOs</code>
+          </td>
+          <td>
+            <code>"ios26" | "ios27"</code> · omitted
+          </td>
+          <td>
+            Enables OS-gated behavior. Only <code>"ios27"</code> renders valid top-level Featured
+            Actions; omission and <code>"ios26"</code> do not.
+          </td>
+        </tr>
+      </tbody>
+    </table>
     <p>
-      The full prop reference and source-snippet corrections are scheduled for the documentation
-      phase. For a working first render, open the{" "}
-      <StoryLink storyId="start-here-welcome--quick-start">quick start</StoryLink>.
+      Start with the runnable{" "}
+      <StoryLink storyId="start-here-welcome--quick-start">quick start</StoryLink>, then use{" "}
+      <StoryLink storyId="developer-guide--playground">Playground</StoryLink> to inspect variant and
+      target-OS combinations.
     </p>
+  </GuidePage>
+);
+
+const KnownDeviationsPage = () => (
+  <GuidePage>
+    <p className="guide-eyebrow">Developer guide</p>
+    <h1>Known deviations from Apple Wallet</h1>
+    <p>
+      The web renderer is a design-time approximation. These are the documented gaps and
+      compatibility boundaries behind the native references in this Storybook.
+    </p>
+    <div className="deviation-list">
+      <section>
+        <h2>One Featured Action</h2>
+        <p>
+          <strong>Difference:</strong> {ONE_ACTION_DIFFERENCE} The unknown-action “Open” tile is
+          also an unverified proposal.
+        </p>
+        <p>
+          <strong>Reference:</strong> iOS 27.0 build 24A434, iPhone 17 Pro Simulator, Generic and
+          Event Ticket passes. <strong>Status:</strong> open visual gap; width and content are based
+          on native captures.
+        </p>
+      </section>
+      <section>
+        <h2>Back fields / Pass Details</h2>
+        <p>
+          <strong>Difference:</strong> the public component flips to an in-card back-field view.
+          Native Wallet uses a full Pass Details screen with a card thumbnail, description, Remove
+          Pass control, and grouped light fields. Storybook does not fake those controls.
+        </p>
+        <p>
+          <strong>Reference:</strong> fixture <code>backFields1</code>, iOS 27.0 build 24A434,
+          iPhone 17 Pro Simulator. <strong>Status:</strong> documented product boundary; compare the{" "}
+          <StoryLink storyId="back-fields--ios-27-pass-details">Pass Details story</StoryLink>.
+        </p>
+      </section>
+      <section>
+        <h2>Poster Generic</h2>
+        <p>
+          <strong>Difference:</strong> browser font metrics, exact ellipsis points, artwork/QR
+          raster scaling, and in dense cases the bottom-band shade can differ from Wallet.
+        </p>
+        <p>
+          <strong>Reference:</strong> Vltava Club iOS 27.0, iPhone 17 Pro Simulator.{" "}
+          <strong>Status:</strong> known approximation; field order, row structure, and clamps are
+          covered by focused stories.
+        </p>
+      </section>
+      <section>
+        <h2>Older iOS and reference provenance</h2>
+        <p>
+          <strong>Boundary:</strong> Wallet iOS 26.5 ignores Featured Actions and shows Vltava's
+          classic Generic fallback rather than Poster Generic. The web preview requires the matching{" "}
+          <code>targetOs="ios26"</code> / <code>variant="fallback"</code> configuration.
+        </p>
+        <p>
+          <strong>Reference:</strong> iOS 26.5, iPhone 17 Pro Simulator, original add-pass preview.
+          <strong> Status:</strong> behavior aligned in the recorded cases. Other unversioned legacy
+          references remain labelled “origin not recorded”; no OS/device is inferred.
+        </p>
+      </section>
+    </div>
   </GuidePage>
 );
 
@@ -57,8 +181,9 @@ const QaMatrix = () => (
         — card plus iOS 27 action tiles.
       </li>
       <li>
-        <StoryLink storyId="back-fields--back-fields-1">Back fields</StoryLink> — current
-        back-fields fixture (true back-side VRT comes later).
+        <StoryLink storyId="back-fields--back-fields-1">Back fields front</StoryLink> and{" "}
+        <StoryLink storyId="back-fields--ios-27-pass-details">Pass Details</StoryLink> — the same
+        fixture's two native views.
       </li>
     </ul>
     <p>The permalink guard protects 78 baseline entries and the 62-story VRT selection.</p>
@@ -95,6 +220,19 @@ type Story = StoryObj<PlaygroundArgs>;
 export const Api: Story = {
   name: "API",
   render: () => <ApiPage />,
+  parameters: {
+    controls: { disable: true },
+    options: { showPanel: false },
+  },
+};
+
+export const KnownDeviations: Story = {
+  name: "Known deviations",
+  render: () => <KnownDeviationsPage />,
+  parameters: {
+    controls: { disable: true },
+    options: { showPanel: false },
+  },
 };
 
 export const Playground: Story = {
@@ -111,4 +249,8 @@ export const Playground: Story = {
 export const Qa: Story = {
   name: "QA matrix",
   render: () => <QaMatrix />,
+  parameters: {
+    controls: { disable: true },
+    options: { showPanel: false },
+  },
 };

@@ -14,7 +14,7 @@ const meta: Meta<ComparisonArgs> = {
     docs: {
       description: {
         component:
-          "Back-side render — long-form key/value pairs in the iOS Wallet dark layout. No header strip, no logo; primary text is hidden.",
+          "Back-field coverage for long-form key/value pairs. The legacy story preserves the front comparison; the iOS 27 Pass Details story flips the component through its public interaction and documents the difference from Wallet's full details screen.",
       },
     },
   },

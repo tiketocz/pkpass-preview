@@ -16,6 +16,17 @@ const QuickStartPage = () => (
       <pre>
         <code>{`import { PKPassPreview } from "@tiketo/pkpass-preview";
 
+const pass = {
+  "pass.json": {
+    formatVersion: 1,
+    organizationName: "Example Coffee",
+    description: "Loyalty card",
+    storeCard: {
+      primaryFields: [{ key: "points", label: "POINTS", value: "420" }],
+    },
+  },
+};
+
 <PKPassPreview values={pass} />`}</code>
       </pre>
     </div>
@@ -32,6 +43,8 @@ const meta: Meta = {
   parameters: {
     layout: "fullscreen",
     docs: { page: WelcomePage },
+    controls: { disable: true },
+    options: { showPanel: false },
   },
 };
 export default meta;

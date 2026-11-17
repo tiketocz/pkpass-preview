@@ -32,7 +32,7 @@ const preview: Preview = {
           "Examples",
           ["Vltava Club", "Other use cases"],
           "Developer guide",
-          ["API", "Playground", "QA matrix", "Gallery (stress)"],
+          ["API", "Known deviations", "Playground", "QA matrix", "Gallery (stress)"],
         ],
       },
     },
@@ -42,9 +42,13 @@ const preview: Preview = {
       // own app, not the side-by-side test harness.
       source: {
         language: "tsx",
-        transform: (code: string) => {
+        transform: (code: string, context) => {
           const m = code.match(/values=\{([A-Za-z0-9_$]+)\}/);
-          return m ? `<PKPassPreview values={${m[1]}} />` : code;
+          if (!m) return code;
+          const props = [`values={${m[1]}}`];
+          if (context.args.variant) props.push(`variant="${context.args.variant}"`);
+          if (context.args.targetOs) props.push(`targetOs="${context.args.targetOs}"`);
+          return `<PKPassPreview ${props.join(" ")} />`;
         },
       },
     },

@@ -139,6 +139,8 @@ const meta: Meta = {
   tags: ["autodocs"],
   parameters: {
     layout: "fullscreen",
+    controls: { disable: true },
+    options: { showPanel: false },
     docs: {
       description: {
         component:

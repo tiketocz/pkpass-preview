@@ -60,7 +60,11 @@ export const BothVariants: Story = {
   name: scenarioTitle("examples-vltava-club--both-variants"),
   args: fallbackArgs,
   tags: ["vrt:skip"],
-  parameters: { __id: "examples-vltava-club--both-variants" },
+  parameters: {
+    __id: "examples-vltava-club--both-variants",
+    controls: { disable: true },
+    options: { showPanel: false },
+  },
   render: () => <BothVariantsDetail />,
 };
 

@@ -64,7 +64,15 @@ export const Generic5: Story = {
 export const Generic6: Story = {
   name: scenarioTitle("generic--generic-6"),
   args: comparisonArgs("generic--generic-6", generic6),
-  parameters: { __id: "generic--generic-6" },
+  parameters: {
+    __id: "generic--generic-6",
+    docs: {
+      description: {
+        story:
+          "Intentional compatibility alias of Generic 5. The fixture and native reference are retained under both permanent story IDs so historical links and VRT pairs stay valid.",
+      },
+    },
+  },
 };
 
 export const Generic7: Story = {
