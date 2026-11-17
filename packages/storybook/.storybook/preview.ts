@@ -1,4 +1,6 @@
 import type { Preview } from "@storybook/react";
+import { SharedDocsPage } from "../src/SharedDocsPage";
+import { buildComparisonSource } from "../src/docsSource";
 import "./preview.css";
 
 const preview: Preview = {
@@ -37,18 +39,13 @@ const preview: Preview = {
       },
     },
     docs: {
-      // Per-story raw JSX snippet — strips the Comparison wrapper so the
-      // source block in Docs matches what a user would paste into their
-      // own app, not the side-by-side test harness.
+      page: SharedDocsPage,
+      // Build public examples from Args instead of parsing Storybook's
+      // generated JSX, which contains the internal comparison wrapper.
       source: {
         language: "tsx",
         transform: (code: string, context) => {
-          const m = code.match(/values=\{([A-Za-z0-9_$]+)\}/);
-          if (!m) return code;
-          const props = [`values={${m[1]}}`];
-          if (context.args.variant) props.push(`variant="${context.args.variant}"`);
-          if (context.args.targetOs) props.push(`targetOs="${context.args.targetOs}"`);
-          return `<PKPassPreview ${props.join(" ")} />`;
+          return buildComparisonSource(context.args) ?? code;
         },
       },
     },
