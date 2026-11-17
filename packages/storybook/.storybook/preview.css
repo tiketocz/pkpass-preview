@@ -180,13 +180,23 @@
 
 .catalog-results li {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: 96px minmax(0, 1fr);
   gap: 12px;
   min-width: 0;
   padding: 16px;
   border: 1px solid #e2e8f0;
   border-radius: 10px;
   background: #fff;
+}
+
+.catalog-thumbnail {
+  display: block;
+  width: 96px;
+  height: 122px;
+  border-radius: 6px;
+  object-fit: cover;
+  object-position: top;
+  box-shadow: 0 2px 5px rgb(15 23 42 / 16%);
 }
 
 .catalog-result-copy {
@@ -273,6 +283,15 @@
 }
 
 @media (max-width: 420px) {
+  .catalog-results li {
+    grid-template-columns: 72px minmax(0, 1fr);
+  }
+
+  .catalog-thumbnail {
+    width: 72px;
+    height: 92px;
+  }
+
   .catalog-result-copy {
     grid-template-columns: minmax(0, 1fr);
   }

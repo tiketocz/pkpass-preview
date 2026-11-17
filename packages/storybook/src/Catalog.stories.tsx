@@ -89,6 +89,14 @@ const Catalog = () => {
       <ul className="catalog-results">
         {filtered.map((scenario) => (
           <li key={scenario.id}>
+            {scenario.references[0] ? (
+              <img
+                src={scenario.references[0].path}
+                alt=""
+                loading="lazy"
+                className="catalog-thumbnail"
+              />
+            ) : null}
             <div className="catalog-result-copy">
               <StoryLink storyId={scenario.id}>{scenario.title}</StoryLink>
               <span>{scenario.passStyles.map((style) => passStyleLabels[style]).join(" · ")}</span>
