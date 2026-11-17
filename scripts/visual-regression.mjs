@@ -30,12 +30,12 @@
  *   VRT_TAG         opt-in tag name (default: "vrt")
  */
 
-import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import http from "node:http";
 import path from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
+import { pathToFileURL } from "node:url";
 import pixelmatch from "pixelmatch";
 import { chromium } from "playwright";
 import { PNG } from "pngjs";
@@ -49,7 +49,7 @@ const DPR = Number(process.env.DPR ?? 2);
 const VRT_TAG = process.env.VRT_TAG ?? "vrt";
 const VRT_SKIP_TAG = `${VRT_TAG}:skip`;
 
-async function discoverStories(storybookDir) {
+export async function discoverStories(storybookDir) {
   const indexPath = path.join(storybookDir, "index.json");
   if (!existsSync(indexPath)) {
     throw new Error(
@@ -105,16 +105,37 @@ function startServer(dir, port) {
       `Storybook build dir "${dir}" not found — run \`bun run storybook:build\` first.`,
     );
   }
-  const proc = spawn("python3", ["-m", "http.server", String(port)], {
-    cwd: dir,
-    stdio: ["ignore", "ignore", "pipe"],
-  });
-  proc.on("exit", (code) => {
-    if (code && code !== 0 && code !== null) {
-      console.error(`http.server exited with code ${code}`);
+  const root = path.resolve(dir);
+  const contentTypes = {
+    ".css": "text/css",
+    ".html": "text/html",
+    ".js": "text/javascript",
+    ".json": "application/json",
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".svg": "image/svg+xml",
+    ".woff2": "font/woff2",
+  };
+  const server = http.createServer(async (req, res) => {
+    try {
+      const pathname = decodeURIComponent(new URL(req.url ?? "/", "http://localhost").pathname);
+      const relativePath = pathname === "/" ? "index.html" : pathname.replace(/^\/+/, "");
+      const filePath = path.resolve(root, relativePath);
+      if (filePath !== root && !filePath.startsWith(`${root}${path.sep}`)) {
+        res.writeHead(403).end("Forbidden");
+        return;
+      }
+      const body = await fs.readFile(filePath);
+      res.writeHead(200, {
+        "Content-Type": contentTypes[path.extname(filePath)] ?? "application/octet-stream",
+      });
+      res.end(body);
+    } catch {
+      res.writeHead(404).end("Not found");
     }
   });
-  return () => proc.kill("SIGTERM");
+  server.listen(port, "127.0.0.1");
+  return () => server.close();
 }
 
 async function captureStory(page, storyId) {
@@ -351,7 +372,9 @@ async function main() {
   }
 }
 
-main().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main().catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });
+}

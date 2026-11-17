@@ -1,0 +1,460 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "0c658f330fa6af6976c2543dabeb501277ffc070",
+  "entries": [
+    {
+      "id": "back-fields--back-fields-1",
+      "type": "story",
+      "title": "Back fields"
+    },
+    {
+      "id": "back-fields--docs",
+      "type": "docs",
+      "title": "Back fields"
+    },
+    {
+      "id": "barcode--code-128-1",
+      "type": "story",
+      "title": "Barcode"
+    },
+    {
+      "id": "barcode--code-128-2",
+      "type": "story",
+      "title": "Barcode"
+    },
+    {
+      "id": "barcode--code-128-3",
+      "type": "story",
+      "title": "Barcode"
+    },
+    {
+      "id": "barcode--code-128-4",
+      "type": "story",
+      "title": "Barcode"
+    },
+    {
+      "id": "barcode--code-128-5",
+      "type": "story",
+      "title": "Barcode"
+    },
+    {
+      "id": "barcode--docs",
+      "type": "docs",
+      "title": "Barcode"
+    },
+    {
+      "id": "barcode--large-barcode",
+      "type": "story",
+      "title": "Barcode"
+    },
+    {
+      "id": "barcode--pdf-417-1",
+      "type": "story",
+      "title": "Barcode"
+    },
+    {
+      "id": "barcode--pdf-417-2",
+      "type": "story",
+      "title": "Barcode"
+    },
+    {
+      "id": "barcode--pdf-417-3",
+      "type": "story",
+      "title": "Barcode"
+    },
+    {
+      "id": "barcode--pdf-417-4",
+      "type": "story",
+      "title": "Barcode"
+    },
+    {
+      "id": "boarding-pass--boarding-pass-1",
+      "type": "story",
+      "title": "Boarding pass"
+    },
+    {
+      "id": "boarding-pass--boarding-pass-2",
+      "type": "story",
+      "title": "Boarding pass"
+    },
+    {
+      "id": "boarding-pass--boarding-pass-3",
+      "type": "story",
+      "title": "Boarding pass"
+    },
+    {
+      "id": "boarding-pass--docs",
+      "type": "docs",
+      "title": "Boarding pass"
+    },
+    {
+      "id": "boarding-pass--transit-type-air",
+      "type": "story",
+      "title": "Boarding pass"
+    },
+    {
+      "id": "boarding-pass--transit-type-boat",
+      "type": "story",
+      "title": "Boarding pass"
+    },
+    {
+      "id": "boarding-pass--transit-type-bus",
+      "type": "story",
+      "title": "Boarding pass"
+    },
+    {
+      "id": "boarding-pass--transit-type-generic",
+      "type": "story",
+      "title": "Boarding pass"
+    },
+    {
+      "id": "boarding-pass--transit-type-train",
+      "type": "story",
+      "title": "Boarding pass"
+    },
+    {
+      "id": "coupon--coupon-1",
+      "type": "story",
+      "title": "Coupon"
+    },
+    {
+      "id": "coupon--docs",
+      "type": "docs",
+      "title": "Coupon"
+    },
+    {
+      "id": "event-ticket--docs",
+      "type": "docs",
+      "title": "Event ticket"
+    },
+    {
+      "id": "event-ticket--event-ticket-1",
+      "type": "story",
+      "title": "Event ticket"
+    },
+    {
+      "id": "event-ticket--event-ticket-2",
+      "type": "story",
+      "title": "Event ticket"
+    },
+    {
+      "id": "event-ticket--event-ticket-3",
+      "type": "story",
+      "title": "Event ticket"
+    },
+    {
+      "id": "event-ticket--event-ticket-4",
+      "type": "story",
+      "title": "Event ticket"
+    },
+    {
+      "id": "event-ticket--event-ticket-5",
+      "type": "story",
+      "title": "Event ticket"
+    },
+    {
+      "id": "examples--docs",
+      "type": "docs",
+      "title": "Examples"
+    },
+    {
+      "id": "examples--generic",
+      "type": "story",
+      "title": "Examples"
+    },
+    {
+      "id": "examples--store-card",
+      "type": "story",
+      "title": "Examples"
+    },
+    {
+      "id": "examples-featured-actions-ios-27--docs",
+      "type": "docs",
+      "title": "Examples/Featured Actions (iOS 27)"
+    },
+    {
+      "id": "examples-featured-actions-ios-27--event-ticket-no-actions",
+      "type": "story",
+      "title": "Examples/Featured Actions (iOS 27)"
+    },
+    {
+      "id": "examples-featured-actions-ios-27--event-ticket-older-ios",
+      "type": "story",
+      "title": "Examples/Featured Actions (iOS 27)"
+    },
+    {
+      "id": "examples-featured-actions-ios-27--event-ticket-one-action",
+      "type": "story",
+      "title": "Examples/Featured Actions (iOS 27)"
+    },
+    {
+      "id": "examples-featured-actions-ios-27--event-ticket-two-actions",
+      "type": "story",
+      "title": "Examples/Featured Actions (iOS 27)"
+    },
+    {
+      "id": "examples-featured-actions-ios-27--generic-no-actions",
+      "type": "story",
+      "title": "Examples/Featured Actions (iOS 27)"
+    },
+    {
+      "id": "examples-featured-actions-ios-27--generic-older-ios",
+      "type": "story",
+      "title": "Examples/Featured Actions (iOS 27)"
+    },
+    {
+      "id": "examples-featured-actions-ios-27--generic-one-action",
+      "type": "story",
+      "title": "Examples/Featured Actions (iOS 27)"
+    },
+    {
+      "id": "examples-featured-actions-ios-27--generic-two-actions",
+      "type": "story",
+      "title": "Examples/Featured Actions (iOS 27)"
+    },
+    {
+      "id": "examples-vltava-club--both-variants",
+      "type": "story",
+      "title": "Examples/Vltava Club"
+    },
+    {
+      "id": "examples-vltava-club--docs",
+      "type": "docs",
+      "title": "Examples/Vltava Club"
+    },
+    {
+      "id": "examples-vltava-club--ios-265-generic",
+      "type": "story",
+      "title": "Examples/Vltava Club"
+    },
+    {
+      "id": "examples-vltava-club--ios-270-poster-generic",
+      "type": "story",
+      "title": "Poster Generic (iOS 27)"
+    },
+    {
+      "id": "examples-vltava-club--poster-long-czech-text",
+      "type": "story",
+      "title": "Poster Generic (iOS 27)"
+    },
+    {
+      "id": "examples-vltava-club--poster-more-primary-fields",
+      "type": "story",
+      "title": "Poster Generic (iOS 27)"
+    },
+    {
+      "id": "examples-vltava-club--poster-short-text",
+      "type": "story",
+      "title": "Poster Generic (iOS 27)"
+    },
+    {
+      "id": "examples-vltava-club--poster-three-primary-fields",
+      "type": "story",
+      "title": "Poster Generic (iOS 27)"
+    },
+    {
+      "id": "gallery--all-cards-story",
+      "type": "story",
+      "title": "Gallery"
+    },
+    {
+      "id": "gallery--docs",
+      "type": "docs",
+      "title": "Gallery"
+    },
+    {
+      "id": "generic--docs",
+      "type": "docs",
+      "title": "Generic"
+    },
+    {
+      "id": "generic--generic-1",
+      "type": "story",
+      "title": "Generic"
+    },
+    {
+      "id": "generic--generic-2",
+      "type": "story",
+      "title": "Generic"
+    },
+    {
+      "id": "generic--generic-3",
+      "type": "story",
+      "title": "Generic"
+    },
+    {
+      "id": "generic--generic-4",
+      "type": "story",
+      "title": "Generic"
+    },
+    {
+      "id": "generic--generic-5",
+      "type": "story",
+      "title": "Generic"
+    },
+    {
+      "id": "generic--generic-6",
+      "type": "story",
+      "title": "Generic"
+    },
+    {
+      "id": "generic--generic-7",
+      "type": "story",
+      "title": "Generic"
+    },
+    {
+      "id": "generic--generic-8",
+      "type": "story",
+      "title": "Generic"
+    },
+    {
+      "id": "generic--generic-9",
+      "type": "story",
+      "title": "Generic"
+    },
+    {
+      "id": "poster-generic-ios-27--docs",
+      "type": "docs",
+      "title": "Poster Generic (iOS 27)"
+    },
+    {
+      "id": "samples--docs",
+      "type": "docs",
+      "title": "Samples"
+    },
+    {
+      "id": "samples--long-qr-alt-text",
+      "type": "story",
+      "title": "Samples"
+    },
+    {
+      "id": "samples--membership-id-card",
+      "type": "story",
+      "title": "Samples"
+    },
+    {
+      "id": "samples--resident-benefit",
+      "type": "story",
+      "title": "Samples"
+    },
+    {
+      "id": "samples--tour-pro",
+      "type": "story",
+      "title": "Samples"
+    },
+    {
+      "id": "store-card--docs",
+      "type": "docs",
+      "title": "Store card"
+    },
+    {
+      "id": "store-card--store-card-1",
+      "type": "story",
+      "title": "Store card"
+    },
+    {
+      "id": "store-card--store-card-2",
+      "type": "story",
+      "title": "Store card"
+    },
+    {
+      "id": "store-card--store-card-3",
+      "type": "story",
+      "title": "Store card"
+    },
+    {
+      "id": "store-card--store-card-4",
+      "type": "story",
+      "title": "Store card"
+    },
+    {
+      "id": "store-card--store-card-5",
+      "type": "story",
+      "title": "Store card"
+    },
+    {
+      "id": "store-card--store-card-6",
+      "type": "story",
+      "title": "Store card"
+    },
+    {
+      "id": "store-card--store-card-7",
+      "type": "story",
+      "title": "Store card"
+    },
+    {
+      "id": "store-card--store-card-8",
+      "type": "story",
+      "title": "Store card"
+    },
+    {
+      "id": "welcome--docs",
+      "type": "docs",
+      "title": "Welcome"
+    }
+  ],
+  "vrtStoryIds": [
+    "back-fields--back-fields-1",
+    "barcode--code-128-1",
+    "barcode--code-128-2",
+    "barcode--code-128-3",
+    "barcode--code-128-4",
+    "barcode--code-128-5",
+    "barcode--large-barcode",
+    "barcode--pdf-417-1",
+    "barcode--pdf-417-2",
+    "barcode--pdf-417-3",
+    "barcode--pdf-417-4",
+    "boarding-pass--boarding-pass-1",
+    "boarding-pass--boarding-pass-2",
+    "boarding-pass--boarding-pass-3",
+    "boarding-pass--transit-type-air",
+    "boarding-pass--transit-type-boat",
+    "boarding-pass--transit-type-bus",
+    "boarding-pass--transit-type-generic",
+    "boarding-pass--transit-type-train",
+    "coupon--coupon-1",
+    "event-ticket--event-ticket-1",
+    "event-ticket--event-ticket-2",
+    "event-ticket--event-ticket-3",
+    "event-ticket--event-ticket-4",
+    "event-ticket--event-ticket-5",
+    "examples--generic",
+    "examples--store-card",
+    "examples-featured-actions-ios-27--event-ticket-no-actions",
+    "examples-featured-actions-ios-27--event-ticket-older-ios",
+    "examples-featured-actions-ios-27--event-ticket-one-action",
+    "examples-featured-actions-ios-27--event-ticket-two-actions",
+    "examples-featured-actions-ios-27--generic-no-actions",
+    "examples-featured-actions-ios-27--generic-older-ios",
+    "examples-featured-actions-ios-27--generic-one-action",
+    "examples-featured-actions-ios-27--generic-two-actions",
+    "examples-vltava-club--ios-265-generic",
+    "examples-vltava-club--ios-270-poster-generic",
+    "examples-vltava-club--poster-long-czech-text",
+    "examples-vltava-club--poster-more-primary-fields",
+    "examples-vltava-club--poster-short-text",
+    "examples-vltava-club--poster-three-primary-fields",
+    "generic--generic-1",
+    "generic--generic-2",
+    "generic--generic-3",
+    "generic--generic-4",
+    "generic--generic-5",
+    "generic--generic-6",
+    "generic--generic-7",
+    "generic--generic-8",
+    "generic--generic-9",
+    "samples--long-qr-alt-text",
+    "samples--membership-id-card",
+    "samples--resident-benefit",
+    "samples--tour-pro",
+    "store-card--store-card-1",
+    "store-card--store-card-2",
+    "store-card--store-card-3",
+    "store-card--store-card-4",
+    "store-card--store-card-5",
+    "store-card--store-card-6",
+    "store-card--store-card-7",
+    "store-card--store-card-8"
+  ]
+}
