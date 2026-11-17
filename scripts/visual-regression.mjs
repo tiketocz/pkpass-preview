@@ -144,8 +144,8 @@ async function captureStory(page, storyId) {
   const url = `http://127.0.0.1:${PORT}/iframe.html?id=${storyId}&viewMode=story`;
   await page.goto(url, { waitUntil: "networkidle" });
   await page.waitForSelector("#passCard", { timeout: 10_000 });
-  // Let use-fit-text + dynamic styles settle.
-  await page.waitForTimeout(400);
+  // Let use-fit-text, dynamic styles, and the 500ms card-flip transition settle.
+  await page.waitForTimeout(650);
 
   const cardHandle = await page.$("#passCard");
   if (!cardHandle) return null;
@@ -158,44 +158,108 @@ async function captureStory(page, storyId) {
     (await page.$('img[alt^="iOS Wallet screenshot"]'));
   const iosSrc = imgHandle ? await imgHandle.getAttribute("src") : null;
 
-  // TIK-318: when Featured Actions tiles render (below #passCard), the iOS
-  // reference is cropped to card + tile row, so compare against the whole
-  // preview (tight, no padding) instead of #passCard alone. Stories without
-  // tiles keep the #passCard capture, so their metrics are unchanged.
   const hasFeaturedActions = (await page.$(".featured-actions")) !== null;
-  const ourBuf =
-    (hasFeaturedActions ? await captureFullPreview(page, 0) : null) ??
-    (await cardHandle.screenshot({ omitBackground: false }));
+  const capture = await captureVisiblePreview(page, 0);
+  if (!capture) return null;
+  const ourBuf = capture.buffer;
+  const png = PNG.sync.read(ourBuf);
+  assertVisibleSideCaptureDimensions({
+    storyId,
+    ...capture,
+    capturePixelWidth: png.width,
+    capturePixelHeight: png.height,
+    dpr: DPR,
+  });
   return { storyId, iosSrc, ourBuf, hasFeaturedActions };
 }
 
-// Render-only baseline for stories without an iOS reference (e.g. TIK-318
-// Featured Actions, whose tiles sit BELOW #passCard). Captures the whole
-// PKPassPreview root including content that overflows it (the classic front
-// is taller than #passCard). Never feeds the metrics/report.
-async function captureFullPreview(page, pad = 8) {
-  const clip = await page.evaluate((pad) => {
-    const root = document.querySelector("#passCard")?.parentElement;
-    if (!root) return null;
-    const { left, top, right } = root.getBoundingClientRect();
-    let { bottom } = root.getBoundingClientRect();
-    for (const el of root.querySelectorAll("*")) {
-      const r = el.getBoundingClientRect();
-      if (r.width === 0 || r.height === 0) continue;
-      // Only grow downwards: the classic front overflows the root at the
-      // bottom; decorations poking out above/sideways are not wanted.
-      bottom = Math.max(bottom, r.bottom);
-    }
-    // `pad`: small margin so box-shadows are not cut off (0 = tight).
+const expectedVisibleSideDimensions = ({ isPoster, isBack, isCoupon }) => ({
+  width: 320,
+  height: (isBack ? 462 : isPoster ? 420 : 470) + (isCoupon ? 4 : 0),
+});
+
+export function assertVisibleSideCaptureDimensions({
+  storyId,
+  isPoster,
+  isBack,
+  isCoupon = false,
+  sideCssWidth,
+  sideCssHeight,
+  clipCssWidth,
+  clipCssHeight,
+  capturePixelWidth,
+  capturePixelHeight,
+  dpr,
+}) {
+  const expectedSide = expectedVisibleSideDimensions({ isPoster, isBack, isCoupon });
+  const closeTo = (actual, expected) => Math.abs(actual - expected) < 0.05;
+  if (!closeTo(sideCssWidth, expectedSide.width) || !closeTo(sideCssHeight, expectedSide.height)) {
+    throw new Error(
+      `${storyId}: visible ${isBack ? "back" : isPoster ? "poster front" : "classic front"} ` +
+        `is ${sideCssWidth}x${sideCssHeight} CSS px; expected ${expectedSide.width}x${expectedSide.height}`,
+    );
+  }
+
+  const expectedPixelWidth = Math.round(clipCssWidth * dpr);
+  const expectedPixelHeight = Math.round(clipCssHeight * dpr);
+  if (capturePixelWidth !== expectedPixelWidth || capturePixelHeight !== expectedPixelHeight) {
+    throw new Error(
+      `${storyId}: capture is ${capturePixelWidth}x${capturePixelHeight} px; ` +
+        `expected ${expectedPixelWidth}x${expectedPixelHeight} for DPR ${dpr}`,
+    );
+  }
+  if (
+    capturePixelWidth < Math.round(expectedSide.width * dpr) ||
+    capturePixelHeight < Math.round(expectedSide.height * dpr)
+  ) {
+    throw new Error(
+      `${storyId}: capture ${capturePixelWidth}x${capturePixelHeight} clips the visible ` +
+        `${expectedSide.width}x${expectedSide.height} CSS px side at DPR ${dpr}`,
+    );
+  }
+}
+
+// Capture the real bounding-box union of the currently visible pass face and
+// Featured Actions (when present). The hidden face is deliberately excluded.
+// This applies identically to base and head Storybook builds in CI.
+async function captureVisiblePreview(page, pad = 0) {
+  const bounds = await page.evaluate((pad) => {
+    const card = document.querySelector("#passCard");
+    if (!(card instanceof HTMLElement)) return null;
+    const isBack = card.classList.contains("flipped");
+    const visibleSide = card.querySelector(isBack ? "#passBack" : "#passFront");
+    if (!(visibleSide instanceof HTMLElement)) return null;
+
+    const elements = [visibleSide];
+    const featuredActions = card.parentElement?.querySelector(":scope > .featured-actions");
+    if (featuredActions instanceof HTMLElement) elements.push(featuredActions);
+
+    const rects = elements.map((element) => element.getBoundingClientRect());
+    const left = Math.min(...rects.map((rect) => rect.left));
+    const top = Math.min(...rects.map((rect) => rect.top));
+    const right = Math.max(...rects.map((rect) => rect.right));
+    const bottom = Math.max(...rects.map((rect) => rect.bottom));
+    const sideRect = rects[0];
+
     return {
-      x: Math.max(0, left - pad + window.scrollX),
-      y: Math.max(0, top - pad + window.scrollY),
-      width: right - left + 2 * pad,
-      height: bottom - top + 2 * pad,
+      clip: {
+        x: Math.max(0, left - pad + window.scrollX),
+        y: Math.max(0, top - pad + window.scrollY),
+        width: right - left + 2 * pad,
+        height: bottom - top + 2 * pad,
+      },
+      isPoster: visibleSide.classList.contains("poster-front"),
+      isBack,
+      isCoupon: card.parentElement?.classList.contains("coupon") ?? false,
+      sideCssWidth: sideRect.width,
+      sideCssHeight: sideRect.height,
+      clipCssWidth: right - left + 2 * pad,
+      clipCssHeight: bottom - top + 2 * pad,
     };
   }, pad);
-  if (!clip) return null;
-  return page.screenshot({ clip, fullPage: true });
+  if (!bounds) return null;
+  const buffer = await page.screenshot({ clip: bounds.clip, fullPage: true });
+  return { ...bounds, buffer };
 }
 
 async function compareOne({ ourBuf, iosPath, outDir, slug }) {
@@ -352,9 +416,12 @@ async function main() {
       if (captured.hasFeaturedActions) {
         // Keep a padded render-only PNG for tile stories even when they have
         // a reference, for side-by-side review (not part of the metrics).
-        const renderBuf = await captureFullPreview(page).catch(() => null);
-        if (renderBuf) {
-          await fs.writeFile(path.join(OUT_DIR, "render-only", `${slug}.png`), renderBuf);
+        const renderCapture = await captureVisiblePreview(page, 8).catch(() => null);
+        if (renderCapture) {
+          await fs.writeFile(
+            path.join(OUT_DIR, "render-only", `${slug}.png`),
+            renderCapture.buffer,
+          );
         }
       }
       const metrics = await compareOne({

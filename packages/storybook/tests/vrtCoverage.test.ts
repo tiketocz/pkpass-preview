@@ -3,12 +3,54 @@ import { describe, expect, it } from "vitest";
 // @ts-expect-error The runtime .mjs helper has no declaration file.
 import { classifyRenderedEntry } from "../../../scripts/check-storybook-overflow.mjs";
 // @ts-expect-error The runtime .mjs helper has no declaration file.
+import { assertVisibleSideCaptureDimensions } from "../../../scripts/visual-regression.mjs";
+// @ts-expect-error The runtime .mjs helper has no declaration file.
 import { buildComparisonMarkdown } from "../../../scripts/vrt-compare.mjs";
 // Node runs this shared helper directly; it intentionally remains plain ESM.
 // @ts-expect-error The runtime .mjs helper has no declaration file.
 import { assertCaptureCoverage, assertPairedCoverage } from "../../../scripts/vrt-coverage.mjs";
 
 describe("VRT structural coverage", () => {
+  it.each([
+    ["classic front", false, false, false, 470, 940],
+    ["poster front", true, false, false, 420, 840],
+    ["back", false, true, false, 462, 924],
+    ["coupon front", false, false, true, 474, 948],
+  ])("accepts a full %s capture", (storyId, isPoster, isBack, isCoupon, cssHeight, pixelHeight) => {
+    expect(() =>
+      assertVisibleSideCaptureDimensions({
+        storyId,
+        isPoster,
+        isBack,
+        isCoupon,
+        sideCssWidth: 320,
+        sideCssHeight: cssHeight,
+        clipCssWidth: 320,
+        clipCssHeight: cssHeight,
+        capturePixelWidth: 640,
+        capturePixelHeight: pixelHeight,
+        dpr: 2,
+      }),
+    ).not.toThrow();
+  });
+
+  it("rejects the old 320x420 card capture when the classic front is 320x470", () => {
+    expect(() =>
+      assertVisibleSideCaptureDimensions({
+        storyId: "generic-generic-1",
+        isPoster: false,
+        isBack: false,
+        sideCssWidth: 320,
+        sideCssHeight: 470,
+        clipCssWidth: 320,
+        clipCssHeight: 420,
+        capturePixelWidth: 640,
+        capturePixelHeight: 840,
+        dpr: 2,
+      }),
+    ).toThrow(/clips the visible 320x470/);
+  });
+
   it("fails with the ids of VRT-eligible stories missing references", () => {
     expect(() =>
       assertCaptureCoverage({
