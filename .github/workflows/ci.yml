@@ -16,7 +16,9 @@ permissions:
 jobs:
   build:
     name: lint + typecheck + test
-    runs-on: ubuntu-latest
+    # Playwright does not provide Chromium dependencies for ubuntu-latest's
+    # 26.04 image yet. Keep CI aligned with the supported VRT runner.
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
