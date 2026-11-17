@@ -33,7 +33,8 @@ const styles = {
     textTransform: "uppercase",
   } as const,
   placeholder: {
-    width: 312,
+    width: 320,
+    maxWidth: "100%",
     minHeight: 408,
     border: "1px dashed #c4c4c4",
     borderRadius: 12,
@@ -44,10 +45,13 @@ const styles = {
     color: "#888",
     fontSize: 13,
     padding: 16,
+    boxSizing: "border-box",
     textAlign: "center",
   } as const,
   img: {
-    maxWidth: 312,
+    width: 320,
+    maxWidth: "100%",
+    height: "auto",
     borderRadius: 12,
     // Match PKPassPreview's own box-shadow (see packages/preview/src/styles.ts)
     // so the side-by-side looks balanced. Requires every screenshot to be
@@ -71,17 +75,18 @@ export const Comparison = ({
   const [hasShot, setHasShot] = useState(true);
   const src = `screenshots/${screenshot}.${screenshotExtension}`;
   return (
-    <div style={styles.wrap}>
-      <div style={styles.col}>
+    <div className="pkpass-comparison" style={styles.wrap}>
+      <div className="pkpass-comparison-column" style={styles.col}>
         <div style={styles.label}>Our render</div>
         <PKPassPreview values={values} variant={variant} targetOs={targetOs} />
       </div>
-      <div style={styles.col}>
+      <div className="pkpass-comparison-column" style={styles.col}>
         <div style={styles.label}>{referenceLabel}</div>
         {hasShot ? (
           <img
             src={src}
             alt={`iOS Wallet screenshot of ${screenshot}`}
+            className="pkpass-reference"
             style={styles.img}
             onError={() => setHasShot(false)}
           />

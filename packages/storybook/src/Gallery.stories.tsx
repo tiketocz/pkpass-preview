@@ -122,7 +122,7 @@ const styles = {
 // unscoped CSS rule that would otherwise only surface when two cards
 // land on one screen in a downstream consumer.
 const AllCards = () => (
-  <div style={styles.grid}>
+  <div className="qa-gallery-grid" style={styles.grid}>
     {fixtures.map((f) => (
       <div key={f.label} style={styles.cell}>
         <div style={styles.label}>{f.label}</div>

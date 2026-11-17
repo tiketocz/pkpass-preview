@@ -77,7 +77,7 @@ function slugify(s) {
     .replace(/^-|-$/g, "");
 }
 
-async function waitForServer(port) {
+export async function waitForServer(port) {
   for (let i = 0; i < 30; i++) {
     const ok = await new Promise((resolve) => {
       const req = http.get(
@@ -99,7 +99,7 @@ async function waitForServer(port) {
   throw new Error(`Storybook server on :${port} did not become ready`);
 }
 
-function startServer(dir, port) {
+export function startServer(dir, port) {
   if (!existsSync(dir)) {
     throw new Error(
       `Storybook build dir "${dir}" not found — run \`bun run storybook:build\` first.`,

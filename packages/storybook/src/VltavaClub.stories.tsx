@@ -26,7 +26,7 @@ export const BothVariants: Story = {
   args: fallbackArgs,
   tags: ["vrt:skip"],
   render: () => (
-    <div style={{ display: "flex", gap: 48, alignItems: "flex-start" }}>
+    <div className="vltava-variants" style={{ display: "flex", gap: 48, alignItems: "flex-start" }}>
       <Comparison {...fallbackArgs} />
       <Comparison {...posterArgs} />
     </div>

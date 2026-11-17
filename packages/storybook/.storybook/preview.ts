@@ -1,4 +1,5 @@
 import type { Preview } from "@storybook/react";
+import "./preview.css";
 
 const preview: Preview = {
   parameters: {
@@ -45,6 +46,12 @@ const preview: Preview = {
           return m ? `<PKPassPreview values={${m[1]}} />` : code;
         },
       },
+    },
+  },
+  argTypes: {
+    values: {
+      control: false,
+      table: { disable: true },
     },
   },
 };
