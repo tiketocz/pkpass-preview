@@ -12,12 +12,12 @@ iOS-faithful Apple Wallet pass previews for React.
 
 [![npm version](https://img.shields.io/npm/v/@tiketo/pkpass-preview?style=flat-square&color=cb3837&label=npm)](https://www.npmjs.com/package/@tiketo/pkpass-preview)
 [![types](https://img.shields.io/npm/types/@tiketo/pkpass-preview?style=flat-square&color=3178c6)](https://www.npmjs.com/package/@tiketo/pkpass-preview)
-[![license](https://img.shields.io/github/license/tiketocz/pkpass-preview?style=flat-square&color=4c1)](./LICENSE)
+[![license](https://img.shields.io/github/license/tiketocz/pkpass-preview?style=flat-square&color=4c1)](https://github.com/tiketocz/pkpass-preview/blob/main/LICENSE)
 [![Storybook](https://img.shields.io/badge/Storybook-live-FF4785?style=flat-square&logo=storybook&logoColor=white)](https://tiketocz.github.io/pkpass-preview/)
 [![Used in production by tiketo](https://img.shields.io/badge/Used%20in%20production%20by-tiketo-0a84ff?style=flat-square)](https://tiketo.eu)
 
 <a href="https://tiketocz.github.io/pkpass-preview/">
-  <img src="./packages/storybook/public/screenshots/hero-3cards.png" alt="Three Apple Wallet passes rendered by @tiketo/pkpass-preview — a navy loyalty store card, a white membership ID card, and a yellow coupon — side by side" width="880" />
+  <img src="https://raw.githubusercontent.com/tiketocz/pkpass-preview/main/packages/storybook/public/screenshots/hero-3cards.png" alt="Three Apple Wallet passes rendered by @tiketo/pkpass-preview — a navy loyalty store card, a white membership ID card, and a yellow coupon — side by side" width="880" />
 </a>
 
 </div>
@@ -90,13 +90,92 @@ That's it. No theme provider, no portal, no global CSS — the component scopes 
 | **All five pass styles** | `boardingPass`, `coupon`, `eventTicket`, `generic`, `storeCard`. |
 | **Auto-variant detection** | id-card / store-card-3col / boarding-pass / coupon / event-ticket-strip and 10+ others, derived from field shape. Manual override available. |
 | **Barcodes** | PDF417, QR, Code 128, Aztec — placement matches iOS (header, footer, strip-overlay). |
-| **iOS 27 Featured Actions (experimental)** | Opt in with `targetOs="ios27"` to render up to two `featuredActions` tiles below the card. Default output is unchanged. The two-tile look for `addToBalance` / `call` is aligned to a native iOS 27.0 Wallet reference (not pixel-perfect); unknown types and the single-action layout remain a proposal; see the [package README](packages/preview/README.md#target-ios-version--featured-actions-ios-27-experimental). |
+| **iOS 27 Featured Actions (experimental)** | Opt in with `targetOs="ios27"` to render up to two `featuredActions` tiles below the card. Default output is unchanged. The two-tile look for `addToBalance` / `call` is aligned to a native iOS 27.0 Wallet reference (not pixel-perfect); unknown types and the single-action layout remain a proposal; see [Target iOS version & Featured Actions](#target-ios-version--featured-actions-ios-27-experimental) below. |
 | **Transit icons** | Airplane / train / bus / boat / generic, inline JSX SVG, `fill: currentColor` follows `labelColor`. |
 | **Back fields & dark mode** | iOS-accurate dark back side with link/separator treatment. |
 | **Scoped styles** | Unique container id per instance — no global CSS, no portal, safe to render many cards on one page. |
 | **CSP-safe** | No inline `style=""`, no inline `<style>`. Works under strict CSP without `unsafe-inline`. |
 | **SSR-friendly** | Client-only; wrap in `next/dynamic({ ssr: false })` or render inside a client component. |
 | **TypeScript-first, ESM-only** | Strict types, tree-shakeable, zero runtime dependencies in the public API surface. |
+
+## Poster generic previews (experimental)
+
+`PKPassPreview` accepts an optional `variant` prop for passes that contain the
+iOS 27 `posterGeneric` structure:
+
+```tsx
+<PKPassPreview values={passFiles} variant="poster" />
+<PKPassPreview values={passFiles} variant="fallback" />
+```
+
+- `variant="poster"` renders the experimental iOS 27 full-bleed artwork layout.
+  If `posterGeneric` is absent, the renderer falls back to the pass's classic
+  structure.
+- `variant="fallback"` always renders the classic structure (for example,
+  `generic`) even when `posterGeneric` is present.
+- Omitting `variant` preserves the existing classic rendering behaviour.
+
+The initial poster renderer covers the full-bleed `artwork` image, logo and
+header, centered barcode, all primary fields in one responsive bottom-band row,
+and footer fields. It is intended for previewing and is not yet a pixel-perfect
+implementation of every iOS 27 poster size or feature.
+
+## Target iOS version & Featured Actions (iOS 27, experimental)
+
+`PKPassPreview` accepts an optional `targetOs` prop that says which iOS release
+the preview emulates for capability-gated features. It is independent of
+`variant`: `variant` chooses the layout (poster vs classic), `targetOs` chooses
+which iOS features are shown.
+
+```tsx
+<PKPassPreview values={passFiles} targetOs="ios27" />
+<PKPassPreview values={passFiles} targetOs="ios27" variant="poster" />
+```
+
+| `targetOs`           | Featured Actions                                       |
+| -------------------- | ------------------------------------------------------ |
+| omitted (default)    | not rendered: output identical to previous releases    |
+| `"ios26"`            | not rendered (Wallet before iOS 27 ignores them)       |
+| `"ios27"`            | up to two tiles rendered below the card front           |
+
+With `targetOs="ios27"`, the top-level `featuredActions` array of `pass.json`
+(schema per apple/pass-builder `Pass+Action.swift`: `identifier` required and
+unique, `type` required, `url` optional) is rendered as a row of up to two
+white rounded tiles directly below the card front, in input order. This works
+for every pass style, including `generic` and `eventTicket`. Each tile has a
+green circle icon (top left), a bold label and a grey "Open Link" subtitle:
+
+| `type`         | Icon (white glyph on iOS green `#34C759`) | Label            | Subtitle    | Status                 |
+| -------------- | ----------------------------------------- | ---------------- | ----------- | ---------------------- |
+| `addToBalance` | credit card                               | "Add to Balance" | "Open Link" | native reference       |
+| `call`         | phone handset                             | "Call"           | "Open Link" | native reference       |
+| anything else  | arrow                                     | "Open"           | "Open Link" | proposal (unverified)  |
+
+Invalid input never throws. The rules are exported as `resolveFeaturedActions(featuredActions, targetOs)`:
+
+- A non-array value (missing, `null`, object, …) means no actions.
+- Entries that are not plain objects, or have a missing or blank `identifier`
+  or `type`, or have a non-string `url`, are skipped.
+- A later entry that repeats an `identifier` is skipped.
+- Unknown `type` values are kept and rendered as a generic tile with the label
+  "Open" and an arrow icon.
+- Only the first two valid entries are rendered. Zero valid entries means no
+  tile container at all.
+
+> **Native reference vs proposal.** The two-tile row for `addToBalance` +
+> `call` (tile proportions, green icons, labels, "Open Link" subtitle) is
+> aligned to native Apple Wallet iOS 27.0 (24A434) on an iPhone 17 Pro
+> Simulator, for both `generic` and `eventTicket`. It is an approximation,
+> not pixel-perfect (web fonts, glyph shapes, shadow). Still a **proposal**
+> without native reference: the unknown-type tile ("Open" + arrow) and the
+> single-action layout (one tile spanning the card width).
+> The preview is static: tiles are not links, and `url` is only exposed via
+> `title` / `data-url`.
+
+New exports: types `FeaturedAction`, `KnownFeaturedActionType`,
+`PreviewTargetOs` and `ResolvedFeaturedAction`, plus `resolveFeaturedActions`,
+`supportsFeaturedActions`, `MAX_FEATURED_ACTIONS`, `FEATURED_ACTION_LABELS`,
+`FEATURED_ACTION_SUBTITLE` and `UNKNOWN_FEATURED_ACTION_LABEL`.
 
 ## Compatibility
 
@@ -208,7 +287,7 @@ Tag-driven, OIDC-published. Bump the version in `packages/preview/package.json`,
 
 ## License
 
-[MIT](./LICENSE) — do whatever you want, just don't sue us.
+[MIT](https://github.com/tiketocz/pkpass-preview/blob/main/LICENSE) — do whatever you want, just don't sue us.
 
 ---
 

@@ -26,3 +26,7 @@ visual-regression-output/
 # Per-PR proposal / scratchpad docs (e.g. TIK-145-proposals.md). Pre-merge
 # design notes live here while a branch is in flight; not committed to main.
 .planning/
+
+# Generated copy of the root README (release.yml copies it before npm publish;
+# prepack copies it for local npm pack). The root README.md is the only source.
+packages/preview/README.md

@@ -1,6 +1,6 @@
 {
   "name": "@tiketo/pkpass-preview",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "React component for previewing Apple Wallet passes (.pkpass) in the browser.",
   "license": "MIT",
   "type": "module",
@@ -30,7 +30,8 @@
   "files": ["dist", "README.md", "LICENSE"],
   "scripts": {
     "build": "NODE_ENV=production bun ./scripts/build.ts",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "prepack": "cp ../../README.md README.md"
   },
   "dependencies": {
     "@bwip-js/browser": "^4.7.0",

@@ -65,6 +65,17 @@ jobs:
           fi
           echo "tag $tag matches package version $pkg"
 
+      # The root README.md is the only maintained README. It must exist in
+      # packages/preview BEFORE `npm publish` starts: npm reads the readme
+      # for the registry metadata (versions[v].readme / readmeFilename)
+      # before lifecycle scripts run, so a prepack copy only reaches the
+      # tarball, not the npm page. The copy is gitignored.
+      - name: copy root README into the package
+        run: |
+          set -euo pipefail
+          cp README.md packages/preview/README.md
+          cmp README.md packages/preview/README.md
+
       # npm 11 refuses to apply the default 'latest' dist-tag to a
       # SemVer prerelease (anything with a hyphen, e.g. 0.0.1-alpha.0).
       # Route prereleases to the 'next' channel, stable to 'latest'.
