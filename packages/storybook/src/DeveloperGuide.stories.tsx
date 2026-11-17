@@ -1,9 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { PKPassPreview, type PreviewTargetOs, type PreviewVariant } from "@tiketo/pkpass-preview";
+import type { PreviewTargetOs, PreviewVariant } from "@tiketo/pkpass-preview";
 import type { ReactNode } from "react";
 
+import { WebWalletDetail } from "./Comparison";
 import { StoryLink } from "./StoryLink";
-import { exampleStoreCard } from "./fixtures/example-store-card";
+import { vltavaClub } from "./fixtures/vltava-club";
+import { vltavaFeaturedGeneric } from "./fixtures/vltava-featured-actions";
 
 const GuidePage = ({ children }: { children: ReactNode }) => (
   <main className="guide-page">{children}</main>
@@ -64,6 +66,7 @@ const QaMatrix = () => (
 );
 
 type PlaygroundArgs = {
+  fixture: "vltava-club" | "vltava-featured-generic";
   variant: PreviewVariant;
   targetOs: PreviewTargetOs;
 };
@@ -72,6 +75,14 @@ const meta: Meta<PlaygroundArgs> = {
   title: "Developer guide",
   id: "developer-guide",
   argTypes: {
+    fixture: {
+      control: "select",
+      options: ["vltava-club", "vltava-featured-generic"],
+      labels: {
+        "vltava-club": "Vltava Club (Generic + Poster Generic)",
+        "vltava-featured-generic": "Vltava Featured Actions (2 actions)",
+      },
+    },
     variant: { control: "inline-radio", options: ["fallback", "poster"] },
     targetOs: { control: "inline-radio", options: ["ios26", "ios27"] },
   },
@@ -88,10 +99,13 @@ export const Api: Story = {
 
 export const Playground: Story = {
   name: "Playground",
-  args: { variant: "fallback", targetOs: "ios27" },
-  render: (args) => (
-    <PKPassPreview values={exampleStoreCard} variant={args.variant} targetOs={args.targetOs} />
-  ),
+  args: { fixture: "vltava-club", variant: "poster", targetOs: "ios27" },
+  render: ({ fixture, variant, targetOs }) => {
+    const values = fixture === "vltava-club" ? vltavaClub : vltavaFeaturedGeneric(2);
+    return (
+      <WebWalletDetail values={values} fixtureKey={fixture} variant={variant} targetOs={targetOs} />
+    );
+  },
 };
 
 export const Qa: Story = {
