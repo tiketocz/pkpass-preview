@@ -17,16 +17,13 @@ import {
 // same 2-action pass in Apple Wallet iOS 26.5 (Simulator): card only, no
 // tiles. The tile look is aligned to the references but is not pixel-perfect.
 //
-// Known difference: with one action, native Wallet draws one wide tile with a
-// grey chevron on the right; our tile matches the width but has no chevron.
-//
 // NÁVRH / PROPOSAL, still unverified: the unknown-type tile ("Open" + arrow).
 
 const NATIVE_NOTE =
   "**Look based on a native reference** — Apple Wallet iOS 27.0 (24A434), iPhone 17 Pro Simulator: two white tiles, green circle icon (credit card / phone handset), bold label (“Add to Balance” / “Call”) and grey “Open Link” subtitle. Approximation, not pixel-perfect (web fonts, glyph shapes, shadow). The unknown-type tile (“Open” + arrow) remains a **návrh / proposal**.";
 
 const ONE_ACTION_NOTE =
-  "**Native reference** — Apple Wallet iOS 27.0 (24A434), iPhone 17 Pro Simulator: one wide white tile spanning the card width. Our tile matches the width; **difference:** native Wallet shows a grey chevron on the right of the tile, the web preview has none. The unknown-type tile (“Open” + arrow) remains a **návrh / proposal**.";
+  "**Native reference** — Apple Wallet iOS 27.0 (24A434), iPhone 17 Pro Simulator: one wide white tile spanning the card width, with a grey chevron aligned to the bottom label/subtitle group. The web rendering remains approximate for fonts, glyph shape and shadow. The unknown-type tile (“Open” + arrow) remains a **návrh / proposal**.";
 
 const NO_ACTIONS_NOTE =
   "**Native reference** — Apple Wallet iOS 27.0 (24A434), iPhone 17 Pro Simulator: no tile row below the card, same as the web preview.";
