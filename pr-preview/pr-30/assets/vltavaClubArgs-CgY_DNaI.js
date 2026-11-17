@@ -1,0 +1,1 @@
+import{c as e}from"./Comparison-CqibxpI0.js";import{v as s}from"./index-SvsTIwFY.js";const n=t=>{const r=structuredClone(s),a=r["pass.json"];return a.posterGeneric=t,r},p=e("examples-vltava-club--ios-265-generic",s),i=e("examples-vltava-club--ios-270-poster-generic",s,{variant:"poster",targetOs:"ios27"});export{p as f,i as p,n as w};
