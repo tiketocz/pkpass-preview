@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { BarcodesPreview } from "./components/BarcodesPreview";
 import { PassBackFieldItem, PassFieldItem, PassFieldItemHeader } from "./components/PassFieldItems";
 import {
@@ -216,6 +216,24 @@ export const PKPassPreview = ({
   targetOs,
 }: PreviewProps) => {
   const [flipped, setFlipped] = useState(false);
+  const frontRef = useRef<HTMLDivElement>(null);
+  const backRef = useRef<HTMLDivElement>(null);
+  const infoButtonRef = useRef<HTMLButtonElement>(null);
+  const doneButtonRef = useRef<HTMLButtonElement>(null);
+  const previousFlipped = useRef(flipped);
+
+  // React 18 does not forward a boolean `inert` JSX prop, while React 19
+  // does. Set the DOM attribute directly so both supported peer versions
+  // make only the currently visible face interactive.
+  useEffect(() => {
+    frontRef.current?.toggleAttribute("inert", flipped);
+    backRef.current?.toggleAttribute("inert", !flipped);
+
+    if (previousFlipped.current !== flipped) {
+      (flipped ? doneButtonRef.current : infoButtonRef.current)?.focus();
+    }
+    previousFlipped.current = flipped;
+  }, [flipped]);
 
   // Typography is still derived from `values` (pkpass type + field shape).
   // The optional public preview variant only selects poster vs classic layout.
@@ -506,7 +524,12 @@ ${secondaryFieldsCount >= 4 ? `max-width: calc(100% / ${secondaryFieldsCount});`
     >
       <div id="passCard" className={`flipper ${flipped ? "flipped" : ""}`}>
         {isPoster ? (
-          <div id="passFront" className="pass shadow poster-front">
+          <div
+            id="passFront"
+            className="pass shadow poster-front"
+            ref={frontRef}
+            aria-hidden={flipped ? "true" : undefined}
+          >
             <div
               className="poster-artwork"
               style={{
@@ -573,7 +596,12 @@ ${secondaryFieldsCount >= 4 ? `max-width: calc(100% / ${secondaryFieldsCount});`
             </div>
           </div>
         ) : (
-          <div id="passFront" className={`pass${data.coupon ? "" : " shadow"}`}>
+          <div
+            id="passFront"
+            className={`pass${data.coupon ? "" : " shadow"}`}
+            ref={frontRef}
+            aria-hidden={flipped ? "true" : undefined}
+          >
             <div className="decoration" />
             <div className="decoration" />
             <div id="headerFields">
@@ -674,13 +702,31 @@ ${secondaryFieldsCount >= 4 ? `max-width: calc(100% / ${secondaryFieldsCount});`
               </div>
             ) : null}
             <BarcodesPreview barcodes={data.barcodes} expired={isExpired} qrSize={qrSize} />
-            <span className="infoButton" onClick={() => setFlipped(!flipped)}>
+            <button
+              type="button"
+              className="infoButton"
+              aria-label="Show pass details"
+              ref={infoButtonRef}
+              tabIndex={flipped ? -1 : undefined}
+              onClick={() => setFlipped(true)}
+            >
               i
-            </span>
+            </button>
           </div>
         )}
-        <div id="passBack" className={`pass${data.coupon ? "" : " shadow"}`}>
-          <button className="doneButton" onClick={() => setFlipped(!flipped)}>
+        <div
+          id="passBack"
+          className={`pass${data.coupon ? "" : " shadow"}`}
+          ref={backRef}
+          aria-hidden={!flipped ? "true" : undefined}
+        >
+          <button
+            type="button"
+            className="doneButton"
+            ref={doneButtonRef}
+            tabIndex={!flipped ? -1 : undefined}
+            onClick={() => setFlipped(false)}
+          >
             Done
           </button>
           <div id="backFields">

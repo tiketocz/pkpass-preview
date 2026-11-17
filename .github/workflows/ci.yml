@@ -63,5 +63,8 @@ jobs:
       - name: guard Storybook permalinks and VRT coverage
         run: bun run storybook:permalinks
 
+      - name: verify back-fields keyboard accessibility
+        run: bun run storybook:a11y
+
       - name: audit Storybook overflow and reference responses
         run: bun run storybook:overflow
