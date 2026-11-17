@@ -6,6 +6,7 @@ import {
   type CatalogFeature,
   type CatalogPassStyle,
   type CatalogSource,
+  passStyleLabels,
   scenarioCatalog,
 } from "./scenarioCatalog";
 
@@ -15,14 +16,19 @@ const Catalog = () => {
   const [passStyle, setPassStyle] = useState<"all" | CatalogPassStyle>("all");
   const [feature, setFeature] = useState<"all" | CatalogFeature>("all");
   const [source, setSource] = useState<"all" | CatalogSource>("all");
-  const passStyles = unique(scenarioCatalog.map((scenario) => scenario.passStyle));
+  const passStyles = unique(
+    scenarioCatalog.flatMap((scenario) =>
+      scenario.passStyles.map((style) => passStyleLabels[style]),
+    ),
+  );
   const features = unique(scenarioCatalog.flatMap((scenario) => scenario.features));
   const sources = unique(scenarioCatalog.map((scenario) => scenario.source));
   const filtered = useMemo(
     () =>
       scenarioCatalog.filter(
         (scenario) =>
-          (passStyle === "all" || scenario.passStyle === passStyle) &&
+          (passStyle === "all" ||
+            scenario.passStyles.some((style) => passStyleLabels[style] === passStyle)) &&
           (feature === "all" || scenario.features.includes(feature)) &&
           (source === "all" || scenario.source === source),
       ),
@@ -83,10 +89,12 @@ const Catalog = () => {
       <ul className="catalog-results">
         {filtered.map((scenario) => (
           <li key={scenario.id}>
-            <StoryLink storyId={scenario.id}>{scenario.name}</StoryLink>
-            <span>{scenario.passStyle}</span>
-            <span>{scenario.source}</span>
-            <small>{scenario.features.join(" · ")}</small>
+            <div className="catalog-result-copy">
+              <StoryLink storyId={scenario.id}>{scenario.title}</StoryLink>
+              <span>{scenario.passStyles.map((style) => passStyleLabels[style]).join(" · ")}</span>
+              <span>{scenario.source}</span>
+              <small>{scenario.features.join(" · ")}</small>
+            </div>
           </li>
         ))}
       </ul>

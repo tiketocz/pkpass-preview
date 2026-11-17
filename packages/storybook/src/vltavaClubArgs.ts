@@ -1,6 +1,6 @@
 import type { PassData, PassStructure } from "@tiketo/pkpass-preview";
 
-import type { ComparisonArgs } from "./Comparison";
+import { comparisonArgs } from "./Comparison";
 import { vltavaClub } from "./fixtures/vltava-club";
 
 // Shared by Examples/Vltava Club and Poster Generic (iOS 27): both groups
@@ -13,16 +13,13 @@ export const withPosterGeneric = (posterGeneric: PassStructure): Record<string, 
   return values;
 };
 
-export const fallbackArgs = {
-  values: vltavaClub,
-  screenshot: "vltava-club-ios-26.5",
-  referenceLabel: "iOS Wallet — iOS 26.5",
-  variant: "fallback",
-} satisfies ComparisonArgs;
+export const fallbackArgs = comparisonArgs("examples-vltava-club--ios-265-generic", vltavaClub);
 
-export const posterArgs = {
-  values: vltavaClub,
-  screenshot: "vltava-club-ios-27.0",
-  referenceLabel: "iOS Wallet — iOS 27.0",
-  variant: "poster",
-} satisfies ComparisonArgs;
+export const posterArgs = comparisonArgs(
+  "examples-vltava-club--ios-270-poster-generic",
+  vltavaClub,
+  {
+    variant: "poster",
+    targetOs: "ios27",
+  },
+);

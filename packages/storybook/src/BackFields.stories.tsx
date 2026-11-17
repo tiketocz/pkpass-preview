@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { Comparison, type ComparisonArgs } from "./Comparison";
+import { Comparison, type ComparisonArgs, comparisonArgs } from "./Comparison";
 import { backFields1 } from "./fixtures/back-fields";
+import { scenarioTitle } from "./scenarioCatalog";
 
 const meta: Meta<ComparisonArgs> = {
   title: "Features/Back fields",
@@ -23,7 +24,7 @@ export default meta;
 type Story = StoryObj<ComparisonArgs>;
 
 export const BackFields1: Story = {
-  name: "Back fields demo",
-  args: { values: backFields1, screenshot: "back-fields-1" },
+  name: scenarioTitle("back-fields--back-fields-1"),
+  args: comparisonArgs("back-fields--back-fields-1", backFields1),
   parameters: { __id: "back-fields--back-fields-1" },
 };

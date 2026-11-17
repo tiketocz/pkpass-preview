@@ -16,10 +16,54 @@
   height: auto;
 }
 
-.vltava-variants {
-  flex-wrap: wrap;
-  justify-content: center;
+.vltava-both-detail {
+  display: grid;
+  gap: 24px;
+  width: 100%;
   max-width: 100%;
+}
+
+.vltava-version-switch {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+}
+
+.vltava-version-switch button {
+  padding: 8px 14px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #334155;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.vltava-version-switch button:first-child {
+  border-radius: 8px 0 0 8px;
+}
+
+.vltava-version-switch button:last-child {
+  border-radius: 0 8px 8px 0;
+}
+
+.vltava-version-switch button[aria-pressed="true"] {
+  border-color: #0066ff;
+  background: #0066ff;
+  color: #fff;
+}
+
+.vltava-variants {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(672px, 100%), 1fr));
+  gap: 32px;
+  align-items: start;
+  width: 100%;
+  max-width: 100%;
+}
+
+.vltava-variant {
+  min-width: 0;
 }
 
 .qa-gallery-grid {
@@ -136,13 +180,21 @@
 
 .catalog-results li {
   display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 6px 12px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
   min-width: 0;
   padding: 16px;
   border: 1px solid #e2e8f0;
   border-radius: 10px;
   background: #fff;
+}
+
+.catalog-result-copy {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-content: start;
+  gap: 6px 12px;
+  min-width: 0;
 }
 
 .catalog-results a {
@@ -156,7 +208,7 @@
   text-align: right;
 }
 
-.catalog-results small {
+.catalog-result-copy small {
   grid-column: 1 / -1;
   color: #64748b;
 }
@@ -201,10 +253,13 @@
 }
 
 @media (max-width: 720px) {
-  .pkpass-comparison,
-  .vltava-variants {
+  .pkpass-comparison {
     flex-direction: column;
     align-items: center;
+  }
+
+  .vltava-variant:not(.is-active) {
+    display: none;
   }
 
   .quick-start-page,
@@ -214,6 +269,16 @@
 
   .quick-start-preview {
     justify-self: center;
+  }
+}
+
+@media (max-width: 420px) {
+  .catalog-result-copy {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .catalog-result-copy span {
+    text-align: left;
   }
 }
 

@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { Comparison, type ComparisonArgs } from "./Comparison";
+import { Comparison, type ComparisonArgs, comparisonArgs } from "./Comparison";
+import { scenarioTitle } from "./scenarioCatalog";
 import { posterArgs, withPosterGeneric } from "./vltavaClubArgs";
 
 // iOS 27 posterGeneric as its own style next to Generic. The stories were
@@ -29,7 +30,7 @@ export default meta;
 type Story = StoryObj<ComparisonArgs>;
 
 export const Ios270PosterGeneric: Story = {
-  name: "iOS 27.0 (posterGeneric)",
+  name: scenarioTitle("examples-vltava-club--ios-270-poster-generic"),
   tags: ["vrt"],
   args: posterArgs,
   parameters: {
@@ -46,16 +47,15 @@ export const Ios270PosterGeneric: Story = {
 };
 
 export const PosterShortText: Story = {
-  name: "Poster front text — short",
+  name: scenarioTitle("examples-vltava-club--poster-short-text"),
   tags: ["vrt"],
-  args: {
-    values: withPosterGeneric({
+  args: comparisonArgs(
+    "examples-vltava-club--poster-short-text",
+    withPosterGeneric({
       primaryFields: [{ key: "title", value: "Vltava Club" }],
     }),
-    screenshot: "vltava-club-poster-short-text-ios-27",
-    referenceLabel: "iOS Wallet — iOS 27.0",
-    variant: "poster",
-  },
+    { variant: "poster", targetOs: "ios27" },
+  ),
   parameters: {
     // Keeps the original Examples/Vltava Club story id so existing links and
     // VRT baselines still resolve after the move.
@@ -70,10 +70,11 @@ export const PosterShortText: Story = {
 };
 
 export const PosterLongCzechText: Story = {
-  name: "Poster front text — long Czech",
+  name: scenarioTitle("examples-vltava-club--poster-long-czech-text"),
   tags: ["vrt"],
-  args: {
-    values: withPosterGeneric({
+  args: comparisonArgs(
+    "examples-vltava-club--poster-long-czech-text",
+    withPosterGeneric({
       headerFields: [
         {
           key: "membership",
@@ -100,10 +101,8 @@ export const PosterLongCzechText: Story = {
         },
       ],
     }),
-    screenshot: "vltava-club-poster-long-czech-text-ios-27",
-    referenceLabel: "iOS Wallet — iOS 27.0",
-    variant: "poster",
-  },
+    { variant: "poster", targetOs: "ios27" },
+  ),
   parameters: {
     // Keeps the original Examples/Vltava Club story id so existing links and
     // VRT baselines still resolve after the move.
@@ -118,10 +117,11 @@ export const PosterLongCzechText: Story = {
 };
 
 export const PosterThreePrimaryFields: Story = {
-  name: "Poster front text — three primary fields",
+  name: scenarioTitle("examples-vltava-club--poster-three-primary-fields"),
   tags: ["vrt"],
-  args: {
-    values: withPosterGeneric({
+  args: comparisonArgs(
+    "examples-vltava-club--poster-three-primary-fields",
+    withPosterGeneric({
       headerFields: [{ key: "status", label: "STAV", value: "Aktivní" }],
       primaryFields: [
         { key: "title", value: "Vltava Club" },
@@ -130,10 +130,8 @@ export const PosterThreePrimaryFields: Story = {
       ],
       footerFields: [{ key: "member-id", label: "ČLENSKÉ ČÍSLO", value: "VC-0024" }],
     }),
-    screenshot: "vltava-club-poster-three-primary-fields-ios-27",
-    referenceLabel: "iOS Wallet — iOS 27.0",
-    variant: "poster",
-  },
+    { variant: "poster", targetOs: "ios27" },
+  ),
   parameters: {
     // Keeps the original Examples/Vltava Club story id so existing links and
     // VRT baselines still resolve after the move.
@@ -148,10 +146,11 @@ export const PosterThreePrimaryFields: Story = {
 };
 
 export const PosterMorePrimaryFields: Story = {
-  name: "Poster front text — more primary fields",
+  name: scenarioTitle("examples-vltava-club--poster-more-primary-fields"),
   tags: ["vrt"],
-  args: {
-    values: withPosterGeneric({
+  args: comparisonArgs(
+    "examples-vltava-club--poster-more-primary-fields",
+    withPosterGeneric({
       headerFields: [{ key: "status", label: "STAV", value: "Aktivní" }],
       primaryFields: [
         { key: "title", value: "Vltava Club" },
@@ -161,10 +160,8 @@ export const PosterMorePrimaryFields: Story = {
       ],
       footerFields: [{ key: "member-id", label: "ČLENSKÉ ČÍSLO", value: "VC-0024" }],
     }),
-    screenshot: "vltava-club-poster-more-primary-fields-ios-27",
-    referenceLabel: "iOS Wallet — iOS 27.0",
-    variant: "poster",
-  },
+    { variant: "poster", targetOs: "ios27" },
+  ),
   parameters: {
     // Keeps the original Examples/Vltava Club story id so existing links and
     // VRT baselines still resolve after the move.

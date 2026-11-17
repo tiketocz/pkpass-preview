@@ -1,11 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { Comparison, type ComparisonArgs } from "./Comparison";
+import { Comparison, type ComparisonArgs, comparisonArgs } from "./Comparison";
 import { eventTicket1 } from "./fixtures/event-ticket-1";
 import { eventTicket2 } from "./fixtures/event-ticket-2";
 import { eventTicket3 } from "./fixtures/event-ticket-3";
 import { eventTicket4 } from "./fixtures/event-ticket-4";
 import { eventTicket5 } from "./fixtures/event-ticket-5";
+import { scenarioTitle } from "./scenarioCatalog";
 
 const meta: Meta<ComparisonArgs> = {
   title: "Pass styles/Event ticket",
@@ -27,31 +28,31 @@ export default meta;
 type Story = StoryObj<ComparisonArgs>;
 
 export const EventTicket1: Story = {
-  name: "Event ticket 1",
-  args: { values: eventTicket1, screenshot: "event-ticket-1" },
+  name: scenarioTitle("event-ticket--event-ticket-1"),
+  args: comparisonArgs("event-ticket--event-ticket-1", eventTicket1),
   parameters: { __id: "event-ticket--event-ticket-1" },
 };
 
 export const EventTicket2: Story = {
-  name: "Event ticket 2",
-  args: { values: eventTicket2, screenshot: "event-ticket-2" },
+  name: scenarioTitle("event-ticket--event-ticket-2"),
+  args: comparisonArgs("event-ticket--event-ticket-2", eventTicket2),
   parameters: { __id: "event-ticket--event-ticket-2" },
 };
 
 export const EventTicket3: Story = {
-  name: "Event ticket 3",
-  args: { values: eventTicket3, screenshot: "event-ticket-3" },
+  name: scenarioTitle("event-ticket--event-ticket-3"),
+  args: comparisonArgs("event-ticket--event-ticket-3", eventTicket3),
   parameters: { __id: "event-ticket--event-ticket-3" },
 };
 
 export const EventTicket4: Story = {
-  name: "Event ticket 4",
-  args: { values: eventTicket4, screenshot: "event-ticket-4" },
+  name: scenarioTitle("event-ticket--event-ticket-4"),
+  args: comparisonArgs("event-ticket--event-ticket-4", eventTicket4),
   parameters: { __id: "event-ticket--event-ticket-4" },
 };
 
 export const EventTicket5: Story = {
-  name: "Event ticket 5",
-  args: { values: eventTicket5, screenshot: "event-ticket-5" },
+  name: scenarioTitle("event-ticket--event-ticket-5"),
+  args: comparisonArgs("event-ticket--event-ticket-5", eventTicket5),
   parameters: { __id: "event-ticket--event-ticket-5" },
 };

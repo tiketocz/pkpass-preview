@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { Comparison, type ComparisonArgs } from "./Comparison";
+import { Comparison, type ComparisonArgs, comparisonArgs } from "./Comparison";
 import { code128_1 } from "./fixtures/code128-1";
 import { code128_2 } from "./fixtures/code128-2";
 import { code128_3 } from "./fixtures/code128-3";
@@ -11,6 +11,7 @@ import { pdf417_1 } from "./fixtures/pdf417-1";
 import { pdf417_2 } from "./fixtures/pdf417-2";
 import { pdf417_3 } from "./fixtures/pdf417-3";
 import { pdf417_4 } from "./fixtures/pdf417-4";
+import { scenarioTitle } from "./scenarioCatalog";
 
 const meta: Meta<ComparisonArgs> = {
   title: "Features/Barcodes",
@@ -32,52 +33,52 @@ export default meta;
 type Story = StoryObj<ComparisonArgs>;
 
 export const Code128_1: Story = {
-  name: "Code128 1",
-  args: { values: code128_1, screenshot: "code128-1" },
+  name: scenarioTitle("barcode--code-128-1"),
+  args: comparisonArgs("barcode--code-128-1", code128_1),
   parameters: { __id: "barcode--code-128-1" },
 };
 export const Code128_2: Story = {
-  name: "Code128 2",
-  args: { values: code128_2, screenshot: "code128-2" },
+  name: scenarioTitle("barcode--code-128-2"),
+  args: comparisonArgs("barcode--code-128-2", code128_2),
   parameters: { __id: "barcode--code-128-2" },
 };
 export const Code128_3: Story = {
-  name: "Code128 3",
-  args: { values: code128_3, screenshot: "code128-3" },
+  name: scenarioTitle("barcode--code-128-3"),
+  args: comparisonArgs("barcode--code-128-3", code128_3),
   parameters: { __id: "barcode--code-128-3" },
 };
 export const Code128_4: Story = {
-  name: "Code128 4",
-  args: { values: code128_4, screenshot: "code128-4" },
+  name: scenarioTitle("barcode--code-128-4"),
+  args: comparisonArgs("barcode--code-128-4", code128_4),
   parameters: { __id: "barcode--code-128-4" },
 };
 export const Code128_5: Story = {
-  name: "Code128 5",
-  args: { values: code128_5, screenshot: "code128-5" },
+  name: scenarioTitle("barcode--code-128-5"),
+  args: comparisonArgs("barcode--code-128-5", code128_5),
   parameters: { __id: "barcode--code-128-5" },
 };
 export const Pdf417_1: Story = {
-  name: "PDF417 1",
-  args: { values: pdf417_1, screenshot: "pdf417-1" },
+  name: scenarioTitle("barcode--pdf-417-1"),
+  args: comparisonArgs("barcode--pdf-417-1", pdf417_1),
   parameters: { __id: "barcode--pdf-417-1" },
 };
 export const Pdf417_2: Story = {
-  name: "PDF417 2",
-  args: { values: pdf417_2, screenshot: "pdf417-2" },
+  name: scenarioTitle("barcode--pdf-417-2"),
+  args: comparisonArgs("barcode--pdf-417-2", pdf417_2),
   parameters: { __id: "barcode--pdf-417-2" },
 };
 export const Pdf417_3: Story = {
-  name: "PDF417 3",
-  args: { values: pdf417_3, screenshot: "pdf417-3" },
+  name: scenarioTitle("barcode--pdf-417-3"),
+  args: comparisonArgs("barcode--pdf-417-3", pdf417_3),
   parameters: { __id: "barcode--pdf-417-3" },
 };
 export const Pdf417_4: Story = {
-  name: "PDF417 4",
-  args: { values: pdf417_4, screenshot: "pdf417-4" },
+  name: scenarioTitle("barcode--pdf-417-4"),
+  args: comparisonArgs("barcode--pdf-417-4", pdf417_4),
   parameters: { __id: "barcode--pdf-417-4" },
 };
 export const LargeBarcode: Story = {
-  name: "Large barcode",
-  args: { values: largeBarcode, screenshot: "large-barcode" },
+  name: scenarioTitle("barcode--large-barcode"),
+  args: comparisonArgs("barcode--large-barcode", largeBarcode),
   parameters: { __id: "barcode--large-barcode" },
 };

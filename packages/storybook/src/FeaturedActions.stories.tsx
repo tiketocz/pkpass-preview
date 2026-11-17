@@ -6,6 +6,7 @@ import {
   vltavaFeaturedEventTicket,
   vltavaFeaturedGeneric,
 } from "./fixtures/vltava-featured-actions";
+import { scenarioTitle } from "./scenarioCatalog";
 
 // TIK-318 — iOS 27 Featured Actions.
 //
@@ -31,14 +32,8 @@ const ONE_ACTION_NOTE =
 const NO_ACTIONS_NOTE =
   "**Native reference** — Apple Wallet iOS 27.0 (24A434), iPhone 17 Pro Simulator: no tile row below the card, same as the web preview.";
 
-const PENDING_REFERENCE =
-  "Native reference image missing — every story in this group should have an Apple Wallet screenshot in public/screenshots/.";
-
 const OLDER_IOS_NOTE =
   "**Native reference** — Apple Wallet iOS 26.5, iPhone 17 Pro Simulator: Wallet before iOS 27 ignores `featuredActions`, no tile row.";
-
-const NATIVE_REFERENCE_LABEL = "Apple Wallet / iOS 27.0 Simulator";
-const OLDER_IOS_REFERENCE_LABEL = "Apple Wallet / iOS 26.5 Simulator";
 
 type Style = "generic" | "eventTicket";
 
@@ -47,18 +42,25 @@ const fixtureFor = (style: Style, count: FeaturedActionsCount, zeroMode?: "empty
     ? vltavaFeaturedGeneric(count, zeroMode)
     : vltavaFeaturedEventTicket(count, zeroMode);
 
-const ios27 = (
+type FeaturedStoryArgs = Omit<ComparisonArgs, "values"> & {
+  style: Style;
+  count: FeaturedActionsCount;
+  zeroMode?: "empty" | "omit";
+};
+
+const featuredArgs = (
+  scenarioId: string,
   style: Style,
   count: FeaturedActionsCount,
+  targetOs: "ios26" | "ios27" = "ios27",
   zeroMode?: "empty" | "omit",
-): ComparisonArgs => ({
-  values: fixtureFor(style, count, zeroMode),
-  // Native refs cropped to the current pass (card + tile row) for 0/1/2.
-  screenshot: `vltava-featured-actions-${style === "generic" ? "generic" : "event-ticket"}-${count}-ios-27`,
-  referenceLabel: NATIVE_REFERENCE_LABEL,
-  referencePlaceholder: PENDING_REFERENCE,
+): FeaturedStoryArgs => ({
+  scenarioId,
+  style,
+  count,
+  zeroMode,
   variant: "fallback",
-  targetOs: "ios27",
+  targetOs,
 });
 
 const story = (id: string, description: string, note: string) => ({
@@ -66,14 +68,20 @@ const story = (id: string, description: string, note: string) => ({
   docs: { description: { story: `${description}\n\n${note}` } },
 });
 
-const meta: Meta<ComparisonArgs> = {
+const meta: Meta<FeaturedStoryArgs> = {
   title: "Features/Featured Actions",
   id: "examples-featured-actions-ios-27",
-  render: (args) => <Comparison {...args} />,
+  render: ({ style, count, zeroMode, ...args }) => (
+    <Comparison {...args} values={fixtureFor(style, count, zeroMode)} />
+  ),
   tags: ["autodocs", "vrt"],
   argTypes: {
     targetOs: { control: "inline-radio", options: ["ios26", "ios27"] },
     variant: { control: "inline-radio", options: ["fallback", "poster"] },
+    count: { control: "inline-radio", options: [0, 1, 2] },
+    style: { control: false, table: { disable: true } },
+    zeroMode: { control: false, table: { disable: true } },
+    scenarioId: { control: false, table: { disable: true } },
   },
   parameters: {
     layout: "centered",
@@ -86,11 +94,11 @@ const meta: Meta<ComparisonArgs> = {
 };
 export default meta;
 
-type Story = StoryObj<ComparisonArgs>;
+type Story = StoryObj<FeaturedStoryArgs>;
 
 export const GenericTwoActions: Story = {
-  name: "Generic — 2 actions (iOS 27)",
-  args: ios27("generic", 2),
+  name: scenarioTitle("examples-featured-actions-ios-27--generic-two-actions"),
+  args: featuredArgs("examples-featured-actions-ios-27--generic-two-actions", "generic", 2),
   parameters: story(
     "examples-featured-actions-ios-27--generic-two-actions",
     "Both fixture actions in input order: `addToBalance`, then `call`. Right: native Apple Wallet iOS 27.0 reference (card + tile row).",
@@ -99,8 +107,8 @@ export const GenericTwoActions: Story = {
 };
 
 export const GenericOneAction: Story = {
-  name: "Generic — 1 action (iOS 27)",
-  args: ios27("generic", 1),
+  name: scenarioTitle("examples-featured-actions-ios-27--generic-one-action"),
+  args: featuredArgs("examples-featured-actions-ios-27--generic-one-action", "generic", 1),
   parameters: story(
     "examples-featured-actions-ios-27--generic-one-action",
     "Only the first fixture action (`addToBalance`) is kept. Right: native Apple Wallet iOS 27.0 reference (card + one wide tile).",
@@ -109,8 +117,14 @@ export const GenericOneAction: Story = {
 };
 
 export const GenericNoActions: Story = {
-  name: "Generic — 0 actions (iOS 27)",
-  args: ios27("generic", 0, "empty"),
+  name: scenarioTitle("examples-featured-actions-ios-27--generic-no-actions"),
+  args: featuredArgs(
+    "examples-featured-actions-ios-27--generic-no-actions",
+    "generic",
+    0,
+    "ios27",
+    "empty",
+  ),
   parameters: story(
     "examples-featured-actions-ios-27--generic-no-actions",
     "`featuredActions: []` → no tile row is rendered. Right: native Apple Wallet iOS 27.0 reference (card only).",
@@ -119,8 +133,12 @@ export const GenericNoActions: Story = {
 };
 
 export const EventTicketTwoActions: Story = {
-  name: "Event ticket — 2 actions (iOS 27)",
-  args: ios27("eventTicket", 2),
+  name: scenarioTitle("examples-featured-actions-ios-27--event-ticket-two-actions"),
+  args: featuredArgs(
+    "examples-featured-actions-ios-27--event-ticket-two-actions",
+    "eventTicket",
+    2,
+  ),
   parameters: story(
     "examples-featured-actions-ios-27--event-ticket-two-actions",
     "Both fixture actions in input order: `addToBalance`, then `call`. Right: native Apple Wallet iOS 27.0 reference (card + tile row).",
@@ -129,8 +147,8 @@ export const EventTicketTwoActions: Story = {
 };
 
 export const EventTicketOneAction: Story = {
-  name: "Event ticket — 1 action (iOS 27)",
-  args: ios27("eventTicket", 1),
+  name: scenarioTitle("examples-featured-actions-ios-27--event-ticket-one-action"),
+  args: featuredArgs("examples-featured-actions-ios-27--event-ticket-one-action", "eventTicket", 1),
   parameters: story(
     "examples-featured-actions-ios-27--event-ticket-one-action",
     "Only the first fixture action (`addToBalance`) is kept. Right: native Apple Wallet iOS 27.0 reference (card + one wide tile).",
@@ -139,8 +157,14 @@ export const EventTicketOneAction: Story = {
 };
 
 export const EventTicketNoActions: Story = {
-  name: "Event ticket — 0 actions (iOS 27)",
-  args: ios27("eventTicket", 0, "omit"),
+  name: scenarioTitle("examples-featured-actions-ios-27--event-ticket-no-actions"),
+  args: featuredArgs(
+    "examples-featured-actions-ios-27--event-ticket-no-actions",
+    "eventTicket",
+    0,
+    "ios27",
+    "omit",
+  ),
   parameters: story(
     "examples-featured-actions-ios-27--event-ticket-no-actions",
     "`featuredActions` key omitted → no tile row is rendered. Right: native Apple Wallet iOS 27.0 reference (card only).",
@@ -149,13 +173,8 @@ export const EventTicketNoActions: Story = {
 };
 
 export const GenericOlderIos: Story = {
-  name: "Generic — 2 actions, older iOS (no tiles)",
-  args: {
-    ...ios27("generic", 2),
-    screenshot: "vltava-featured-actions-generic-2-ios-26",
-    referenceLabel: OLDER_IOS_REFERENCE_LABEL,
-    targetOs: "ios26",
-  },
+  name: scenarioTitle("examples-featured-actions-ios-27--generic-older-ios"),
+  args: featuredArgs("examples-featured-actions-ios-27--generic-older-ios", "generic", 2, "ios26"),
   parameters: story(
     "examples-featured-actions-ios-27--generic-older-ios",
     'Same pass with two actions but `targetOs="ios26"`: no tiles (identical to omitting `targetOs`). Right: native Apple Wallet iOS 26.5 reference — detail of the added pass with two actions in pass.json, no tile row.',
@@ -164,13 +183,13 @@ export const GenericOlderIos: Story = {
 };
 
 export const EventTicketOlderIos: Story = {
-  name: "Event ticket — 2 actions, older iOS (no tiles)",
-  args: {
-    ...ios27("eventTicket", 2),
-    screenshot: "vltava-featured-actions-event-ticket-2-ios-26",
-    referenceLabel: OLDER_IOS_REFERENCE_LABEL,
-    targetOs: "ios26",
-  },
+  name: scenarioTitle("examples-featured-actions-ios-27--event-ticket-older-ios"),
+  args: featuredArgs(
+    "examples-featured-actions-ios-27--event-ticket-older-ios",
+    "eventTicket",
+    2,
+    "ios26",
+  ),
   parameters: story(
     "examples-featured-actions-ios-27--event-ticket-older-ios",
     'Same pass with two actions but `targetOs="ios26"`: no tiles (identical to omitting `targetOs`). Right: native Apple Wallet iOS 26.5 reference — detail of the added pass with two actions in pass.json, no tile row.',

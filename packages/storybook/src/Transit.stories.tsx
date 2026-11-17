@@ -1,8 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { PassTransitType } from "@tiketo/pkpass-preview";
 
-import { Comparison, type ComparisonArgs } from "./Comparison";
+import { Comparison, type ComparisonArgs, comparisonArgs } from "./Comparison";
 import { boardingPass1 } from "./fixtures/boarding-pass-1";
+import { scenarioTitle } from "./scenarioCatalog";
 
 // All five transit types render against one fixture. The primary FROM value
 // and header match the native transit reference captures without modifying
@@ -45,37 +46,46 @@ export default meta;
 type Story = StoryObj<ComparisonArgs>;
 
 export const TransitTypeAir: Story = {
-  name: "Air",
-  args: { values: withTransitType(PassTransitType.PKTransitTypeAir), screenshot: "transit-air" },
+  name: scenarioTitle("boarding-pass--transit-type-air"),
+  args: comparisonArgs(
+    "boarding-pass--transit-type-air",
+    withTransitType(PassTransitType.PKTransitTypeAir),
+  ),
   parameters: { __id: "boarding-pass--transit-type-air" },
 };
 
 export const TransitTypeTrain: Story = {
-  name: "Train",
-  args: {
-    values: withTransitType(PassTransitType.PKTransitTypeTrain),
-    screenshot: "transit-train",
-  },
+  name: scenarioTitle("boarding-pass--transit-type-train"),
+  args: comparisonArgs(
+    "boarding-pass--transit-type-train",
+    withTransitType(PassTransitType.PKTransitTypeTrain),
+  ),
   parameters: { __id: "boarding-pass--transit-type-train" },
 };
 
 export const TransitTypeBus: Story = {
-  name: "Bus",
-  args: { values: withTransitType(PassTransitType.PKTransitTypeBus), screenshot: "transit-bus" },
+  name: scenarioTitle("boarding-pass--transit-type-bus"),
+  args: comparisonArgs(
+    "boarding-pass--transit-type-bus",
+    withTransitType(PassTransitType.PKTransitTypeBus),
+  ),
   parameters: { __id: "boarding-pass--transit-type-bus" },
 };
 
 export const TransitTypeBoat: Story = {
-  name: "Boat",
-  args: { values: withTransitType(PassTransitType.PKTransitTypeBoat), screenshot: "transit-boat" },
+  name: scenarioTitle("boarding-pass--transit-type-boat"),
+  args: comparisonArgs(
+    "boarding-pass--transit-type-boat",
+    withTransitType(PassTransitType.PKTransitTypeBoat),
+  ),
   parameters: { __id: "boarding-pass--transit-type-boat" },
 };
 
 export const TransitTypeGeneric: Story = {
-  name: "Generic",
-  args: {
-    values: withTransitType(PassTransitType.PKTransitTypeGeneric),
-    screenshot: "transit-generic",
-  },
+  name: scenarioTitle("boarding-pass--transit-type-generic"),
+  args: comparisonArgs(
+    "boarding-pass--transit-type-generic",
+    withTransitType(PassTransitType.PKTransitTypeGeneric),
+  ),
   parameters: { __id: "boarding-pass--transit-type-generic" },
 };
