@@ -50,6 +50,10 @@ const preview: Preview = {
     },
   },
   argTypes: {
+    scenarioId: {
+      control: false,
+      table: { disable: true },
+    },
     values: {
       control: false,
       table: { disable: true },

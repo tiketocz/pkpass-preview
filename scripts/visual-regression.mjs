@@ -42,6 +42,7 @@ import { chromium } from "playwright";
 import { PNG } from "pngjs";
 import sharp from "sharp";
 import { ssim } from "ssim.js";
+import { assertCaptureCoverage } from "./vrt-coverage.mjs";
 
 const STORYBOOK_DIR = process.env.STORYBOOK_DIR ?? "packages/storybook/storybook-static";
 const PORT = Number(process.env.STORYBOOK_PORT ?? 9700);
@@ -277,23 +278,10 @@ async function main() {
   await fs.mkdir(path.join(OUT_DIR, "render-only"), { recursive: true });
 
   const stories = await discoverStories(STORYBOOK_DIR);
-  if (stories.length === 0) {
-    // Happens on the PR base when the base pre-dates VRT tagging (e.g. the
-    // very PR that introduces the tags). Soft-fail: write an empty report
-    // so `vrt-compare.mjs` can still render a delta comment from the head
-    // side. Once tags are merged to main this branch is silent.
-    const reason = `No stories tagged "${VRT_TAG}" found in ${STORYBOOK_DIR}/index.json`;
-    console.warn(`${reason} — emitting empty report.`);
-    await fs.writeFile(
-      path.join(OUT_DIR, "report.json"),
-      `${JSON.stringify({ results: [], emptyReason: reason }, null, 2)}\n`,
-    );
-    await fs.writeFile(
-      path.join(OUT_DIR, "report.md"),
-      `# Visual regression report\n\n_${reason} — no fixtures to compare._\n`,
-    );
-    return;
-  }
+  const baseline = JSON.parse(
+    await fs.readFile("packages/storybook/permalinks.baseline.json", "utf8"),
+  );
+  const baselineIds = baseline.vrtStoryIds ?? [];
   console.log(`Discovered ${stories.length} stories tagged "${VRT_TAG}"`);
 
   const stopServer = startServer(STORYBOOK_DIR, PORT);
@@ -307,20 +295,18 @@ async function main() {
     const page = await ctx.newPage();
 
     const results = [];
+    const failures = {};
     for (const story of stories) {
       const captured = await captureStory(page, story).catch((e) => {
-        console.warn(`  ${story}: capture failed — ${e.message}`);
+        failures[story] = `capture failed — ${e.message}`;
         return null;
       });
-      if (!captured) continue;
+      if (!captured) {
+        failures[story] ??= "pass card was not found";
+        continue;
+      }
       if (!captured.iosSrc) {
-        const renderBuf = await captureFullPreview(page).catch(() => null);
-        if (renderBuf) {
-          await fs.writeFile(path.join(OUT_DIR, "render-only", `${slugify(story)}.png`), renderBuf);
-        }
-        console.log(
-          `  ${story.padEnd(40)} skip (no iOS reference)${renderBuf ? " — render saved to render-only/" : ""}`,
-        );
+        failures[story] = "no Wallet reference image found";
         continue;
       }
 
@@ -328,7 +314,7 @@ async function main() {
       // of "screenshots/foo.jpg" maps to <STORYBOOK_DIR>/screenshots/foo.jpg.
       const iosPath = path.join(STORYBOOK_DIR, captured.iosSrc);
       if (!existsSync(iosPath)) {
-        console.warn(`  ${story}: iOS ref missing on disk: ${iosPath}`);
+        failures[story] = `Wallet reference missing on disk: ${iosPath}`;
         continue;
       }
 
@@ -360,7 +346,18 @@ async function main() {
     const generatedAt = new Date().toISOString();
     await fs.writeFile(
       path.join(OUT_DIR, "report.json"),
-      JSON.stringify({ generatedAt, storybookDir: STORYBOOK_DIR, results }, null, 2),
+      JSON.stringify(
+        {
+          generatedAt,
+          storybookDir: STORYBOOK_DIR,
+          baselineStoryIds: baselineIds,
+          discoveredStoryIds: stories,
+          missingStoryIds: stories.filter((id) => !results.some((result) => result.story === id)),
+          results,
+        },
+        null,
+        2,
+      ),
     );
     await fs.writeFile(
       path.join(OUT_DIR, "report.md"),
@@ -370,6 +367,13 @@ async function main() {
     console.log(`\nWrote ${results.length} fixture comparisons to ${OUT_DIR}/`);
     console.log(`  - ${OUT_DIR}/report.json`);
     console.log(`  - ${OUT_DIR}/report.md`);
+
+    assertCaptureCoverage({
+      baselineIds,
+      discoveredIds: stories,
+      capturedIds: results.map((result) => result.story),
+      failures,
+    });
   } finally {
     stopServer();
   }

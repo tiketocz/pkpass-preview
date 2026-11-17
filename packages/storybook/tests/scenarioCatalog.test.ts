@@ -1,8 +1,11 @@
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
+import { Comparison, comparisonArgs } from "../src/Comparison";
 import { backFields1 } from "../src/fixtures/back-fields";
 import { benesov } from "../src/fixtures/benesov";
 import { boardingPass1 } from "../src/fixtures/boarding-pass-1";
@@ -51,7 +54,7 @@ import {
   vltavaFeaturedEventTicket,
   vltavaFeaturedGeneric,
 } from "../src/fixtures/vltava-featured-actions";
-import { getPassStyles, scenarioCatalog } from "../src/scenarioCatalog";
+import { getPassStyles, getScenario, scenarioCatalog } from "../src/scenarioCatalog";
 
 const fixtureValues: Record<string, Record<string, unknown>> = {
   "example-generic": exampleGeneric,
@@ -112,6 +115,23 @@ const fixtureValues: Record<string, Record<string, unknown>> = {
 };
 
 describe("scenario catalog fixture metadata", () => {
+  it("keeps scenario identity out of editable story args", () => {
+    expect(getScenario("not-a-story-id")).toBeUndefined();
+    expect(comparisonArgs("examples--generic", exampleGeneric)).not.toHaveProperty("scenarioId");
+  });
+
+  it("renders the explicit no-reference state for an unknown story id", () => {
+    const html = renderToStaticMarkup(
+      createElement(Comparison, {
+        values: exampleGeneric,
+        scenarioId: "not-a-story-id",
+        variant: "fallback",
+        targetOs: "ios26",
+      }),
+    );
+    expect(html).toContain("No native reference for this configuration.");
+  });
+
   it("matches every catalog pass style to the keys in the actual fixture pass.json", () => {
     expect(scenarioCatalog).toHaveLength(63);
     for (const scenario of scenarioCatalog) {

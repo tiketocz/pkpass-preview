@@ -6,7 +6,7 @@ import {
   vltavaFeaturedEventTicket,
   vltavaFeaturedGeneric,
 } from "./fixtures/vltava-featured-actions";
-import { scenarioTitle } from "./scenarioCatalog";
+import { getScenario, scenarioTitle } from "./scenarioCatalog";
 
 // TIK-318 — iOS 27 Featured Actions.
 //
@@ -54,14 +54,18 @@ const featuredArgs = (
   count: FeaturedActionsCount,
   targetOs: "ios26" | "ios27" = "ios27",
   zeroMode?: "empty" | "omit",
-): FeaturedStoryArgs => ({
-  scenarioId,
-  style,
-  count,
-  zeroMode,
-  variant: "fallback",
-  targetOs,
-});
+): FeaturedStoryArgs => {
+  if (!getScenario(scenarioId)) {
+    throw new Error(`Unknown scenario metadata while defining story: ${scenarioId}`);
+  }
+  return {
+    style,
+    count,
+    zeroMode,
+    variant: "fallback",
+    targetOs,
+  };
+};
 
 const story = (id: string, description: string, note: string) => ({
   __id: id,
@@ -71,8 +75,8 @@ const story = (id: string, description: string, note: string) => ({
 const meta: Meta<FeaturedStoryArgs> = {
   title: "Features/Featured Actions",
   id: "examples-featured-actions-ios-27",
-  render: ({ style, count, zeroMode, ...args }) => (
-    <Comparison {...args} values={fixtureFor(style, count, zeroMode)} />
+  render: ({ style, count, zeroMode, ...args }, context) => (
+    <Comparison {...args} values={fixtureFor(style, count, zeroMode)} scenarioId={context.id} />
   ),
   tags: ["autodocs", "vrt"],
   argTypes: {
@@ -81,7 +85,6 @@ const meta: Meta<FeaturedStoryArgs> = {
     count: { control: "inline-radio", options: [0, 1, 2] },
     style: { control: false, table: { disable: true } },
     zeroMode: { control: false, table: { disable: true } },
-    scenarioId: { control: false, table: { disable: true } },
   },
   parameters: {
     layout: "centered",

@@ -29,7 +29,7 @@ const withTransitType = (transitType: PassTransitType) => {
 const meta: Meta<ComparisonArgs> = {
   title: "Features/Transit",
   id: "features-transit",
-  render: (args) => <Comparison {...args} />,
+  render: (args, context) => <Comparison {...args} scenarioId={context.id} />,
   tags: ["autodocs", "vrt"],
   parameters: {
     layout: "centered",

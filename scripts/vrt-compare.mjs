@@ -9,6 +9,7 @@
  */
 
 import fs from "node:fs";
+import { assertPairedCoverage } from "./vrt-coverage.mjs";
 
 const [, , basePath, headPath, baseLabel = "main", headLabel = "PR"] = process.argv;
 if (!basePath || !headPath) {
@@ -32,6 +33,12 @@ const mean = (arr, sel) => (arr.length ? arr.reduce((s, x) => s + sel(x), 0) / a
 
 const baseRows = fixturesOf(base);
 const headRows = fixturesOf(head);
+
+assertPairedCoverage({
+  expectedIds: [...new Set([...(base.baselineStoryIds ?? []), ...(head.baselineStoryIds ?? [])])],
+  baseIds: baseRows.map((row) => row.story),
+  headIds: headRows.map((row) => row.story),
+});
 
 // Head-only fallback: base report flagged as empty (typically the PR that
 // introduces VRT tagging — main pre-dates the `vrt` tag, so the base side

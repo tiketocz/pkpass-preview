@@ -9,7 +9,7 @@ import { scenarioTitle } from "./scenarioCatalog";
 const meta: Meta<ComparisonArgs> = {
   title: "Pass styles/Boarding pass",
   id: "boarding-pass",
-  render: (args) => <Comparison {...args} />,
+  render: (args, context) => <Comparison {...args} scenarioId={context.id} />,
   tags: ["autodocs", "vrt"],
   parameters: {
     layout: "centered",

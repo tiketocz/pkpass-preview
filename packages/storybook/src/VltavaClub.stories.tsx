@@ -27,10 +27,10 @@ const BothVariantsDetail = () => {
       </div>
       <div className="vltava-variants">
         <div className={`vltava-variant ${selected === "ios27" ? "is-active" : ""}`}>
-          <Comparison {...posterArgs} />
+          <Comparison {...posterArgs} scenarioId="examples-vltava-club--both-variants" />
         </div>
         <div className={`vltava-variant ${selected === "ios26" ? "is-active" : ""}`}>
-          <Comparison {...fallbackArgs} />
+          <Comparison {...fallbackArgs} scenarioId="examples-vltava-club--both-variants" />
         </div>
       </div>
     </div>
@@ -40,7 +40,7 @@ const BothVariantsDetail = () => {
 const meta: Meta<ComparisonArgs> = {
   title: "Examples/Vltava Club",
   id: "examples-vltava-club",
-  render: (args) => <Comparison {...args} />,
+  render: (args, context) => <Comparison {...args} scenarioId={context.id} />,
   tags: ["autodocs"],
   parameters: {
     layout: "centered",

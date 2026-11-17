@@ -10,11 +10,12 @@ import {
 
 export type ComparisonArgs = {
   values: Record<string, unknown>;
-  scenarioId: string;
   variant: PreviewVariant;
   /** Forwarded to PKPassPreview; omitted = legacy behaviour (TIK-318). */
   targetOs: PreviewTargetOs;
 };
+
+type ComparisonProps = ComparisonArgs & { scenarioId: string };
 
 export type WebWalletDetailProps = {
   values: Record<string, unknown>;
@@ -149,12 +150,12 @@ export const WebWalletDetail = (props: WebWalletDetailProps) => {
   );
 };
 
-export const Comparison = ({ values, scenarioId, variant, targetOs }: ComparisonArgs) => {
+export const Comparison = ({ values, scenarioId, variant, targetOs }: ComparisonProps) => {
   const metadata = getScenario(scenarioId);
   return (
     <WebWalletDetail
       values={values}
-      fixtureKey={metadata.fixtureKey}
+      fixtureKey={metadata?.fixtureKey ?? `unknown:${scenarioId}`}
       variant={variant}
       targetOs={targetOs}
     />
@@ -165,10 +166,14 @@ export const comparisonArgs = (
   scenarioId: string,
   values: Record<string, unknown>,
   configuration: Partial<Pick<ComparisonArgs, "variant" | "targetOs">> = {},
-): ComparisonArgs => ({
-  values,
-  scenarioId,
-  variant: "fallback",
-  targetOs: "ios26",
-  ...configuration,
-});
+): ComparisonArgs => {
+  if (!getScenario(scenarioId)) {
+    throw new Error(`Unknown scenario metadata while defining story: ${scenarioId}`);
+  }
+  return {
+    values,
+    variant: "fallback",
+    targetOs: "ios26",
+    ...configuration,
+  };
+};

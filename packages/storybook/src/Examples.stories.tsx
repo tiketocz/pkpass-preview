@@ -8,7 +8,7 @@ import { scenarioTitle } from "./scenarioCatalog";
 const meta: Meta<ComparisonArgs> = {
   title: "Start here/iOS comparison",
   id: "examples",
-  render: (args) => <Comparison {...args} />,
+  render: (args, context) => <Comparison {...args} scenarioId={context.id} />,
   tags: ["autodocs", "vrt"],
   parameters: {
     layout: "centered",
