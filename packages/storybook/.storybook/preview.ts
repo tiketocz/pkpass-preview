@@ -1,4 +1,7 @@
 import type { Preview } from "@storybook/react";
+import { SharedDocsPage } from "../src/SharedDocsPage";
+import { buildComparisonSource } from "../src/docsSource";
+import "./preview.css";
 
 const preview: Preview = {
   parameters: {
@@ -13,38 +16,48 @@ const preview: Preview = {
       ],
     },
     options: {
-      // Editorial sidebar order (not alphabetical). Welcome leads; the
-      // examples & gallery introduce the lib visually; the per-pass-type
-      // sections walk users through every variant; Back fields and
-      // Barcodes are special-case demos and land at the end.
       storySort: {
         order: [
-          "Welcome",
+          "Start here",
+          ["Welcome", ["Docs", "Quick start"], "Catalog", "iOS comparison"],
+          "Pass styles",
+          [
+            "Generic",
+            "Poster Generic (iOS 27)",
+            "Event ticket",
+            "Boarding pass",
+            "Store card",
+            "Coupon",
+          ],
+          "Features",
+          ["Featured Actions", "Barcodes", "Back fields", "Transit"],
           "Examples",
-          "Samples",
-          "Gallery",
-          "Boarding pass",
-          "Store card",
-          "Event ticket",
-          "Generic",
-          "Poster Generic (iOS 27)",
-          "Coupon",
-          "Back fields",
-          "Barcode",
+          ["Vltava Club", "Other use cases"],
+          "Developer guide",
+          ["API", "Known deviations", "Playground", "QA matrix", "Gallery (stress)"],
         ],
       },
     },
     docs: {
-      // Per-story raw JSX snippet — strips the Comparison wrapper so the
-      // source block in Docs matches what a user would paste into their
-      // own app, not the side-by-side test harness.
+      page: SharedDocsPage,
+      // Build public examples from Args instead of parsing Storybook's
+      // generated JSX, which contains the internal comparison wrapper.
       source: {
         language: "tsx",
-        transform: (code: string) => {
-          const m = code.match(/values=\{([A-Za-z0-9_$]+)\}/);
-          return m ? `<PKPassPreview values={${m[1]}} />` : code;
+        transform: (code: string, context) => {
+          return buildComparisonSource(context.args) ?? code;
         },
       },
+    },
+  },
+  argTypes: {
+    scenarioId: {
+      control: false,
+      table: { disable: true },
+    },
+    values: {
+      control: false,
+      table: { disable: true },
     },
   },
 };

@@ -9,8 +9,9 @@
  *
  * For each in-scope story the script:
  *   - screenshots the rendered PKPassPreview (#passCard inside Comparison)
- *   - loads the iOS reference image (img alt^="iOS Wallet screenshot")
- *   - resizes the iOS reference to match the screenshot dimensions
+ *   - loads the Wallet reference image via its stable data hook (with a
+ *     legacy alt-text fallback for older/base Storybook builds)
+ *   - contains both images on the web-render canvas without changing aspect ratio
  *   - computes pixelmatch %-diff and SSIM
  *   - writes per-fixture diff PNG + aggregate report.{json,md}
  *
@@ -30,17 +31,18 @@
  *   VRT_TAG         opt-in tag name (default: "vrt")
  */
 
-import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import http from "node:http";
 import path from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
+import { pathToFileURL } from "node:url";
 import pixelmatch from "pixelmatch";
 import { chromium } from "playwright";
 import { PNG } from "pngjs";
 import sharp from "sharp";
 import { ssim } from "ssim.js";
+import { assertCaptureCoverage } from "./vrt-coverage.mjs";
 
 const STORYBOOK_DIR = process.env.STORYBOOK_DIR ?? "packages/storybook/storybook-static";
 const PORT = Number(process.env.STORYBOOK_PORT ?? 9700);
@@ -49,7 +51,7 @@ const DPR = Number(process.env.DPR ?? 2);
 const VRT_TAG = process.env.VRT_TAG ?? "vrt";
 const VRT_SKIP_TAG = `${VRT_TAG}:skip`;
 
-async function discoverStories(storybookDir) {
+export async function discoverStories(storybookDir) {
   const indexPath = path.join(storybookDir, "index.json");
   if (!existsSync(indexPath)) {
     throw new Error(
@@ -77,7 +79,7 @@ function slugify(s) {
     .replace(/^-|-$/g, "");
 }
 
-async function waitForServer(port) {
+export async function waitForServer(port) {
   for (let i = 0; i < 30; i++) {
     const ok = await new Promise((resolve) => {
       const req = http.get(
@@ -99,104 +101,196 @@ async function waitForServer(port) {
   throw new Error(`Storybook server on :${port} did not become ready`);
 }
 
-function startServer(dir, port) {
+export function startServer(dir, port) {
   if (!existsSync(dir)) {
     throw new Error(
       `Storybook build dir "${dir}" not found — run \`bun run storybook:build\` first.`,
     );
   }
-  const proc = spawn("python3", ["-m", "http.server", String(port)], {
-    cwd: dir,
-    stdio: ["ignore", "ignore", "pipe"],
-  });
-  proc.on("exit", (code) => {
-    if (code && code !== 0 && code !== null) {
-      console.error(`http.server exited with code ${code}`);
+  const root = path.resolve(dir);
+  const contentTypes = {
+    ".css": "text/css",
+    ".html": "text/html",
+    ".js": "text/javascript",
+    ".json": "application/json",
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".svg": "image/svg+xml",
+    ".woff2": "font/woff2",
+  };
+  const server = http.createServer(async (req, res) => {
+    try {
+      const pathname = decodeURIComponent(new URL(req.url ?? "/", "http://localhost").pathname);
+      const relativePath = pathname === "/" ? "index.html" : pathname.replace(/^\/+/, "");
+      const filePath = path.resolve(root, relativePath);
+      if (filePath !== root && !filePath.startsWith(`${root}${path.sep}`)) {
+        res.writeHead(403).end("Forbidden");
+        return;
+      }
+      const body = await fs.readFile(filePath);
+      res.writeHead(200, {
+        "Content-Type": contentTypes[path.extname(filePath)] ?? "application/octet-stream",
+      });
+      res.end(body);
+    } catch {
+      res.writeHead(404).end("Not found");
     }
   });
-  return () => proc.kill("SIGTERM");
+  server.listen(port, "127.0.0.1");
+  return () => server.close();
 }
 
 async function captureStory(page, storyId) {
   const url = `http://127.0.0.1:${PORT}/iframe.html?id=${storyId}&viewMode=story`;
   await page.goto(url, { waitUntil: "networkidle" });
   await page.waitForSelector("#passCard", { timeout: 10_000 });
-  // Let use-fit-text + dynamic styles settle.
-  await page.waitForTimeout(400);
+  // Let use-fit-text, dynamic styles, and the 500ms card-flip transition settle.
+  await page.waitForTimeout(650);
 
   const cardHandle = await page.$("#passCard");
   if (!cardHandle) return null;
 
-  // Comparison renders the iOS img with alt starting "iOS Wallet screenshot
-  // of <name>". If the file is missing, the component swaps to a placeholder
-  // <div>; querying for the <img> here returns null and we skip the story.
-  const imgHandle = await page.$('img[alt^="iOS Wallet screenshot"]');
+  // New builds expose a stable data hook. Keep the old alt selector as a
+  // fallback because CI runs this head script against both the new build and
+  // the base build, whose Comparison predates the data hook.
+  const imgHandle =
+    (await page.$("img[data-wallet-reference]")) ??
+    (await page.$('img[alt^="iOS Wallet screenshot"]'));
   const iosSrc = imgHandle ? await imgHandle.getAttribute("src") : null;
 
-  // TIK-318: when Featured Actions tiles render (below #passCard), the iOS
-  // reference is cropped to card + tile row, so compare against the whole
-  // preview (tight, no padding) instead of #passCard alone. Stories without
-  // tiles keep the #passCard capture, so their metrics are unchanged.
   const hasFeaturedActions = (await page.$(".featured-actions")) !== null;
-  const ourBuf =
-    (hasFeaturedActions ? await captureFullPreview(page, 0) : null) ??
-    (await cardHandle.screenshot({ omitBackground: false }));
+  const capture = await captureVisiblePreview(page, 0);
+  if (!capture) return null;
+  const ourBuf = capture.buffer;
+  const png = PNG.sync.read(ourBuf);
+  assertVisibleSideCaptureDimensions({
+    storyId,
+    ...capture,
+    capturePixelWidth: png.width,
+    capturePixelHeight: png.height,
+    dpr: DPR,
+  });
   return { storyId, iosSrc, ourBuf, hasFeaturedActions };
 }
 
-// Render-only baseline for stories without an iOS reference (e.g. TIK-318
-// Featured Actions, whose tiles sit BELOW #passCard). Captures the whole
-// PKPassPreview root including content that overflows it (the classic front
-// is taller than #passCard). Never feeds the metrics/report.
-async function captureFullPreview(page, pad = 8) {
-  const clip = await page.evaluate((pad) => {
-    const root = document.querySelector("#passCard")?.parentElement;
-    if (!root) return null;
-    const { left, top, right } = root.getBoundingClientRect();
-    let { bottom } = root.getBoundingClientRect();
-    for (const el of root.querySelectorAll("*")) {
-      const r = el.getBoundingClientRect();
-      if (r.width === 0 || r.height === 0) continue;
-      // Only grow downwards: the classic front overflows the root at the
-      // bottom; decorations poking out above/sideways are not wanted.
-      bottom = Math.max(bottom, r.bottom);
-    }
-    // `pad`: small margin so box-shadows are not cut off (0 = tight).
+const expectedVisibleSideDimensions = ({ isPoster, isBack, isCoupon }) => ({
+  width: 320,
+  height: (isBack ? 462 : isPoster ? 420 : 470) + (isCoupon ? 4 : 0),
+});
+
+export function assertVisibleSideCaptureDimensions({
+  storyId,
+  isPoster,
+  isBack,
+  isCoupon = false,
+  sideCssWidth,
+  sideCssHeight,
+  clipCssWidth,
+  clipCssHeight,
+  capturePixelWidth,
+  capturePixelHeight,
+  dpr,
+}) {
+  const expectedSide = expectedVisibleSideDimensions({ isPoster, isBack, isCoupon });
+  const closeTo = (actual, expected) => Math.abs(actual - expected) < 0.05;
+  if (!closeTo(sideCssWidth, expectedSide.width) || !closeTo(sideCssHeight, expectedSide.height)) {
+    throw new Error(
+      `${storyId}: visible ${isBack ? "back" : isPoster ? "poster front" : "classic front"} ` +
+        `is ${sideCssWidth}x${sideCssHeight} CSS px; expected ${expectedSide.width}x${expectedSide.height}`,
+    );
+  }
+
+  const expectedPixelWidth = Math.round(clipCssWidth * dpr);
+  const expectedPixelHeight = Math.round(clipCssHeight * dpr);
+  if (capturePixelWidth !== expectedPixelWidth || capturePixelHeight !== expectedPixelHeight) {
+    throw new Error(
+      `${storyId}: capture is ${capturePixelWidth}x${capturePixelHeight} px; ` +
+        `expected ${expectedPixelWidth}x${expectedPixelHeight} for DPR ${dpr}`,
+    );
+  }
+  if (
+    capturePixelWidth < Math.round(expectedSide.width * dpr) ||
+    capturePixelHeight < Math.round(expectedSide.height * dpr)
+  ) {
+    throw new Error(
+      `${storyId}: capture ${capturePixelWidth}x${capturePixelHeight} clips the visible ` +
+        `${expectedSide.width}x${expectedSide.height} CSS px side at DPR ${dpr}`,
+    );
+  }
+}
+
+// Capture the real bounding-box union of the currently visible pass face and
+// Featured Actions (when present). The hidden face is deliberately excluded.
+// This applies identically to base and head Storybook builds in CI.
+async function captureVisiblePreview(page, pad = 0) {
+  const bounds = await page.evaluate((pad) => {
+    const card = document.querySelector("#passCard");
+    if (!(card instanceof HTMLElement)) return null;
+    const isBack = card.classList.contains("flipped");
+    const visibleSide = card.querySelector(isBack ? "#passBack" : "#passFront");
+    if (!(visibleSide instanceof HTMLElement)) return null;
+
+    const elements = [visibleSide];
+    const featuredActions = card.parentElement?.querySelector(":scope > .featured-actions");
+    if (featuredActions instanceof HTMLElement) elements.push(featuredActions);
+
+    const rects = elements.map((element) => element.getBoundingClientRect());
+    const left = Math.min(...rects.map((rect) => rect.left));
+    const top = Math.min(...rects.map((rect) => rect.top));
+    const right = Math.max(...rects.map((rect) => rect.right));
+    const bottom = Math.max(...rects.map((rect) => rect.bottom));
+    const sideRect = rects[0];
+
     return {
-      x: Math.max(0, left - pad + window.scrollX),
-      y: Math.max(0, top - pad + window.scrollY),
-      width: right - left + 2 * pad,
-      height: bottom - top + 2 * pad,
+      clip: {
+        x: Math.max(0, left - pad + window.scrollX),
+        y: Math.max(0, top - pad + window.scrollY),
+        width: right - left + 2 * pad,
+        height: bottom - top + 2 * pad,
+      },
+      isPoster: visibleSide.classList.contains("poster-front"),
+      isBack,
+      isCoupon: card.parentElement?.classList.contains("coupon") ?? false,
+      sideCssWidth: sideRect.width,
+      sideCssHeight: sideRect.height,
+      clipCssWidth: right - left + 2 * pad,
+      clipCssHeight: bottom - top + 2 * pad,
     };
   }, pad);
-  if (!clip) return null;
-  return page.screenshot({ clip, fullPage: true });
+  if (!bounds) return null;
+  const buffer = await page.screenshot({ clip: bounds.clip, fullPage: true });
+  return { ...bounds, buffer };
 }
 
 async function compareOne({ ourBuf, iosPath, outDir, slug }) {
   const iosOriginal = await fs.readFile(iosPath);
   const ourPng = PNG.sync.read(ourBuf);
   const { width, height } = ourPng;
+  const referenceMetadata = await sharp(iosOriginal).metadata();
+  const referenceWidth = referenceMetadata.width;
+  const referenceHeight = referenceMetadata.height;
+  if (!referenceWidth || !referenceHeight) {
+    throw new Error(`could not read native reference dimensions for ${slug}`);
+  }
 
-  const iosResizedBuf = await sharp(iosOriginal)
-    .resize(width, height, { fit: "fill" })
-    .removeAlpha()
-    .ensureAlpha()
-    .png()
-    .toBuffer();
-
-  const ourFlatBuf = await sharp(ourBuf)
+  const containOptions = {
+    fit: "contain",
+    background: { r: 255, g: 255, b: 255, alpha: 1 },
+  };
+  const ourCanvasBuf = await sharp(ourBuf)
     .flatten({ background: { r: 255, g: 255, b: 255 } })
+    .resize(width, height, containOptions)
     .ensureAlpha()
     .png()
     .toBuffer();
-  const iosFlatBuf = await sharp(iosResizedBuf)
+  const iosCanvasBuf = await sharp(iosOriginal)
     .flatten({ background: { r: 255, g: 255, b: 255 } })
+    .resize(width, height, containOptions)
     .ensureAlpha()
     .png()
     .toBuffer();
-  const ourFlat = PNG.sync.read(ourFlatBuf);
-  const iosFlat = PNG.sync.read(iosFlatBuf);
+  const ourFlat = PNG.sync.read(ourCanvasBuf);
+  const iosFlat = PNG.sync.read(iosCanvasBuf);
 
   const diff = new PNG({ width, height });
   const numDiff = pixelmatch(ourFlat.data, iosFlat.data, diff.data, width, height, {
@@ -217,12 +311,26 @@ async function compareOne({ ourBuf, iosPath, outDir, slug }) {
     console.warn(`SSIM failed for ${slug}: ${e.message}`);
   }
 
-  await fs.writeFile(path.join(outDir, "ours", `${slug}.png`), ourBuf);
-  await fs.writeFile(path.join(outDir, "ref", `${slug}.png`), iosResizedBuf);
+  await fs.writeFile(path.join(outDir, "ours", `${slug}.png`), ourCanvasBuf);
+  await fs.writeFile(path.join(outDir, "ref", `${slug}.png`), iosCanvasBuf);
   await fs.writeFile(path.join(outDir, "diff", `${slug}.png`), PNG.sync.write(diff));
 
-  return { width, height, pixelmatchDiffPct, ssim: ssimMean };
+  return {
+    width,
+    height,
+    webRenderWidth: width,
+    webRenderHeight: height,
+    webRenderAspectRatio: width / height,
+    referenceWidth,
+    referenceHeight,
+    referenceAspectRatio: referenceWidth / referenceHeight,
+    pixelmatchDiffPct,
+    ssim: ssimMean,
+  };
 }
+
+const formatDimensions = (width, height, aspectRatio) =>
+  `${width}×${height} (${aspectRatio.toFixed(4)})`;
 
 function buildMarkdown(results, generatedAt, storybookDir) {
   const lines = [];
@@ -234,12 +342,23 @@ function buildMarkdown(results, generatedAt, storybookDir) {
   lines.push("");
   lines.push("Lower pixelmatch %-diff and higher SSIM (closer to 1.0) = closer match.");
   lines.push("");
-  lines.push("| Story | iOS ref | Pixelmatch diff % | SSIM | Diff |");
-  lines.push("|---|---|---:|---:|---|");
+  lines.push(
+    "Both the web capture and native reference are aspect-preserved with `contain` on the web-render canvas. Original dimensions are retained below so padding or different screen shapes remain visible rather than being stretched.",
+  );
+  lines.push("");
+  lines.push(
+    "**Back fields / Pass Details is informational only:** it compares two different native screens—the web component's in-card back render and native Wallet's full Pass Details screen.",
+  );
+  lines.push("");
+  lines.push(
+    "| Story | Web render px (aspect) | iOS ref | Native original px (aspect) | Pixelmatch diff % | SSIM | Scope | Diff |",
+  );
+  lines.push("|---|---:|---|---:|---:|---:|---|---|");
   for (const r of results) {
     const ssimCell = r.ssim == null ? "—" : r.ssim.toFixed(4);
+    const scope = r.informationalOnly ? "different screens; informational only" : "same screen";
     lines.push(
-      `| \`${r.story}\` | \`${r.iosSrc}\` | ${r.pixelmatchDiffPct.toFixed(2)} | ${ssimCell} | \`diff/${r.slug}.png\` |`,
+      `| \`${r.story}\` | ${formatDimensions(r.webRenderWidth, r.webRenderHeight, r.webRenderAspectRatio)} | \`${r.iosSrc}\` | ${formatDimensions(r.referenceWidth, r.referenceHeight, r.referenceAspectRatio)} | ${r.pixelmatchDiffPct.toFixed(2)} | ${ssimCell} | ${scope} | \`diff/${r.slug}.png\` |`,
     );
   }
   lines.push("");
@@ -253,23 +372,10 @@ async function main() {
   await fs.mkdir(path.join(OUT_DIR, "render-only"), { recursive: true });
 
   const stories = await discoverStories(STORYBOOK_DIR);
-  if (stories.length === 0) {
-    // Happens on the PR base when the base pre-dates VRT tagging (e.g. the
-    // very PR that introduces the tags). Soft-fail: write an empty report
-    // so `vrt-compare.mjs` can still render a delta comment from the head
-    // side. Once tags are merged to main this branch is silent.
-    const reason = `No stories tagged "${VRT_TAG}" found in ${STORYBOOK_DIR}/index.json`;
-    console.warn(`${reason} — emitting empty report.`);
-    await fs.writeFile(
-      path.join(OUT_DIR, "report.json"),
-      `${JSON.stringify({ results: [], emptyReason: reason }, null, 2)}\n`,
-    );
-    await fs.writeFile(
-      path.join(OUT_DIR, "report.md"),
-      `# Visual regression report\n\n_${reason} — no fixtures to compare._\n`,
-    );
-    return;
-  }
+  const baseline = JSON.parse(
+    await fs.readFile("packages/storybook/permalinks.baseline.json", "utf8"),
+  );
+  const baselineIds = baseline.vrtStoryIds ?? [];
   console.log(`Discovered ${stories.length} stories tagged "${VRT_TAG}"`);
 
   const stopServer = startServer(STORYBOOK_DIR, PORT);
@@ -283,20 +389,18 @@ async function main() {
     const page = await ctx.newPage();
 
     const results = [];
+    const failures = {};
     for (const story of stories) {
       const captured = await captureStory(page, story).catch((e) => {
-        console.warn(`  ${story}: capture failed — ${e.message}`);
+        failures[story] = `capture failed — ${e.message}`;
         return null;
       });
-      if (!captured) continue;
+      if (!captured) {
+        failures[story] ??= "pass card was not found";
+        continue;
+      }
       if (!captured.iosSrc) {
-        const renderBuf = await captureFullPreview(page).catch(() => null);
-        if (renderBuf) {
-          await fs.writeFile(path.join(OUT_DIR, "render-only", `${slugify(story)}.png`), renderBuf);
-        }
-        console.log(
-          `  ${story.padEnd(40)} skip (no iOS reference)${renderBuf ? " — render saved to render-only/" : ""}`,
-        );
+        failures[story] = "no Wallet reference image found";
         continue;
       }
 
@@ -304,7 +408,7 @@ async function main() {
       // of "screenshots/foo.jpg" maps to <STORYBOOK_DIR>/screenshots/foo.jpg.
       const iosPath = path.join(STORYBOOK_DIR, captured.iosSrc);
       if (!existsSync(iosPath)) {
-        console.warn(`  ${story}: iOS ref missing on disk: ${iosPath}`);
+        failures[story] = `Wallet reference missing on disk: ${iosPath}`;
         continue;
       }
 
@@ -312,9 +416,12 @@ async function main() {
       if (captured.hasFeaturedActions) {
         // Keep a padded render-only PNG for tile stories even when they have
         // a reference, for side-by-side review (not part of the metrics).
-        const renderBuf = await captureFullPreview(page).catch(() => null);
-        if (renderBuf) {
-          await fs.writeFile(path.join(OUT_DIR, "render-only", `${slug}.png`), renderBuf);
+        const renderCapture = await captureVisiblePreview(page, 8).catch(() => null);
+        if (renderCapture) {
+          await fs.writeFile(
+            path.join(OUT_DIR, "render-only", `${slug}.png`),
+            renderCapture.buffer,
+          );
         }
       }
       const metrics = await compareOne({
@@ -323,7 +430,13 @@ async function main() {
         outDir: OUT_DIR,
         slug,
       });
-      results.push({ story, iosSrc: captured.iosSrc, slug, ...metrics });
+      results.push({
+        story,
+        iosSrc: captured.iosSrc,
+        slug,
+        informationalOnly: story === "back-fields--ios-27-pass-details",
+        ...metrics,
+      });
 
       const ssimStr = metrics.ssim == null ? "   —  " : metrics.ssim.toFixed(4);
       console.log(
@@ -336,7 +449,18 @@ async function main() {
     const generatedAt = new Date().toISOString();
     await fs.writeFile(
       path.join(OUT_DIR, "report.json"),
-      JSON.stringify({ generatedAt, storybookDir: STORYBOOK_DIR, results }, null, 2),
+      JSON.stringify(
+        {
+          generatedAt,
+          storybookDir: STORYBOOK_DIR,
+          baselineStoryIds: baselineIds,
+          discoveredStoryIds: stories,
+          missingStoryIds: stories.filter((id) => !results.some((result) => result.story === id)),
+          results,
+        },
+        null,
+        2,
+      ),
     );
     await fs.writeFile(
       path.join(OUT_DIR, "report.md"),
@@ -346,12 +470,21 @@ async function main() {
     console.log(`\nWrote ${results.length} fixture comparisons to ${OUT_DIR}/`);
     console.log(`  - ${OUT_DIR}/report.json`);
     console.log(`  - ${OUT_DIR}/report.md`);
+
+    assertCaptureCoverage({
+      baselineIds,
+      discoveredIds: stories,
+      capturedIds: results.map((result) => result.story),
+      failures,
+    });
   } finally {
     stopServer();
   }
 }
 
-main().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main().catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });
+}

@@ -1,3 +1,4 @@
+import { DOCS_RENDERED, STORY_CHANGED, STORY_RENDERED } from "storybook/internal/core-events";
 import { addons } from "storybook/internal/manager-api";
 import { create } from "storybook/internal/theming";
 
@@ -40,4 +41,17 @@ const tiketoTheme = create({
 addons.setConfig({
   theme: tiketoTheme,
   sidebar: { showRoots: true },
+});
+
+// Story-level `options.showPanel` is not applied dynamically by Storybook 8's
+// manager. Mirror it on navigation so content pages can use the full canvas,
+// while Playground and comparison stories still open their useful controls.
+addons.register("pkpass-preview/content-panel", (api) => {
+  const syncPanel = (storyId: string) => {
+    const options = api.getParameters(storyId, "options") as { showPanel?: boolean } | undefined;
+    api.togglePanel(options?.showPanel !== false);
+  };
+  api.on(STORY_CHANGED, syncPanel);
+  api.on(STORY_RENDERED, syncPanel);
+  api.on(DOCS_RENDERED, syncPanel);
 });

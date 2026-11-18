@@ -36,7 +36,7 @@ Designing an Apple Wallet pass is a slow loop: edit `pass.json` → sign it → 
 - **Drop-in `<PKPassPreview values={...} />`** — pass the same `pass.json` + assets you'd zip up; nothing else to wire.
 - **Auto-variant detection** — `id-card`, `store-card`, `boarding-pass`, `event-ticket`, `coupon`, and more, picked automatically from the field shape. Manual override available.
 - **Scoped styles** — every instance gets its own unique container id; no global CSS, no portal, safe to render many cards on one page.
-- **TypeScript-first**, **ESM-only**, **tree-shakeable**, **CSP-safe** (no inline `style=""`), **SSR-friendly** (wrap in `dynamic` import).
+- **TypeScript-first**, **ESM-only**, **tree-shakeable**, **SSR-friendly** (wrap in `dynamic` import).
 
 ## Install
 
@@ -69,9 +69,6 @@ const values = {
       secondaryFields: [{ key: "tier",    label: "TIER",    value: "Gold" }],
     },
   },
-  "icon.png":  { base64: "..." },
-  "logo.png":  { base64: "..." },
-  "strip.png": { base64: "..." },
 };
 
 export default function PassPreview() {
@@ -90,11 +87,11 @@ That's it. No theme provider, no portal, no global CSS — the component scopes 
 | **All five pass styles** | `boardingPass`, `coupon`, `eventTicket`, `generic`, `storeCard`. |
 | **Auto-variant detection** | id-card / store-card-3col / boarding-pass / coupon / event-ticket-strip and 10+ others, derived from field shape. Manual override available. |
 | **Barcodes** | PDF417, QR, Code 128, Aztec — placement matches iOS (header, footer, strip-overlay). |
-| **iOS 27 Featured Actions (experimental)** | Opt in with `targetOs="ios27"` to render up to two `featuredActions` tiles below the card. Default output is unchanged. The two-tile look for `addToBalance` / `call` is aligned to a native iOS 27.0 Wallet reference (not pixel-perfect); unknown types and the single-action layout remain a proposal; see [Target iOS version & Featured Actions](#target-ios-version--featured-actions-ios-27-experimental) below. |
+| **iOS 27 Featured Actions (experimental)** | Opt in with `targetOs="ios27"` to render up to two `featuredActions` tiles below the card. Default output is unchanged. The one- and two-tile layouts are based on native iOS 27.0 references (not pixel-perfect); unknown types remain a proposal. See [Target iOS version & Featured Actions](#target-ios-version--featured-actions-ios-27-experimental). |
 | **Transit icons** | Airplane / train / bus / boat / generic, inline JSX SVG, `fill: currentColor` follows `labelColor`. |
-| **Back fields & dark mode** | iOS-accurate dark back side with link/separator treatment. |
+| **Back fields** | Interactive in-card back-field view with link/separator treatment. Native Wallet's full Pass Details screen is a documented deviation. |
 | **Scoped styles** | Unique container id per instance — no global CSS, no portal, safe to render many cards on one page. |
-| **CSP-safe** | No inline `style=""`, no inline `<style>`. Works under strict CSP without `unsafe-inline`. |
+| **Content Security Policy** | The component emits scoped inline `<style>` content and some `style` attributes, so `style-src 'self'` alone blocks its presentation. See [CSP](#content-security-policy-csp). |
 | **SSR-friendly** | Client-only; wrap in `next/dynamic({ ssr: false })` or render inside a client component. |
 | **TypeScript-first, ESM-only** | Strict types, tree-shakeable, zero runtime dependencies in the public API surface. |
 
@@ -104,8 +101,8 @@ That's it. No theme provider, no portal, no global CSS — the component scopes 
 iOS 27 `posterGeneric` structure:
 
 ```tsx
-<PKPassPreview values={passFiles} variant="poster" />
-<PKPassPreview values={passFiles} variant="fallback" />
+<PKPassPreview values={values} variant="poster" />
+<PKPassPreview values={values} variant="fallback" />
 ```
 
 - `variant="poster"` renders the experimental iOS 27 full-bleed artwork layout.
@@ -128,8 +125,8 @@ the preview emulates for capability-gated features. It is independent of
 which iOS features are shown.
 
 ```tsx
-<PKPassPreview values={passFiles} targetOs="ios27" />
-<PKPassPreview values={passFiles} targetOs="ios27" variant="poster" />
+<PKPassPreview values={values} targetOs="ios27" />
+<PKPassPreview values={values} targetOs="ios27" variant="poster" />
 ```
 
 | `targetOs`           | Featured Actions                                       |
@@ -167,8 +164,7 @@ Invalid input never throws. The rules are exported as `resolveFeaturedActions(fe
 > aligned to native Apple Wallet iOS 27.0 (24A434) on an iPhone 17 Pro
 > Simulator, for both `generic` and `eventTicket`. It is an approximation,
 > not pixel-perfect (web fonts, glyph shapes, shadow). Still a **proposal**
-> without native reference: the unknown-type tile ("Open" + arrow) and the
-> single-action layout (one tile spanning the card width).
+> without native reference: the unknown-type tile ("Open" + arrow).
 > The preview is static: tiles are not links, and `url` is only exposed via
 > `title` / `data-url`.
 
@@ -184,9 +180,28 @@ New exports: types `FeaturedAction`, `KnownFeaturedActionType`,
 | React | `^18.0.0` (incl. 18.3) — `^19.0.0` |
 | Browsers | Modern evergreen (Chrome, Safari, Firefox, Edge) — ES2022 |
 | Pass spec | [Apple Wallet Developer Guide](https://developer.apple.com/documentation/walletpasses) — `formatVersion: 1` |
-| iOS reference | Wallet on iOS 17 / iOS 18 (screenshots regenerated quarterly) |
+| iOS reference | Recorded per Storybook scenario. Recent signed references use iOS 26.5/27.0; unversioned legacy captures are labelled as such. |
 
 Server-side rendering (Next.js App Router, Remix, Astro): the component is client-only. Wrap in `next/dynamic` with `ssr: false`, or render inside a client component.
+
+## Content Security Policy (CSP)
+
+`PKPassPreview` does **not** currently support a strict `style-src 'self'` policy by itself. Each instance emits a scoped inline `<style>` element, and some layouts use inline `style` attributes for dynamic artwork and field geometry. Consumers must permit inline styles, typically with:
+
+```http
+Content-Security-Policy: style-src 'self' 'unsafe-inline'
+```
+
+There is no public nonce prop or built-in external-stylesheet mode. A fixed hash is not a general workaround because generated CSS contains a per-instance identifier and dynamic asset/layout values; style attributes also require separate CSP handling. Scripts do not require `unsafe-inline` from this component.
+
+## Known differences from Apple Wallet
+
+- A single iOS 27 Featured Action matches the native wide tile with its grey chevron (approximate fonts and shadow). Action types other than `addToBalance` / `call` render as an unverified “Open” proposal tile.
+- The component's back-field interaction is an in-card view; native iOS 27 uses a full Pass Details screen with additional Wallet controls. Storybook compares both honestly and does not imitate those controls.
+- Poster Generic can differ in browser font metrics, exact truncation, raster scaling, and dense bottom-band shading.
+- iOS 26.5 compatibility is explicit: it ignores Featured Actions and uses the classic Generic fallback. Unversioned legacy references remain labelled “origin not recorded.”
+
+See the [Storybook known-deviations page](https://tiketocz.github.io/pkpass-preview/?path=/story/developer-guide--known-deviations) for references and status.
 
 ## Comparison
 
@@ -215,7 +230,7 @@ No. It's a **renderer**, not a generator. Pair it with [`passkit-generator`](htt
 
 <details><summary><b>Is it CSP-safe?</b></summary>
 
-Yes. All styles are emitted via a scoped CSS module (no `style=""` attributes, no inline `<style>`). Works under strict CSP without `unsafe-inline`.
+Not under `style-src 'self'` alone. The component emits scoped inline `<style>` content and dynamic style attributes, so consumers currently need `style-src 'unsafe-inline'`. There is no nonce prop or external-stylesheet mode; see [Content Security Policy](#content-security-policy-csp).
 </details>
 
 <details><summary><b>What pass version / format does it support?</b></summary>
@@ -225,7 +240,7 @@ Apple's `formatVersion: 1` schema, all five pass styles, and every documented fi
 
 <details><summary><b>How are the iOS reference screenshots produced?</b></summary>
 
-A real `.pkpass` is generated (via `tiketocz/pkpass-signer`), installed on an iPhone, screenshotted manually, and committed to `packages/storybook/public/screenshots/`. We re-shoot when iOS Wallet visibly changes a layout (roughly every major iOS release).
+A real `.pkpass` is generated, opened in Wallet or its add-pass flow, screenshotted, and committed to `packages/storybook/public/screenshots/`. Recorded simulator/device/iOS provenance is shown per Storybook scenario; older captures whose provenance was not recorded remain explicitly labelled as legacy rather than guessed.
 </details>
 
 <details><summary><b>Why React only? What about Vue / Svelte / Solid?</b></summary>

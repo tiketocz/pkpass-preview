@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { Comparison, type ComparisonArgs } from "./Comparison";
+import { Comparison, type ComparisonArgs, comparisonArgs } from "./Comparison";
 import { generic1 } from "./fixtures/generic1";
 import { generic2 } from "./fixtures/generic2";
 import { generic3 } from "./fixtures/generic3";
@@ -12,8 +12,9 @@ import { generic8 } from "./fixtures/generic8";
 import { generic9 } from "./fixtures/generic9";
 
 const meta: Meta<ComparisonArgs> = {
-  title: "Generic",
-  render: (args) => <Comparison {...args} />,
+  title: "Pass styles/Generic",
+  id: "generic",
+  render: (args, context) => <Comparison {...args} scenarioId={context.id} />,
   tags: ["autodocs", "vrt"],
   parameters: {
     layout: "centered",
@@ -30,46 +31,63 @@ export default meta;
 type Story = StoryObj<ComparisonArgs>;
 
 export const Generic1: Story = {
-  name: "Generic 1",
-  args: { values: generic1, screenshot: "generic1" },
+  name: "Generic — dense fields without logo text",
+  args: comparisonArgs("generic--generic-1", generic1),
+  parameters: { __id: "generic--generic-1" },
 };
 
 export const Generic2: Story = {
-  name: "Generic 2",
-  args: { values: generic2, screenshot: "generic2" },
+  name: "Generic — dense fields with logo text",
+  args: comparisonArgs("generic--generic-2", generic2),
+  parameters: { __id: "generic--generic-2" },
 };
 
 export const Generic3: Story = {
-  name: "Generic 3",
-  args: { values: generic3, screenshot: "generic3" },
+  name: "Generic — reordered field groups",
+  args: comparisonArgs("generic--generic-3", generic3),
+  parameters: { __id: "generic--generic-3" },
 };
 
 export const Generic4: Story = {
-  name: "Generic 4",
-  args: { values: generic4, screenshot: "generic4" },
+  name: "Generic — five-column density",
+  args: comparisonArgs("generic--generic-4", generic4),
+  parameters: { __id: "generic--generic-4" },
 };
 
 export const Generic5: Story = {
-  name: "Generic 5",
-  args: { values: generic5, screenshot: "generic5" },
+  name: "Membership card — rich back fields",
+  args: comparisonArgs("generic--generic-5", generic5),
+  parameters: { __id: "generic--generic-5" },
 };
 
 export const Generic6: Story = {
-  name: "Generic 6",
-  args: { values: generic6, screenshot: "generic6" },
+  name: "Membership card — alias of Generic 5",
+  args: comparisonArgs("generic--generic-6", generic6),
+  parameters: {
+    __id: "generic--generic-6",
+    docs: {
+      description: {
+        story:
+          "Intentional compatibility alias of Generic 5. The fixture and native reference are retained under both permanent story IDs so historical links and VRT pairs stay valid.",
+      },
+    },
+  },
 };
 
 export const Generic7: Story = {
-  name: "Generic 7",
-  args: { values: generic7, screenshot: "generic7" },
+  name: "Golf membership — empty member values",
+  args: comparisonArgs("generic--generic-7", generic7),
+  parameters: { __id: "generic--generic-7" },
 };
 
 export const Generic8: Story = {
-  name: "Generic 8 (business card)",
-  args: { values: generic8, screenshot: "generic8" },
+  name: "Business card",
+  args: comparisonArgs("generic--generic-8", generic8),
+  parameters: { __id: "generic--generic-8" },
 };
 
 export const Generic9: Story = {
-  name: "Generic 9 (sales card)",
-  args: { values: generic9, screenshot: "generic9" },
+  name: "Sales card",
+  args: comparisonArgs("generic--generic-9", generic9),
+  parameters: { __id: "generic--generic-9" },
 };

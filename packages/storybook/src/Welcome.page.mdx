@@ -1,6 +1,4 @@
-import { Meta } from "@storybook/blocks";
-
-<Meta title="Welcome" />
+import { StoryLink } from "./StoryLink";
 
 <div style={{
   padding: "48px 8px 8px",
@@ -58,12 +56,28 @@ import { Meta } from "@storybook/blocks";
 }}>
 {`import { PKPassPreview } from "@tiketo/pkpass-preview";
 
-<PKPassPreview values={brewbeatCoffee} />`}
+const pass = {
+  "pass.json": {
+    formatVersion: 1,
+    passTypeIdentifier: "pass.com.example.membership",
+    serialNumber: "MEMBER-001",
+    teamIdentifier: "TEAMID",
+    organizationName: "Brewbeat Coffee",
+    description: "Brewbeat membership card",
+    foregroundColor: "rgb(255, 255, 255)",
+    backgroundColor: "rgb(11, 11, 69)",
+    storeCard: {
+      primaryFields: [{ key: "member", label: "MEMBER", value: "Ada Lovelace" }],
+    },
+  },
+};
+
+<PKPassPreview values={pass} />`}
 </div>
 
 <div style={{ display: "flex", gap: 12, flexWrap: "wrap", margin: "24px 0 40px" }}>
-  <a
-    href="?path=/story/examples--store-card"
+  <StoryLink
+    storyId="examples--store-card"
     style={{
       background: "#0066FF",
       color: "#fff",
@@ -73,7 +87,7 @@ import { Meta } from "@storybook/blocks";
       fontWeight: 600,
       fontSize: 14,
     }}
-  >Open live demo →</a>
+  >Open live demo →</StoryLink>
   <a
     href="https://github.com/tiketocz/pkpass-preview"
     target="_blank"
@@ -113,7 +127,7 @@ import { Meta } from "@storybook/blocks";
   <li>✅ <strong>Drop-in</strong> — one component, one prop, no setup</li>
   <li>✅ <strong>All pass types</strong> — boarding · store · event · coupon · generic</li>
   <li>✅ <strong>Auto-variant & density detection</strong></li>
-  <li>✅ <strong>Dark back-side render</strong></li>
+  <li>✅ <strong>Interactive in-card back-field render</strong></li>
   <li>✅ <strong>TypeScript native · ESM-only · tree-shakeable</strong></li>
 </ul>
 
@@ -129,15 +143,15 @@ import { Meta } from "@storybook/blocks";
   <tbody>
     <tr style={{ borderBottom: "1px solid #f1f5f9" }}>
       <td style={{ padding: "10px 0" }}>see the README quick start in action</td>
-      <td style={{ padding: "10px 0" }}><a href="?path=/story/examples--store-card">Examples</a></td>
+      <td style={{ padding: "10px 0" }}><StoryLink storyId="start-here-welcome--quick-start">Quick start</StoryLink></td>
     </tr>
     <tr style={{ borderBottom: "1px solid #f1f5f9" }}>
       <td style={{ padding: "10px 0" }}>see real-world .pkpass samples</td>
-      <td style={{ padding: "10px 0" }}><a href="?path=/story/samples--membership-id-card">Samples</a></td>
+      <td style={{ padding: "10px 0" }}><StoryLink storyId="samples--membership-id-card">Other use cases</StoryLink></td>
     </tr>
     <tr style={{ borderBottom: "1px solid #f1f5f9" }}>
       <td style={{ padding: "10px 0" }}>scan every variant at once</td>
-      <td style={{ padding: "10px 0" }}><a href="?path=/story/gallery--all">Gallery</a></td>
+      <td style={{ padding: "10px 0" }}><StoryLink storyId="gallery--all-cards-story">Gallery</StoryLink></td>
     </tr>
     <tr style={{ borderBottom: "1px solid #f1f5f9" }}>
       <td style={{ padding: "10px 0" }}>find the closest layout to your design</td>

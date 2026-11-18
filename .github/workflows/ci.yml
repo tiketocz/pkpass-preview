@@ -16,8 +16,10 @@ permissions:
 jobs:
   build:
     name: lint + typecheck + test
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # Playwright does not provide Chromium dependencies for ubuntu-latest's
+    # 26.04 image yet. Keep CI aligned with the supported VRT runner.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
@@ -54,3 +56,15 @@ jobs:
 
       - name: build storybook
         run: bun run storybook:build
+
+      - name: install Playwright Chromium
+        run: bunx playwright install --with-deps chromium
+
+      - name: guard Storybook permalinks and VRT coverage
+        run: bun run storybook:permalinks
+
+      - name: verify back-fields keyboard accessibility
+        run: bun run storybook:a11y
+
+      - name: audit Storybook overflow and reference responses
+        run: bun run storybook:overflow

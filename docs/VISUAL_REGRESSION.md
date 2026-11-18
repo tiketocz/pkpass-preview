@@ -21,11 +21,14 @@ Tag a single story (or its meta) with `vrt:skip` to exclude it even if otherwise
 For each in-scope story:
 
 1. Screenshot of `#passCard` from the Storybook iframe (LEFT pane of `Comparison`).
-2. iOS reference image from `packages/storybook/public/screenshots/<name>.jpg`, resized to match.
-3. `pixelmatch` diff count → reported as %-of-pixels-different.
-4. `ssim.js` mssim score (0..1, higher = closer match).
+2. iOS reference image from `packages/storybook/public/screenshots/<name>.jpg`.
+3. Both images placed with aspect-preserving `contain` on the web-render canvas. Any unused area is white, so differently shaped screens are padded rather than stretched.
+4. `pixelmatch` diff count → reported as %-of-pixels-different.
+5. `ssim.js` mssim score (0..1, higher = closer match).
 
-Stories without an iOS reference are still discovered via the tag but skipped at metric time with a log line. For those stories the script also saves a render-only baseline, `render-only/<slug>.png`. It captures the whole `PKPassPreview` root, including content that overflows `#passCard` such as the classic front's bottom edge and the iOS 27 Featured Actions tiles (TIK-318). These PNGs are not part of `report.json` or the metrics.
+Each report row includes the web render size and aspect ratio plus the native reference's original size and aspect ratio. In particular, **Back fields / Pass Details compares two different screens: the web back render versus native Wallet's full Pass Details screen. Its metric is informational only**, not a measure of pixel parity for the same UI.
+
+Every discovered story must produce a web screenshot and resolve a Wallet reference; missing captures or references fail the job. The script also saves a padded `render-only/<slug>.png` for Featured Actions review. It captures the whole `PKPassPreview` root, including content below `#passCard`. These PNGs are not part of the comparison metrics.
 
 Stories that render iOS 27 Featured Actions tiles (TIK-318) and do have a reference (the native refs are cropped to card + tile row) are compared using a tight capture of the whole preview (card + tiles) instead of `#passCard` alone; they also save a padded `render-only/<slug>.png`. Stories without tiles are captured exactly as before, so their metrics are unaffected.
 
@@ -64,6 +67,18 @@ pull_request (opened|sync|reopened)
 Concurrency group `vrt-<pr-number>` cancels in-progress runs on each push.
 
 Artifacts `vrt-reports` (both base + head trees) retained 14 days.
+
+Base-selected stories must remain selected and captured on both sides. A story selected only on head is derived automatically from the two reports (no allowlist): its head reference and screenshot are still required, and it is reported separately as **new on head, no delta**. A base-selected story that disappears or loses either capture fails the job.
+
+## Storybook overflow audit
+
+After building Storybook, run:
+
+```sh
+bun run storybook:overflow
+```
+
+The Playwright audit loads every story and docs entry at 1440, 390, and 320 pixels. It fails on JavaScript/page errors, console errors, Storybook error/no-preview displays, empty or missing rendered roots, native-reference 404s, or horizontal overflow at any supported width (including 320). Failures identify the entry and reason. It is a blocking CI step. On the hardened 86-entry build it completed locally in 184.1 seconds (about three minutes).
 
 ## Why info-only
 

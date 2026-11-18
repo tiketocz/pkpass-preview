@@ -620,6 +620,10 @@ export const getPassStyles = (identifier: string) => `
     border: 0;
     cursor: pointer;
   }
+  #${identifier} #passBack .doneButton:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
   #${identifier} #backFields {
     margin-top: 33px;
     border-radius: 10px;
@@ -632,6 +636,15 @@ export const getPassStyles = (identifier: string) => `
     width: 100%;
   }
   #${identifier} .infoButton {
+    appearance: none;
+    box-sizing: content-box;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    background: none;
+    font: inherit;
+    color: inherit;
+    line-height: inherit;
     color: inherit;
     border-radius: 50%;
     border: 1px solid #fff;
@@ -645,6 +658,10 @@ export const getPassStyles = (identifier: string) => `
     float: right;
     font-family: serif;
     font-weight: 700;
+  }
+  #${identifier} .infoButton:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
   }
   #${identifier} #passFront .infoButton {
     position: absolute;

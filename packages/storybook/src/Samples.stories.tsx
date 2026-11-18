@@ -1,14 +1,15 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { Comparison, type ComparisonArgs } from "./Comparison";
+import { Comparison, type ComparisonArgs, comparisonArgs } from "./Comparison";
 import { benesov } from "./fixtures/benesov";
 import { pga } from "./fixtures/pga";
 import { pgaNational } from "./fixtures/pga-national";
 import { sample2 } from "./fixtures/sample2";
 
 const meta: Meta<ComparisonArgs> = {
-  title: "Samples",
-  render: (args) => <Comparison {...args} />,
+  title: "Examples/Other use cases",
+  id: "samples",
+  render: (args, context) => <Comparison {...args} scenarioId={context.id} />,
   tags: ["autodocs", "vrt"],
   parameters: {
     layout: "centered",
@@ -26,20 +27,24 @@ type Story = StoryObj<ComparisonArgs>;
 
 export const MembershipIdCard: Story = {
   name: "Membership ID card",
-  args: { values: sample2, screenshot: "sample2" },
+  args: comparisonArgs("samples--membership-id-card", sample2),
+  parameters: { __id: "samples--membership-id-card" },
 };
 
 export const ResidentBenefit: Story = {
   name: "Resident benefit card",
-  args: { values: benesov, screenshot: "benesov" },
+  args: comparisonArgs("samples--resident-benefit", benesov),
+  parameters: { __id: "samples--resident-benefit" },
 };
 
 export const TourPro: Story = {
-  name: "Tour-pro card",
-  args: { values: pga, screenshot: "pga" },
+  name: "Tour-pro membership card",
+  args: comparisonArgs("samples--tour-pro", pga),
+  parameters: { __id: "samples--tour-pro" },
 };
 
 export const LongQrAltText: Story = {
-  name: "Long-QR-altText regression",
-  args: { values: pgaNational, screenshot: "pga-national" },
+  name: "Store card — long QR alternative text",
+  args: comparisonArgs("samples--long-qr-alt-text", pgaNational),
+  parameters: { __id: "samples--long-qr-alt-text" },
 };

@@ -1,12 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { Comparison, type ComparisonArgs } from "./Comparison";
+import { Comparison, type ComparisonArgs, comparisonArgs } from "./Comparison";
 import { exampleGeneric } from "./fixtures/example-generic";
 import { exampleStoreCard } from "./fixtures/example-store-card";
 
 const meta: Meta<ComparisonArgs> = {
-  title: "Examples",
-  render: (args) => <Comparison {...args} />,
+  title: "Start here/iOS comparison",
+  id: "examples",
+  render: (args, context) => <Comparison {...args} scenarioId={context.id} />,
   tags: ["autodocs", "vrt"],
   parameters: {
     layout: "centered",
@@ -23,9 +24,13 @@ export default meta;
 type Story = StoryObj<ComparisonArgs>;
 
 export const Generic: Story = {
-  args: { values: exampleGeneric, screenshot: "example-generic" },
+  name: "Generic quick example",
+  args: comparisonArgs("examples--generic", exampleGeneric),
+  parameters: { __id: "examples--generic" },
 };
 
 export const StoreCard: Story = {
-  args: { values: exampleStoreCard, screenshot: "example-store-card" },
+  name: "Store card quick example",
+  args: comparisonArgs("examples--store-card", exampleStoreCard),
+  parameters: { __id: "examples--store-card" },
 };

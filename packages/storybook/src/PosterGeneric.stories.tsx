@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { Comparison, type ComparisonArgs } from "./Comparison";
+import { Comparison, type ComparisonArgs, comparisonArgs } from "./Comparison";
 import { posterArgs, withPosterGeneric } from "./vltavaClubArgs";
 
 // iOS 27 posterGeneric as its own style next to Generic. The stories were
@@ -10,8 +10,9 @@ import { posterArgs, withPosterGeneric } from "./vltavaClubArgs";
 // comparison stays in Examples/Vltava Club.
 
 const meta: Meta<ComparisonArgs> = {
-  title: "Poster Generic (iOS 27)",
-  render: (args) => <Comparison {...args} />,
+  title: "Pass styles/Poster Generic (iOS 27)",
+  id: "poster-generic-ios-27",
+  render: (args, context) => <Comparison {...args} scenarioId={context.id} />,
   tags: ["autodocs"],
   parameters: {
     layout: "centered",
@@ -19,6 +20,10 @@ const meta: Meta<ComparisonArgs> = {
       description: {
         component:
           'posterGeneric — the iOS 27 pass style: full-bleed artwork, logo and constrained logoText top-left, one header value top-right, a bottom band with a large unlabeled title plus up to three label/value columns, a centered barcode and a value-only footer. `<PKPassPreview variant="poster" />` uses this style when the pass has a `posterGeneric` block, otherwise the classic pass style. In Vltava Club the concrete fallback is `generic`, which Wallet before iOS 27 shows — see [Examples / Vltava Club](?path=/docs/examples-vltava-club--docs) for both side by side. Examples use Vltava Club fixtures with iPhone 17 Pro / iOS 27.0 references.',
+      },
+      source: {
+        code: '<PKPassPreview values={passFiles} variant="poster" targetOs="ios27" />',
+        language: "tsx",
       },
     },
   },
@@ -28,7 +33,7 @@ export default meta;
 type Story = StoryObj<ComparisonArgs>;
 
 export const Ios270PosterGeneric: Story = {
-  name: "iOS 27.0 (posterGeneric)",
+  name: "Vltava Club — iOS 27.0 poster",
   tags: ["vrt"],
   args: posterArgs,
   parameters: {
@@ -40,6 +45,10 @@ export const Ios270PosterGeneric: Story = {
         story:
           "The web poster follows the iOS 27 structure: constrained logoText, a single-line header value, a large title plus right-aligned member column, and a value-only footer. Remaining differences are browser font metrics and the QR/artwork raster scaling.",
       },
+      source: {
+        code: '<PKPassPreview values={passFiles} variant="poster" targetOs="ios27" />',
+        language: "tsx",
+      },
     },
   },
 };
@@ -47,14 +56,13 @@ export const Ios270PosterGeneric: Story = {
 export const PosterShortText: Story = {
   name: "Poster front text — short",
   tags: ["vrt"],
-  args: {
-    values: withPosterGeneric({
+  args: comparisonArgs(
+    "examples-vltava-club--poster-short-text",
+    withPosterGeneric({
       primaryFields: [{ key: "title", value: "Vltava Club" }],
     }),
-    screenshot: "vltava-club-poster-short-text-ios-27",
-    referenceLabel: "iOS Wallet — iOS 27.0",
-    variant: "poster",
-  },
+    { variant: "poster", targetOs: "ios27" },
+  ),
   parameters: {
     // Keeps the original Examples/Vltava Club story id so existing links and
     // VRT baselines still resolve after the move.
@@ -64,6 +72,10 @@ export const PosterShortText: Story = {
         story:
           'Observed on iPhone 17 Pro with iOS 27.0: the bottom band contains only the Vltava Club title; the top-right header slot and footer are empty, while the logo and truncated logoText ("Vltava…") remain top-left. The web render now matches that field structure and logoText truncation; only browser font metrics and raster scaling remain different.',
       },
+      source: {
+        code: '<PKPassPreview values={passFiles} variant="poster" targetOs="ios27" />',
+        language: "tsx",
+      },
     },
   },
 };
@@ -71,8 +83,9 @@ export const PosterShortText: Story = {
 export const PosterLongCzechText: Story = {
   name: "Poster front text — long Czech",
   tags: ["vrt"],
-  args: {
-    values: withPosterGeneric({
+  args: comparisonArgs(
+    "examples-vltava-club--poster-long-czech-text",
+    withPosterGeneric({
       headerFields: [
         {
           key: "membership",
@@ -99,10 +112,8 @@ export const PosterLongCzechText: Story = {
         },
       ],
     }),
-    screenshot: "vltava-club-poster-long-czech-text-ios-27",
-    referenceLabel: "iOS Wallet — iOS 27.0",
-    variant: "poster",
-  },
+    { variant: "poster", targetOs: "ios27" },
+  ),
   parameters: {
     // Keeps the original Examples/Vltava Club story id so existing links and
     // VRT baselines still resolve after the move.
@@ -112,6 +123,10 @@ export const PosterLongCzechText: Story = {
         story:
           'Observed on iPhone 17 Pro with iOS 27.0: the header value is a single truncated line ("Zlaté celoroční s výh…"); the smaller title uses two lines and cuts off after "Vltavský klub přátel / Pražského hradu a Karlova"; the member name truncates to "Žofie Přemyslovna Dvořáčk…"; logoText truncates to "Vltava…"; and the full footer value "VC-2026-ŽLUŤOUČKÝ-0024-PRAHA" appears without its label. The web render now follows the same one-line/two-line clamps, single-row field structure, logoText constraint, and value-only footer. Exact ellipsis points can still vary slightly with browser font metrics.',
       },
+      source: {
+        code: '<PKPassPreview values={passFiles} variant="poster" targetOs="ios27" />',
+        language: "tsx",
+      },
     },
   },
 };
@@ -119,8 +134,9 @@ export const PosterLongCzechText: Story = {
 export const PosterThreePrimaryFields: Story = {
   name: "Poster front text — three primary fields",
   tags: ["vrt"],
-  args: {
-    values: withPosterGeneric({
+  args: comparisonArgs(
+    "examples-vltava-club--poster-three-primary-fields",
+    withPosterGeneric({
       headerFields: [{ key: "status", label: "STAV", value: "Aktivní" }],
       primaryFields: [
         { key: "title", value: "Vltava Club" },
@@ -129,10 +145,8 @@ export const PosterThreePrimaryFields: Story = {
       ],
       footerFields: [{ key: "member-id", label: "ČLENSKÉ ČÍSLO", value: "VC-0024" }],
     }),
-    screenshot: "vltava-club-poster-three-primary-fields-ios-27",
-    referenceLabel: "iOS Wallet — iOS 27.0",
-    variant: "poster",
-  },
+    { variant: "poster", targetOs: "ios27" },
+  ),
   parameters: {
     // Keeps the original Examples/Vltava Club story id so existing links and
     // VRT baselines still resolve after the move.
@@ -142,15 +156,20 @@ export const PosterThreePrimaryFields: Story = {
         story:
           'Observed on iPhone 17 Pro with iOS 27.0: Wallet shows all three primary fields in one bottom-band row—large "Vltava Club" on the left, then Členka/Anna and Úroveň/Gold label/value columns on the right. The header shows STAV/Aktivní, logoText is truncated to "Vltava…", and the footer shows value "VC-0024" without its label. The web renderer keeps the same field order and row. Remaining differences are limited to typography (browser font metrics), artwork crop/raster scaling, and the shade of the bottom band.',
       },
+      source: {
+        code: '<PKPassPreview values={passFiles} variant="poster" targetOs="ios27" />',
+        language: "tsx",
+      },
     },
   },
 };
 
 export const PosterMorePrimaryFields: Story = {
-  name: "Poster front text — more primary fields",
+  name: "Poster front text — four primary fields",
   tags: ["vrt"],
-  args: {
-    values: withPosterGeneric({
+  args: comparisonArgs(
+    "examples-vltava-club--poster-more-primary-fields",
+    withPosterGeneric({
       headerFields: [{ key: "status", label: "STAV", value: "Aktivní" }],
       primaryFields: [
         { key: "title", value: "Vltava Club" },
@@ -160,10 +179,8 @@ export const PosterMorePrimaryFields: Story = {
       ],
       footerFields: [{ key: "member-id", label: "ČLENSKÉ ČÍSLO", value: "VC-0024" }],
     }),
-    screenshot: "vltava-club-poster-more-primary-fields-ios-27",
-    referenceLabel: "iOS Wallet — iOS 27.0",
-    variant: "poster",
-  },
+    { variant: "poster", targetOs: "ios27" },
+  ),
   parameters: {
     // Keeps the original Examples/Vltava Club story id so existing links and
     // VRT baselines still resolve after the move.
@@ -172,6 +189,10 @@ export const PosterMorePrimaryFields: Story = {
       description: {
         story:
           'Observed on iPhone 17 Pro with iOS 27.0: Wallet shows all four primary fields in one bottom-band row—large "Vltava Club" on the left, then Členka/Anna, Úroveň/Gold, and Body/1 250 label/value columns—shrinking the title and values to fit. The web renderer now preserves all four fields in that order and row, shows footer value "VC-0024" without its label, and constrains logoText to "Vltava…". Remaining differences are limited to browser font metrics and raster scaling.',
+      },
+      source: {
+        code: '<PKPassPreview values={passFiles} variant="poster" targetOs="ios27" />',
+        language: "tsx",
       },
     },
   },
