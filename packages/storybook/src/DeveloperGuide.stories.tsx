@@ -6,7 +6,6 @@ import { WebWalletDetail } from "./Comparison";
 import { StoryLink } from "./StoryLink";
 import { vltavaClub } from "./fixtures/vltava-club";
 import { vltavaFeaturedGeneric } from "./fixtures/vltava-featured-actions";
-import { ONE_ACTION_DIFFERENCE } from "./knownDeviations";
 
 const GuidePage = ({ children }: { children: ReactNode }) => (
   <main className="guide-page">{children}</main>
@@ -117,14 +116,14 @@ const KnownDeviationsPage = () => (
       <section>
         <h2>One Featured Action</h2>
         <p>
-          <strong>Difference:</strong> {ONE_ACTION_DIFFERENCE} Separately, every action type other
-          than <code>addToBalance</code> / <code>call</code> renders as the unverified “Open” tile,
-          including valid Apple types such as <code>place</code> or <code>viewSchedule</code>.
+          <strong>Difference:</strong> every action type other than <code>addToBalance</code> /{" "}
+          <code>call</code> renders as the unverified “Open” tile, including valid Apple types such
+          as <code>place</code> or <code>viewSchedule</code>.
         </p>
         <p>
           <strong>Reference:</strong> iOS 27.0 build 24A434, iPhone 17 Pro Simulator, Generic and
-          Event Ticket passes. <strong>Status:</strong> open. Missing chevron:{" "}
-          <IssueLink number={31} /> (fix in progress). Action types and unknown-type fallback:{" "}
+          Event Ticket passes. <strong>Status:</strong> open. Grey chevron:{" "}
+          <IssueLink number={31} /> (fixed in 0.2.3). Action types and unknown-type fallback:{" "}
           <IssueLink number={34} /> (needs Wallet references).
         </p>
       </section>

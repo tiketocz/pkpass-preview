@@ -19,9 +19,6 @@ import { getScenario } from "./scenarioCatalog";
 // same 2-action pass in Apple Wallet iOS 26.5 (Simulator): card only, no
 // tiles. The tile look is aligned to the references but is not pixel-perfect.
 //
-// Known difference: with one action, native Wallet draws one wide tile with a
-// grey chevron on the right; our tile matches the width but has no chevron.
-//
 // NÁVRH / PROPOSAL, still unverified: the unknown-type tile ("Open" + arrow).
 
 const NATIVE_NOTE =

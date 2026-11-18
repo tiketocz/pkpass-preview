@@ -87,7 +87,7 @@ That's it. No theme provider, no portal, no global CSS — the component scopes 
 | **All five pass styles** | `boardingPass`, `coupon`, `eventTicket`, `generic`, `storeCard`. |
 | **Auto-variant detection** | id-card / store-card-3col / boarding-pass / coupon / event-ticket-strip and 10+ others, derived from field shape. Manual override available. |
 | **Barcodes** | PDF417, QR, Code 128, Aztec — placement matches iOS (header, footer, strip-overlay). |
-| **iOS 27 Featured Actions (experimental)** | Opt in with `targetOs="ios27"` to render up to two `featuredActions` tiles below the card. Default output is unchanged. The one- and two-tile layouts are based on native iOS 27.0 references (not pixel-perfect); the one-tile chevron is missing and unknown types remain a proposal. See [Target iOS version & Featured Actions](#target-ios-version--featured-actions-ios-27-experimental). |
+| **iOS 27 Featured Actions (experimental)** | Opt in with `targetOs="ios27"` to render up to two `featuredActions` tiles below the card. Default output is unchanged. The one- and two-tile layouts are based on native iOS 27.0 references (not pixel-perfect); unknown types remain a proposal. See [Target iOS version & Featured Actions](#target-ios-version--featured-actions-ios-27-experimental). |
 | **Transit icons** | Airplane / train / bus / boat / generic, inline JSX SVG, `fill: currentColor` follows `labelColor`. |
 | **Back fields** | Interactive in-card back-field view with link/separator treatment. Native Wallet's full Pass Details screen is a documented deviation. |
 | **Scoped styles** | Unique container id per instance — no global CSS, no portal, safe to render many cards on one page. |
@@ -164,8 +164,7 @@ Invalid input never throws. The rules are exported as `resolveFeaturedActions(fe
 > aligned to native Apple Wallet iOS 27.0 (24A434) on an iPhone 17 Pro
 > Simulator, for both `generic` and `eventTicket`. It is an approximation,
 > not pixel-perfect (web fonts, glyph shapes, shadow). Still a **proposal**
-> without native reference: the unknown-type tile ("Open" + arrow) and the
-> single-action tile's missing grey chevron.
+> without native reference: the unknown-type tile ("Open" + arrow).
 > The preview is static: tiles are not links, and `url` is only exposed via
 > `title` / `data-url`.
 
@@ -197,7 +196,7 @@ There is no public nonce prop or built-in external-stylesheet mode. A fixed hash
 
 ## Known differences from Apple Wallet
 
-- A single iOS 27 Featured Action has the native width and content, but the web tile is missing Wallet's grey right-side chevron. Unknown action types remain an unverified proposal.
+- A single iOS 27 Featured Action matches the native wide tile with its grey chevron (approximate fonts and shadow). Action types other than `addToBalance` / `call` render as an unverified “Open” proposal tile.
 - The component's back-field interaction is an in-card view; native iOS 27 uses a full Pass Details screen with additional Wallet controls. Storybook compares both honestly and does not imitate those controls.
 - Poster Generic can differ in browser font metrics, exact truncation, raster scaling, and dense bottom-band shading.
 - iOS 26.5 compatibility is explicit: it ignores Featured Actions and uses the classic Generic fallback. Unversioned legacy references remain labelled “origin not recorded.”

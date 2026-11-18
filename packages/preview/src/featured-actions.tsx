@@ -7,13 +7,13 @@ import type { FeaturedAction, KnownFeaturedActionType, PreviewTargetOs } from ".
 // Native reference: Apple Wallet iOS 27.0 (24A434), iPhone 17 Pro Simulator,
 // detail of the added Vltava Club pass (generic + eventTicket) with
 // [addToBalance, call]. Native-verified (look approximated, not
-// pixel-perfect): two white rounded tiles side by side below the card,
+// pixel-perfect): white rounded tiles below the card (two side by side or
+// one full-width tile with a grey chevron),
 // green circle icon (credit card / phone handset), bold label
 // ("Add to Balance" / "Call") and grey subtitle "Open Link".
 //
 // NÁVRH / PROPOSAL, still UNVERIFIED vs native Wallet:
 // - unknown action types (green circle + arrow, "Open" / "Open Link"),
-// - the single-action layout (one tile spanning the card width),
 // - whether the subtitle ever differs from "Open Link" (e.g. tel: URLs show
 //   "Open Link" in the reference too).
 
@@ -159,6 +159,22 @@ const GenericActionIcon = (props: IconProps) => (
   </svg>
 );
 
+/** Single-action disclosure indicator, measured from the native iOS 27 reference. */
+const FeaturedActionChevron = () => (
+  <span className="featured-action-chevron" aria-hidden="true">
+    <svg viewBox="0 0 7.2 12.4" width={7.2} height={12.4} aria-hidden="true">
+      <path
+        d="m1 1 5.2 5.2L1 11.4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  </span>
+);
+
 const ICONS: Readonly<Record<KnownFeaturedActionType, (props: IconProps) => React.ReactElement>> = {
   addToBalance: AddToBalanceIcon,
   call: CallIcon,
@@ -173,6 +189,7 @@ const iconFor = (action: ResolvedFeaturedAction) =>
  */
 export const FeaturedActionsRow = ({ actions }: { actions: ResolvedFeaturedAction[] }) => {
   if (actions.length === 0) return null;
+  const showChevron = actions.length === 1;
   return (
     <div className={`featured-actions featured-actions-count-${actions.length}`}>
       {actions.map((action) => {
@@ -194,6 +211,7 @@ export const FeaturedActionsRow = ({ actions }: { actions: ResolvedFeaturedActio
               <span className="featured-action-label">{action.label}</span>
               <span className="featured-action-subtitle">{action.subtitle}</span>
             </span>
+            {showChevron ? <FeaturedActionChevron /> : null}
           </div>
         );
       })}
@@ -232,6 +250,7 @@ export const getFeaturedActionStyles = (identifier: string) => `
   }
   #${identifier} .featured-action {
     box-sizing: border-box;
+    position: relative;
     flex: 1 1 0;
     min-width: 0;
     display: flex;
@@ -263,6 +282,15 @@ export const getFeaturedActionStyles = (identifier: string) => `
     flex-direction: column;
     max-width: 100%;
     min-width: 0;
+  }
+  #${identifier} .featured-action-chevron {
+    position: absolute;
+    right: 12.4px;
+    bottom: 24.3px;
+    display: flex;
+    width: 7.2px;
+    height: 12.4px;
+    color: #c7c7cc;
   }
   #${identifier} .featured-action-label,
   #${identifier} .featured-action-subtitle {

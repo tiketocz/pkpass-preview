@@ -153,6 +153,34 @@ describe("PKPassPreview featured actions", () => {
     expect(doc.querySelectorAll(".featured-action-icon svg")).toHaveLength(2);
   });
 
+  it.each([
+    ["generic", genericPass],
+    ["eventTicket", eventTicketPass],
+  ])("renders a decorative chevron only for one %s action on iOS 27", (_style, make) => {
+    const doc = render(make([BALANCE]), { targetOs: "ios27" });
+    expect(tileIds(doc)).toEqual(["vltava-balance"]);
+    expect(doc.querySelector(".featured-actions-count-1")).not.toBeNull();
+    const chevron = doc.querySelector(".featured-action-chevron");
+    expect(chevron).not.toBeNull();
+    expect(chevron?.getAttribute("aria-hidden")).toBe("true");
+    expect(chevron?.textContent).toBe("");
+  });
+
+  it("does not render a chevron for two actions", () => {
+    const doc = render(genericPass([BALANCE, SUPPORT]), { targetOs: "ios27" });
+    expect(doc.querySelector(".featured-action-chevron")).toBeNull();
+  });
+
+  it("does not render a chevron for zero actions", () => {
+    const doc = render(genericPass([]), { targetOs: "ios27" });
+    expect(doc.querySelector(".featured-action-chevron")).toBeNull();
+  });
+
+  it("does not render a chevron for older iOS", () => {
+    const doc = render(genericPass([BALANCE]), { targetOs: "ios26" });
+    expect(doc.querySelector(".featured-action-chevron")).toBeNull();
+  });
+
   it("renders a single tile for one action", () => {
     const doc = render(genericPass([BALANCE]), { targetOs: "ios27" });
     expect(tileIds(doc)).toEqual(["vltava-balance"]);
